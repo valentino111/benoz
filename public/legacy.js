@@ -43,45 +43,6 @@ document.documentElement.dir='ltr';
 const entry=document.getElementById('entry');
 const site=document.getElementById('site');
 const projectHub=document.getElementById('projectHub');
-document.getElementById('enterBtn').addEventListener('click',()=>{
-  entry.style.display='none';
-  projectHub?.classList.add('active');
-  site.classList.remove('active');
-  document.body.classList.remove('locked');
-  window.scrollTo(0,0);
-});
-
-function openProject(target){
-  projectHub?.classList.remove('active');
-  site.classList.add('active');
-  document.body.classList.remove('locked');
-  scheduleFrame(()=>{
-    const section=document.getElementById(target);
-    if(section) section.scrollIntoView({behavior:'auto',block:'start'});
-    else window.scrollTo(0,0);
-  });
-}
-document.querySelectorAll('[data-project-target]').forEach(button=>{
-  button.addEventListener('click',()=>{
-    if(!projectHub?.classList.contains('active') || projectHub.classList.contains('is-leaving')) return;
-
-    const target=button.dataset.projectTarget;
-    const isPoster=button.classList.contains('museum-poster');
-
-    if(!isPoster || window.matchMedia('(prefers-reduced-motion: reduce)').matches){
-      openProject(target);
-      return;
-    }
-
-    button.classList.add('is-selected');
-    projectHub.classList.add('is-leaving');
-    schedule(()=>{
-      openProject(target);
-      button.classList.remove('is-selected');
-      projectHub.classList.remove('is-leaving');
-    },520);
-  });
-});
 
 const langBtn=document.getElementById('langBtn');
 const originalLangLabel=langBtn.textContent;
@@ -369,19 +330,6 @@ lbStage.addEventListener('touchend',e=>{
 },{passive:true});
 
 
-// Return to the original entrance screen.
-function returnHome(event){
-  event?.preventDefault();
-  window.scrollTo({top:0,behavior:'instant'});
-  site.classList.remove('active');
-  entry.style.display='none';
-  projectHub?.classList.add('active');
-  document.body.classList.remove('locked');
-}
-document.getElementById('homeBtn').addEventListener('click',returnHome);
-document.getElementById('brandHome').addEventListener('click',returnHome);
-
-
 // Animate music covers on hover. On touch devices, tap to play.
 document.querySelectorAll('.track-media').forEach(media=>{
   const video=media.querySelector('.track-hover-video');
@@ -427,26 +375,29 @@ document.querySelectorAll('.track-media').forEach(media=>{
 
 // Subtle pointer parallax for the gallery opening.
 const parallaxItems=[...document.querySelectorAll('.parallax-item')];
-const heroSection=document.querySelector('.hero');
-if(heroSection && window.matchMedia('(hover:hover)').matches){
-  let parallaxFrame=null;
-  let pointerEvent=null;
-  heroSection.addEventListener('mousemove',e=>{
-    pointerEvent=e;
-    if(parallaxFrame) return;
-    parallaxFrame=scheduleFrame(()=>{
-      parallaxFrame=null;
-      const r=heroSection.getBoundingClientRect();
-      const x=(pointerEvent.clientX-r.left)/r.width-.5;
-      const y=(pointerEvent.clientY-r.top)/r.height-.5;
-      parallaxItems.forEach((el,i)=>{
-        const depth=(i+1)*1.4;
-        el.style.transform=`translate(${x*depth}px,${y*depth}px)`;
+const heroSections=[...document.querySelectorAll('.hero')];
+if(window.matchMedia('(hover:hover)').matches && !window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+  heroSections.forEach(heroSection=>{
+    const heroParallaxItems=[...heroSection.querySelectorAll('.parallax-item')];
+    let parallaxFrame=null;
+    let pointerEvent=null;
+    heroSection.addEventListener('mousemove',e=>{
+      pointerEvent=e;
+      if(parallaxFrame) return;
+      parallaxFrame=scheduleFrame(()=>{
+        parallaxFrame=null;
+        const r=heroSection.getBoundingClientRect();
+        const x=(pointerEvent.clientX-r.left)/r.width-.5;
+        const y=(pointerEvent.clientY-r.top)/r.height-.5;
+        heroParallaxItems.forEach((el,i)=>{
+          const depth=(i+1)*1.4;
+          el.style.transform=`translate(${x*depth}px,${y*depth}px)`;
+        });
       });
     });
-  });
-  heroSection.addEventListener('mouseleave',()=>{
-    parallaxItems.forEach(el=>el.style.transform='translate(0,0)');
+    heroSection.addEventListener('mouseleave',()=>{
+      heroParallaxItems.forEach(el=>el.style.transform='translate(0,0)');
+    });
   });
 }
 
@@ -530,10 +481,6 @@ document.addEventListener('click',e=>{
 
 const artworkBySlug=new Map(artworkSections.map(section=>[section.dataset.artworkSlug,section]));
 function openGalleryAt(section, smooth=false){
-  entry.style.display='none';
-  projectHub?.classList.remove('active');
-  site.classList.add('active');
-  document.body.classList.remove('locked');
   scheduleFrame(()=>section?.scrollIntoView({behavior:smooth?'smooth':'auto',block:'start'}));
 }
 function handleArtworkHash(){
@@ -561,7 +508,7 @@ artworkSections.forEach(section=>{
     if(Math.abs(dx)<70 || Math.abs(dx)<Math.abs(dy)*1.35)return;
     const target=dx<0?collectionSections[index+1]:collectionSections[index-1];
     if(target){
-      history.replaceState(null,'','#'+target.dataset.artworkSlug);
+      history.replaceState(history.state,'','#'+target.dataset.artworkSlug);
       target.scrollIntoView({behavior:'smooth',block:'start'});
     }
   },{passive:true});
@@ -571,7 +518,7 @@ artworkSections.forEach(section=>{
 const hashObserver=new IntersectionObserver(entries=>{
   const visible=entries.filter(e=>e.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];
   if(visible?.target?.dataset.artworkSlug && site.classList.contains('active')){
-    history.replaceState(null,'','#'+visible.target.dataset.artworkSlug);
+    history.replaceState(history.state,'','#'+visible.target.dataset.artworkSlug);
   }
 },{threshold:[.45,.65]});
 observers.push(hashObserver);
@@ -589,10 +536,6 @@ cleanup=()=>{
   document.querySelectorAll('.image-shield').forEach(shield=>shield.remove());
   document.querySelectorAll('.fade.show').forEach(element=>element.classList.remove('show'));
   document.querySelectorAll('.track-media.is-playing').forEach(element=>element.classList.remove('is-playing'));
-  document.querySelectorAll('.museum-poster.is-selected').forEach(element=>element.classList.remove('is-selected'));
-  projectHub?.classList.remove('active','is-leaving');
-  site.classList.remove('active');
-  entry.style.display='';
   closeMobileMenu();
   parallaxItems.forEach(element=>{element.style.transform=''});
   lbImg.removeAttribute('src');

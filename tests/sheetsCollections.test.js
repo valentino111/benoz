@@ -51,7 +51,7 @@ test('a non-empty remote collection cover overrides while retaining the local fa
   assert.equal(normalized.fallbackCover, '/assets/hidden-harmony.jpg');
 });
 
-test('an enabled Work assigned to the second collection is attached and becomes its landing target', () => {
+test('an enabled Work assigned to the second collection is attached to its collection page', () => {
   const { validated, content } = validatedContent(
     [collection({ id: 'pearls-of-truth', titleEn: 'Pearls of Truth', titleHe: 'פניני אמת' })],
     [work({ id: 'pearl-work', collectionId: 'pearls-of-truth' })],
@@ -60,7 +60,7 @@ test('an enabled Work assigned to the second collection is attached and becomes 
 
   assert.equal(validated.diagnostics.length, 0);
   assert.deepEqual(pearls.works.map(({ id }) => id), ['pearl-work']);
-  assert.equal(pearls.target, 'pearl-work');
+  assert.equal(pearls.pageId, 'collection-pearls-of-truth');
 });
 
 test('collection IDs and Work references are trimmed before deterministic matching', () => {
@@ -127,8 +127,8 @@ test('fallback keeps Exhibition and Pearls of Truth works and covers intact', ()
 
   assert.equal(exhibition.cover, '/assets/hidden-harmony.jpg');
   assert.equal(exhibition.works.length, 6);
-  assert.equal(exhibition.target, 'gallery');
+  assert.equal(exhibition.pageId, 'gallery');
   assert.equal(pearls.cover, '/assets/cover-lachayot.jpg');
   assert.equal(pearls.works.length, 3);
-  assert.equal(pearls.target, 'beauty-as-power');
+  assert.equal(pearls.pageId, 'collection-pearls-of-truth');
 });

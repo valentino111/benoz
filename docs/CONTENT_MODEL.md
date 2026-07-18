@@ -11,7 +11,9 @@ Current collection IDs:
 - `exhibition` — Exhibition / קולות העוטף
 - `pearls-of-truth` — Pearls of Truth / פניני אמת
 
-Core fields include `id`, English and Hebrew titles, description, poster media, slug, enabled state, and sort order. The current local model also includes presentation fields such as number, type, cover, target, and nested works.
+Core fields include `id`, English and Hebrew titles, optional English and Hebrew subtitles, introductory descriptions, poster media, slug, enabled state, and sort order. Published rows normalize `enabled` to `true` and Sheets `sort` to numeric `order`. The normalized model also carries presentation fields such as number, type, cover, hero image, page anchor, and nested works.
+
+Every enabled Collection opens as an independent page: a reusable collection introduction is followed by only the Works whose trimmed `collectionId` matches that Collection. The Exhibition fallback retains its established “The Hidden Geometry of the Soul” subtitle, bilingual manifesto, brand image, and series note. Pearls of Truth uses its existing bilingual title, cover, and available fallback description; an empty localized description produces a clean title-led introduction.
 
 ## Works
 
@@ -26,6 +28,8 @@ Common fields include:
 - format or metadata text;
 - availability labels, boolean availability, and optional price;
 - related Song IDs derived from Song relationships.
+
+`id` identifies a Work and must remain globally unique. The Sheets `sort` value becomes normalized `order` and controls presentation only within the Work's own Collection. The runtime filters by `collectionId` before sorting numerically by `order`; equal values retain source-row order, with Work ID as the final deterministic tie-breaker. Reusing values such as `10`, `20`, and `30` in separate Collections is expected.
 
 The Exhibition series currently contains six Works. Four are exhibition sale works; `fragility-of-love` and `gate-to-infinity` belong to the complete cycle but were not among the four physical exhibition sale works.
 
@@ -63,7 +67,8 @@ Do not change IDs or relationships without explicit approval.
 - IDs must be unique within each entity type and stable after publication.
 - Use camelCase field names: `titleEn`, `relatedWorkIds`.
 - Use `En` and `He` suffixes for localized fields.
-- Sort values should be numeric and deterministic.
+- Collection `sort` controls collection-selection order; Work `sort` controls order only within its parent Collection.
+- Sort values should be numeric. Duplicate Work sort values are allowed and remain stable by source row, then Work ID.
 - `enabled` and `available` should use explicit boolean values in Sheets.
 
 ## Media conventions

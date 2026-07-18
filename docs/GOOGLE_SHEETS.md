@@ -21,21 +21,26 @@ The current application reads CSV through the Google Visualization endpoint. The
 
 ## Collections columns
 
+The inspected production `Collections` sheet currently has these exact headers: `enabled`, `sort`, `id`, `titleEn`, `titleHe`, `posterImage`, `posterVideo`, `descriptionEn`, `descriptionHe`, and `slug`. The loader also accepts optional `subtitleEn` and `subtitleHe` columns when the sheet is extended; they are not present in the current sheet.
+
 | Column | Purpose |
 |---|---|
 | `enabled` | Display row only when `TRUE` |
-| `sort` | Numeric display order |
+| `sort` | Numeric order on the collection-selection screen |
 | `id` | Stable lowercase kebab-case identifier |
 | `titleEn`, `titleHe` | Localized titles |
+| `subtitleEn`, `subtitleHe` | Optional localized collection-page subtitle; local fallback is retained when empty |
 | `posterImage`, `posterVideo` | Local media filenames |
-| `descriptionEn`, `descriptionHe` | Localized descriptions |
+| `descriptionEn`, `descriptionHe` | Localized collection-page introductory text |
 | `slug` | Optional public-facing slug; defaults to ID |
+
+The normalized local presentation model may additionally provide `heroImage`, `noteEn`, `noteHe`, and `pageId` to preserve approved collection-specific presentation. These are not parallel spreadsheet columns and are not editable through the current sheet.
 
 ## Works columns
 
 | Column | Purpose |
 |---|---|
-| `enabled`, `sort`, `id` | Visibility, order, and identity |
+| `enabled`, `sort`, `id` | Visibility, collection-local order, and globally unique identity |
 | `collectionId` | Parent Collection ID |
 | `titleEn`, `titleHe` | Localized titles |
 | `image`, `video`, `thumbnail` | Local media filenames |
@@ -46,6 +51,8 @@ The current application reads CSV through the Google Visualization endpoint. The
 | `availabilityEn`, `availabilityHe` | Localized availability text |
 | `available` | Boolean sale availability |
 | `price` | Editable display price |
+
+The current `Works` sheet also contains a `songIds` header. It is not the relationship source used by the application; current Work-to-Song links are derived from `Songs.relatedWorkIds`.
 
 ## Songs columns
 
@@ -63,11 +70,12 @@ The current application reads CSV through the Google Visualization endpoint. The
 1. The browser requests Collections, Works, and Songs concurrently.
 2. CSV headers become object keys.
 3. Rows with `enabled` other than `TRUE` are excluded.
-4. Rows are sorted numerically by `sort`.
+4. Collections are sorted numerically by their `sort` value.
 5. Media filenames resolve under `assets/` unless already absolute.
 6. Song `relatedWorkIds` are converted into Work `songIds`.
-7. Works are attached to their matching Collections.
-8. The normalized data is passed to React.
+7. Work IDs and `collectionId` values are trimmed, and Works are attached to their matching Collections.
+8. For each Collection, its Works are filtered first and then sorted numerically by `sort` (normalized as `order`). Equal values retain source-row order, then Work ID.
+9. The normalized data is passed to React as independent collection pages.
 
 Changes are read at page load; there is no background synchronization or write-back to Sheets.
 
@@ -81,6 +89,7 @@ Before publishing spreadsheet changes:
 - Required English and Hebrew content is present.
 - `enabled` and `available` use explicit `TRUE` or `FALSE`.
 - `sort` values are numeric and intentional.
+- Work `sort` values need to be unique only within the intended sequence when editors want a strict order; the same values may be reused in different Collections.
 - Referenced filenames exist under `public/assets/`. A collection poster that fails to load falls back visually to the matching local collection cover.
 - Pricing and availability agree.
 - No unapproved remote URL or HTML is inserted.
@@ -98,6 +107,15 @@ The content pipeline distinguishes three row states:
 Artwork images are part of the existing Work presentation, and the gallery has no approved placeholder design. An enabled Work with an empty `image` is therefore excluded as `enabled-public-missing-media` until its real image filename is supplied. Its text is not substituted into another Work and no placeholder is invented.
 
 Remote Collection rows are merged with matching local Collections by `id`. Non-empty remote values override local values; empty or whitespace-only remote visual fields retain the local value. The local cover is also retained as a background fallback when a non-empty remote poster filename cannot be loaded.
+
+Example collection-local ordering:
+
+```text
+exhibition:      work-a sort 10, work-b sort 20
+pearls-of-truth: work-c sort 10, work-d sort 20
+```
+
+`work-c` is first on the Pearls of Truth page. A Work ID is never interpreted as display order.
 
 ## Fallback behavior
 

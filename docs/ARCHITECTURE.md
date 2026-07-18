@@ -32,8 +32,9 @@ The current project is a React application built with Vite. React renders the pa
 - `EntryScreen`
 - `ProjectHub`
 - `SiteHeader`
-- `HeroSection`
-- `ArtworkGallery`
+- one reusable `CollectionPage` per enabled Collection
+  - data-driven `HeroSection`
+  - collection-filtered `ArtworkGallery`
 - `MusicSection`
 - `StorySection`
 - `ExhibitionsSection`
@@ -49,9 +50,22 @@ Some components return JSX directly. Others use `RawMarkup` to inject constant l
 2. `contentService.js` requests the Collections, Works, and Songs sheets as CSV.
 3. Rows are parsed, filtered to `enabled = TRUE`, sorted, and normalized.
 4. Song-to-work relationships are derived from `relatedWorkIds`.
-5. If remote loading fails or produces no enabled collections/works, local fallback data is returned.
-6. React renders Collections, Works, and Songs as component props.
-7. After content renders, `App` loads `/legacy.js`, which attaches navigation, language, lightbox, audio, dialog, mobile, and animation behavior to the DOM.
+5. Each Collection receives only matching Works, sorted by numeric collection-local order with deterministic ties.
+6. If remote loading fails or produces no enabled collections/works, local fallback data is returned.
+7. React renders the entry, selector, selected collection page, and global supporting sections.
+8. After content renders, `App` loads `/legacy.js`, which attaches language, lightbox, audio, dialog, mobile, and animation behavior to the DOM. React owns collection-level navigation.
+
+## Collection navigation
+
+The application deliberately uses the browser History API instead of a routing dependency. Collection URLs use `?collection=<slug-or-id>` and may retain an artwork hash, for example `/?collection=pearls-of-truth#new-work`.
+
+- Entering a Collection pushes a history entry and renders its dedicated page.
+- Browser back and the labeled Home/back control return to the collection selector.
+- A direct refresh resolves the selected Collection from the query string.
+- Invalid or absent collection parameters do not render a mixed gallery.
+- Opening a page moves keyboard focus to its `h1`; returning moves focus to the collection selector.
+
+`src/data/collectionPages.js` owns URL serialization, lookup, ID trimming, and collection-local Work sorting. Keeping these policies outside components makes the behavior testable without adding a router.
 
 See [GOOGLE_SHEETS.md](GOOGLE_SHEETS.md) for remote content details and [CONTENT_MODEL.md](CONTENT_MODEL.md) for entity definitions.
 
@@ -63,9 +77,9 @@ Media is local; Google Sheets should normally store filenames rather than full l
 
 ## Current constraints
 
-- `legacy.js` and React share responsibility for the same rendered DOM.
+- `legacy.js` and React still share responsibility for the rendered DOM, but collection-level navigation is React-owned.
 - Global styles are contained in one large stylesheet with historical override sections.
-- There is no router, state library, test suite, TypeScript configuration, or explicit Vite configuration.
+- There is no router, state library, TypeScript configuration, or explicit Vite configuration; focused content and collection-page tests use Node's test runner.
 - Pearls of Truth local works use a different shape from normalized remote Works.
 
 These constraints should be addressed incrementally through [ROADMAP.md](ROADMAP.md), without redesigning the gallery.

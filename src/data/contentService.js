@@ -1,5 +1,6 @@
 import { collections as localCollections } from './collections.js';
 import { songs as localSongs } from './songs.js';
+import { getCollectionWorks, normalizeCollectionId } from './collectionPages.js';
 import {
   ContentDataError,
   parseBoolean,
@@ -41,17 +42,25 @@ export function normalizeCollections(rows) {
     return {
       ...fallback,
       id: row.id,
+      enabled: true,
+      order: Number(row.sort),
       number: String(index + 1).padStart(2, '0'),
       title: nonEmpty(row.titleEn, fallback.title),
       titleHe: nonEmpty(row.titleHe, fallback.titleHe),
+      subtitleEn: nonEmpty(row.subtitleEn, fallback.subtitleEn),
+      subtitleHe: nonEmpty(row.subtitleHe, fallback.subtitleHe),
       type: fallback.type || 'Visual Collection',
       description: nonEmpty(row.descriptionEn, fallback.description),
       descriptionHe: nonEmpty(row.descriptionHe, fallback.descriptionHe),
+      noteEn: fallback.noteEn || '',
+      noteHe: fallback.noteHe || '',
       cover: remoteCover || fallback.cover || '',
       fallbackCover: fallback.cover || '',
+      heroImage: fallback.heroImage || remoteCover || fallback.cover || '',
+      heroImageAlt: fallback.heroImageAlt || nonEmpty(row.titleEn, fallback.title),
       posterVideo: assetPath(row.posterVideo) || fallback.posterVideo || '',
       slug: nonEmpty(row.slug, fallback.slug || row.id),
-      target: fallback.target || '',
+      pageId: fallback.pageId || `collection-${nonEmpty(row.slug, row.id)}`,
       works: [],
     };
   });
@@ -84,9 +93,11 @@ function normalizeWorks(rows, songs) {
     });
   });
 
-  return sorted(rows).map((row) => ({
+  return rows.map((row, sourceOrder) => ({
     id: row.id,
-    collectionId: row.collectionId,
+    collectionId: normalizeCollectionId(row.collectionId),
+    order: Number(row.sort),
+    sourceOrder,
     titleEn: row.titleEn,
     titleHe: row.titleHe,
     image: assetPath(row.image),
@@ -107,11 +118,13 @@ function normalizeWorks(rows, songs) {
   }));
 }
 
-function normalizeLocalWork(work) {
+function normalizeLocalWork(work, sourceOrder) {
   const media = work.media ?? {};
   return {
     id: work.id,
-    collectionId: work.collectionId,
+    collectionId: normalizeCollectionId(work.collectionId),
+    order: Number.isFinite(Number(work.order)) ? Number(work.order) : (sourceOrder + 1) * 10,
+    sourceOrder,
     titleEn: work.titleEn,
     titleHe: work.titleHe,
     image: work.image || media.image || '',
@@ -133,7 +146,9 @@ function normalizeLocalWork(work) {
 }
 
 export function fallbackContent() {
-  const works = localCollections.flatMap((collection) => collection.works).map(normalizeLocalWork);
+  const works = localCollections.flatMap((collection) => (
+    collection.works.map((work, sourceOrder) => normalizeLocalWork(work, sourceOrder))
+  ));
   const songs = localSongs.map((song) => ({
     ...song,
     titleEn: song.titleEn || song.title,
@@ -147,8 +162,8 @@ export function fallbackContent() {
     posterVideo: collection.posterVideo || '',
     fallbackCover: collection.cover || '',
     slug: collection.slug || collection.id,
-    works: works.filter((work) => work.collectionId === collection.id),
-  })).map(resolveCollectionTarget);
+    works: getCollectionWorks(works, collection.id),
+  }));
   const content = { source: 'local-fallback', collections, works, songs };
   const diagnostics = validateCanonicalContent(content);
   if (diagnostics.length) {
@@ -157,23 +172,12 @@ export function fallbackContent() {
   return content;
 }
 
-function resolveCollectionTarget(collection) {
-  const targetIsOwnWork = collection.works.some((work) => work.id === collection.target);
-  const preservesGalleryEntrance = collection.target === 'gallery';
-  return {
-    ...collection,
-    target: targetIsOwnWork || preservesGalleryEntrance
-      ? collection.target
-      : collection.works[0]?.id || collection.target || 'gallery',
-  };
-}
-
 export function buildRemoteContent(rows) {
   const songs = normalizeSongs(rows.Songs);
   const works = normalizeWorks(rows.Works, songs);
-  const collections = normalizeCollections(rows.Collections).map((collection) => resolveCollectionTarget({
+  const collections = normalizeCollections(rows.Collections).map((collection) => ({
     ...collection,
-    works: works.filter((work) => work.collectionId === collection.id),
+    works: getCollectionWorks(works, collection.id),
   }));
   return { source: 'google-sheets', collections, works, songs };
 }
