@@ -1,0 +1,71 @@
+# Architecture
+
+## Overview
+
+The current project is a React application built with Vite. React renders the page structure and data-driven gallery sections. A legacy browser script supplies much of the imperative interaction behavior.
+
+## Project structure
+
+```text
+.
+├── public/                 Static files copied directly into the build
+│   ├── assets/             Artwork, audio, video, covers, and brand assets
+│   └── legacy.js           Current imperative interaction layer
+├── src/
+│   ├── collections/        Local structured work data by collection
+│   ├── components/         React-rendered page sections and controls
+│   ├── data/               Collections, Songs, and content loading
+│   ├── App.jsx             Application composition and content bootstrap
+│   ├── main.jsx            React entry point
+│   └── styles.css          Global visual and responsive styles
+├── docs/                   Project documentation
+├── index.html              Vite HTML entry and metadata
+└── package.json            Commands and dependencies
+```
+
+`dist/` contains generated production output currently checked into the repository. Treat it as a build artifact; do not edit it by hand.
+
+## React composition
+
+`main.jsx` mounts `App`. `App` loads gallery content and composes:
+
+- `EntryScreen`
+- `ProjectHub`
+- `SiteHeader`
+- `HeroSection`
+- `ArtworkGallery`
+- `MusicSection`
+- `StorySection`
+- `ExhibitionsSection`
+- `ContactSection`
+- `SiteFooter`
+- `Overlays`
+
+Some components return JSX directly. Others use `RawMarkup` to inject constant local HTML. This is current behavior, not the preferred long-term architecture.
+
+## Data flow
+
+1. `App` calls `loadGalleryContent()` after mounting.
+2. `contentService.js` requests the Collections, Works, and Songs sheets as CSV.
+3. Rows are parsed, filtered to `enabled = TRUE`, sorted, and normalized.
+4. Song-to-work relationships are derived from `relatedWorkIds`.
+5. If remote loading fails or produces no enabled collections/works, local fallback data is returned.
+6. React renders Collections, Works, and Songs as component props.
+7. After content renders, `App` loads `/legacy.js`, which attaches navigation, language, lightbox, audio, dialog, mobile, and animation behavior to the DOM.
+
+See [GOOGLE_SHEETS.md](GOOGLE_SHEETS.md) for remote content details and [CONTENT_MODEL.md](CONTENT_MODEL.md) for entity definitions.
+
+## Assets
+
+Vite copies `public/` into the production root. Runtime paths such as `assets/inner-light.jpg` therefore resolve to `public/assets/inner-light.jpg` in development and `/assets/inner-light.jpg` in production.
+
+Media is local; Google Sheets should normally store filenames rather than full local paths. Search the entire repository before renaming any media file.
+
+## Current constraints
+
+- `legacy.js` and React share responsibility for the same rendered DOM.
+- Global styles are contained in one large stylesheet with historical override sections.
+- There is no router, state library, test suite, TypeScript configuration, or explicit Vite configuration.
+- Pearls of Truth local works use a different shape from normalized remote Works.
+
+These constraints should be addressed incrementally through [ROADMAP.md](ROADMAP.md), without redesigning the gallery.
