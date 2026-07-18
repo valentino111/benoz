@@ -1,8 +1,8 @@
 function LanguageText({ en, he }) {
   return (
     <>
-      <span data-lang="he">{he}</span>
-      <span data-lang="en">{en}</span>
+      <span data-lang="he" lang="he" dir="rtl">{he}</span>
+      <span data-lang="en" lang="en" dir="ltr">{en}</span>
     </>
   );
 }
@@ -10,8 +10,8 @@ function LanguageText({ en, he }) {
 function Track({ song }) {
   return (
     <article className="track" id={song.domId}>
-      <div className="track-media">
-        <img alt={song.title} className="track-cover-image" src={song.cover} />
+      <div className="track-media" role="button" tabIndex="0" aria-label={`Preview ${song.titleEn || song.title}`}>
+        <img alt={song.titleEn || song.title} className="track-cover-image" decoding="async" loading="lazy" src={song.cover} />
         {song.animation && (
           <video aria-hidden="true" className="track-hover-video" muted playsInline preload="metadata">
             <source src={song.animation} type="video/mp4" />
@@ -26,8 +26,8 @@ function Track({ song }) {
         </p>
         <audio preload="metadata" src={song.audio}></audio>
         <div className="player">
-          <button className="play">▶</button>
-          <input className="range" max="100" min="0" type="range" defaultValue="0" />
+          <button aria-label={`Play ${song.titleEn || song.title}`} aria-pressed="false" className="play">▶</button>
+          <input aria-label={`Seek in ${song.titleEn || song.title}`} className="range" max="100" min="0" type="range" defaultValue="0" />
           <span className="time">0:00</span>
         </div>
       </div>

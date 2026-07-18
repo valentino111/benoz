@@ -3,5 +3,10 @@ import RawMarkup from './RawMarkup.jsx';
 const markup = "<dialog class=\"details-dialog\" id=\"detailsDialog\">\n<button aria-label=\"Close\" class=\"dialog-close\">×</button>\n<div class=\"dialog-content\">\n<div class=\"dialog-kicker\">\n<span data-lang=\"he\">פרטי היצירה</span><span data-lang=\"en\">Artwork Details</span>\n</div>\n<h2>\n<span data-lang=\"he\" id=\"dialogTitleHe\"></span>\n<span data-lang=\"en\" id=\"dialogTitleEn\"></span>\n</h2>\n<div class=\"dialog-status\" id=\"dialogStatus\"></div>\n<p>\n<span data-lang=\"he\">Fine Art Canvas בגודל 40×60 ס״מ, מתוח על מסגרת עץ ומוכן לתלייה.</span>\n<span data-lang=\"en\">Fine Art Canvas, 40×60 cm, stretched on a wooden frame and ready to hang.</span>\n</p>\n<p>\n<span data-lang=\"he\">העבודה תימסר חתומה על ידי האמן.</span>\n<span data-lang=\"en\">The work will be delivered signed by the artist.</span>\n</p>\n<div class=\"dialog-price\" id=\"dialogPrice\"></div>\n<a class=\"whatsapp\" href=\"https://wa.me/972544520987\" id=\"dialogWhatsapp\" rel=\"noopener\" target=\"_blank\">\n<span data-lang=\"he\">יצירת קשר ב-WhatsApp</span>\n<span data-lang=\"en\">Contact on WhatsApp</span>\n</a>\n</div>\n</dialog><div class=\"lightbox\" id=\"lightbox\">\n<button class=\"close\">×</button>\n<button class=\"prev\">‹</button>\n<div class=\"lb-stage\">\n<img alt=\"\"/>\n</div>\n<div class=\"lb-toolbar\">\n<button aria-label=\"Zoom out\" class=\"zoom-out\">−</button>\n<span class=\"lb-count\">1 / 6</span>\n<button aria-label=\"Zoom in\" class=\"zoom-in\">+</button>\n<button aria-label=\"Reset zoom\" class=\"zoom-reset\">100%</button>\n</div>\n<button class=\"next\">›</button>\n</div>";
 
 export default function Overlays() {
-  return <RawMarkup html={markup} />;
+  const accessibleMarkup = markup
+    .replace('<div class="lightbox" id="lightbox">', '<div aria-hidden="true" aria-label="Artwork viewer" aria-modal="true" class="lightbox" id="lightbox" role="dialog">')
+    .replace('<button class="close">', '<button aria-label="Close artwork viewer" class="close">')
+    .replace('<button class="prev">', '<button aria-label="Previous artwork" class="prev">')
+    .replace('<button class="next">', '<button aria-label="Next artwork" class="next">');
+  return <RawMarkup html={accessibleMarkup} />;
 }
