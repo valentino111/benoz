@@ -11,9 +11,11 @@ Current collection IDs:
 - `exhibition` — Exhibition / קולות העוטף
 - `pearls-of-truth` — Pearls of Truth / פניני אמת
 
-Core fields include `id`, English and Hebrew titles, optional English and Hebrew subtitles, introductory descriptions, poster media, slug, enabled state, and sort order. Published rows normalize `enabled` to `true` and Sheets `sort` to numeric `order`. The normalized model also carries presentation fields such as number, type, cover, hero image, page anchor, and nested works.
+Core fields include `id`, English and Hebrew titles, optional English and Hebrew subtitles, introductory descriptions, poster media, slug, enabled state, and sort order. Published rows normalize `enabled` to `true` and Sheets `sort` to numeric `order`. The normalized model also carries presentation fields such as number, type, card cover, page anchor, and nested works.
 
-Every enabled Collection opens as an independent page: a reusable collection introduction is followed by only the Works whose trimmed `collectionId` matches that Collection. The Exhibition fallback retains its established “The Hidden Geometry of the Soul” subtitle, bilingual manifesto, brand image, and series note. Pearls of Truth uses its existing bilingual title, cover, and available fallback description; an empty localized description produces a clean title-led introduction.
+Every enabled Collection opens as an independent page: a reusable collection introduction is followed by only the Works whose trimmed `collectionId` matches that Collection. Collection cards use each Collection's `cover`; all collection introductions use the shared Ben Oz brand logo at `/assets/brand/ben-oz-logo-gold-transparent.png`. The Exhibition fallback retains its established “The Hidden Geometry of the Soul” subtitle, bilingual manifesto, and series note.
+
+Sheets `descriptionEn` and `descriptionHe` are the exact collection-introduction fields. Remote non-empty text overrides local fallback text; empty remote text preserves a valid localized fallback. English is never substituted into the Hebrew presentation. Pearls of Truth currently has an English fallback description but no approved Hebrew fallback, so its live `descriptionHe` cell must be filled before Hebrew introductory text can appear.
 
 ## Works
 
@@ -76,7 +78,7 @@ Do not change IDs or relationships without explicit approval.
 - Store media under `public/assets/` or an approved subdirectory.
 - Store filenames in Google Sheets, for example `inner-light.jpg`.
 - Do not fabricate, rename, or replace media without verifying every reference.
-- Keep artwork images, covers, audio, video, and brand assets distinct in meaning even when they share a directory.
+- Keep artwork images, collection-card covers, audio, video, and brand assets distinct in meaning even when they share a directory.
 - Preview video should remain short and non-distracting.
 
 See [GOOGLE_SHEETS.md](GOOGLE_SHEETS.md) for columns and validation rules.

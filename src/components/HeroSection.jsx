@@ -1,4 +1,5 @@
 import { Fragment } from 'react';
+import { getCollectionHeroModel } from '../data/collectionPresentation.js';
 
 function TextLines({ text, title = false }) {
   return String(text || '').split('\n').filter(Boolean).map((line, index) => (
@@ -9,49 +10,32 @@ function TextLines({ text, title = false }) {
   ));
 }
 
-function HeroMedia({ collection }) {
-  if (collection.posterVideo) {
-    return (
-      <video
-        aria-label={collection.heroImageAlt || collection.title}
-        autoPlay
-        className="hero-logo logo-shimmer parallax-item"
-        loop
-        muted
-        playsInline
-        poster={collection.heroImage || collection.cover}
-        src={collection.posterVideo}
-      />
-    );
-  }
-
-  if (!collection.heroImage && !collection.cover) return null;
+function HeroLogo({ alt, src }) {
   return (
     <img
-      alt={collection.heroImageAlt || collection.title}
+      alt={alt}
       className="hero-logo logo-shimmer parallax-item"
-      src={collection.heroImage || collection.cover}
+      src={src}
     />
   );
 }
 
 export default function HeroSection({ collection }) {
-  const titleEn = collection.subtitleEn || collection.title;
-  const titleHe = collection.subtitleHe || collection.titleHe;
+  const hero = getCollectionHeroModel(collection);
 
   return (
     <>
       <section className="hero fade" id={collection.pageId}>
         <div>
-          <HeroMedia collection={collection} />
+          <HeroLogo alt={hero.logoAlt} src={hero.logoSrc} />
           <h1 className="parallax-item" id={`collection-title-${collection.id}`} tabIndex="-1">
-            {titleHe && <span data-lang="he" lang="he" dir="rtl"><TextLines text={titleHe} title /></span>}
-            {titleEn && <span data-lang="en" lang="en" dir="ltr"><TextLines text={titleEn} title /></span>}
+            {hero.he.title && <span data-lang="he" lang={hero.he.language} dir={hero.he.direction}><TextLines text={hero.he.title} title /></span>}
+            {hero.en.title && <span data-lang="en" lang={hero.en.language} dir={hero.en.direction}><TextLines text={hero.en.title} title /></span>}
           </h1>
-          {(collection.description || collection.descriptionHe) && (
+          {(hero.en.intro || hero.he.intro) && (
             <div className="manifesto parallax-item">
-              {collection.descriptionHe && <div data-lang="he" lang="he" dir="rtl"><TextLines text={collection.descriptionHe} /></div>}
-              {collection.description && <div data-lang="en" lang="en" dir="ltr"><TextLines text={collection.description} /></div>}
+              {hero.he.intro && <div data-lang="he" lang={hero.he.language} dir={hero.he.direction}><TextLines text={hero.he.intro} /></div>}
+              {hero.en.intro && <div data-lang="en" lang={hero.en.language} dir={hero.en.direction}><TextLines text={hero.en.intro} /></div>}
             </div>
           )}
         </div>

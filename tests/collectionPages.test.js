@@ -10,9 +10,14 @@ import {
 import {
   buildRemoteContent,
   fallbackContent,
+  normalizeCollection,
   normalizeCollections,
 } from '../src/data/contentService.js';
 import { validateSheetRows } from '../src/data/contentValidation.js';
+import {
+  COLLECTION_HERO_LOGO,
+  getCollectionHeroModel,
+} from '../src/data/collectionPresentation.js';
 
 const baseCollections = [
   { id: 'exhibition', slug: 'exhibition', title: 'Exhibition' },
@@ -136,10 +141,11 @@ test('English and Hebrew collection intro content remains available to the page'
 
 test('the first collection retains its established hero structure and content data', () => {
   const exhibition = fallbackContent().collections[0];
+  const hero = getCollectionHeroModel(exhibition);
   assert.deepEqual(
     {
       pageId: exhibition.pageId,
-      heroImage: exhibition.heroImage,
+      heroImage: hero.logoSrc,
       noteEn: exhibition.noteEn,
       workIds: exhibition.works.map(({ id }) => id),
     },
@@ -156,5 +162,82 @@ test('the first collection retains its established hero structure and content da
         'gate-to-infinity',
       ],
     },
+  );
+});
+
+test('Pearls of Truth English intro renders its English text', () => {
+  const pearls = fallbackContent().collections.find(({ id }) => id === 'pearls-of-truth');
+  const hero = getCollectionHeroModel(pearls);
+  assert.equal(hero.en.intro, 'A collection where words, images, music and motion meet.');
+  assert.equal(hero.he.intro, '');
+});
+
+test('Pearls of Truth Hebrew intro renders approved descriptionHe text', () => {
+  const fallback = fallbackContent().collections.find(({ id }) => id === 'pearls-of-truth');
+  const pearls = normalizeCollection(collectionRow({
+    id: 'pearls-of-truth',
+    titleEn: 'Pearls of Truth',
+    titleHe: 'פניני אמת',
+    descriptionHe: 'תיאור עברי מאושר לבדיקה',
+    slug: 'pearls-of-truth',
+  }), fallback, 1);
+  assert.equal(getCollectionHeroModel(pearls).he.intro, 'תיאור עברי מאושר לבדיקה');
+});
+
+test('empty remote Pearls Hebrew intro preserves a valid fallback descriptionHe', () => {
+  const fallback = {
+    ...fallbackContent().collections.find(({ id }) => id === 'pearls-of-truth'),
+    descriptionHe: 'תיאור עברי מאושר לבדיקה',
+  };
+  const pearls = normalizeCollection(collectionRow({
+    id: 'pearls-of-truth',
+    titleEn: 'Pearls of Truth',
+    titleHe: 'פניני אמת',
+    descriptionHe: '   ',
+    slug: 'pearls-of-truth',
+  }), fallback, 1);
+  assert.equal(pearls.descriptionHe, 'תיאור עברי מאושר לבדיקה');
+});
+
+test('every collection intro uses the canonical Ben Oz logo', () => {
+  const heroes = fallbackContent().collections.map(getCollectionHeroModel);
+  assert.ok(heroes.every(({ logoSrc }) => logoSrc === COLLECTION_HERO_LOGO));
+  assert.equal(COLLECTION_HERO_LOGO, '/assets/brand/ben-oz-logo-gold-transparent.png');
+});
+
+test('Pearls collection card keeps its remote poster while its intro uses the logo', () => {
+  const fallback = fallbackContent().collections.find(({ id }) => id === 'pearls-of-truth');
+  const pearls = normalizeCollection(collectionRow({
+    id: 'pearls-of-truth',
+    titleEn: 'Pearls of Truth',
+    titleHe: 'פניני אמת',
+    posterImage: 'pearls-of-truth-poster.jpg',
+    slug: 'pearls-of-truth',
+  }), fallback, 1);
+  assert.equal(pearls.cover, 'assets/pearls-of-truth-poster.jpg');
+  assert.equal(getCollectionHeroModel(pearls).logoSrc, COLLECTION_HERO_LOGO);
+  assert.notEqual(pearls.cover, getCollectionHeroModel(pearls).logoSrc);
+});
+
+test('Exhibition retains its established bilingual hero and canonical logo', () => {
+  const exhibition = fallbackContent().collections.find(({ id }) => id === 'exhibition');
+  const hero = getCollectionHeroModel(exhibition);
+  assert.equal(hero.en.title, 'The Hidden Geometry\nof the Soul');
+  assert.equal(hero.he.title, 'הגאומטריה הנסתרת של הנפש');
+  assert.match(hero.en.intro, /Cinema becomes Memory/);
+  assert.match(hero.he.intro, /קולנוע הופך לזיכרון/);
+  assert.equal(hero.logoSrc, COLLECTION_HERO_LOGO);
+});
+
+test('collection hero English and Hebrew directions remain explicit', () => {
+  const pearls = getCollectionHeroModel({
+    title: 'Pearls of Truth',
+    titleHe: 'פניני אמת',
+    description: 'English intro',
+    descriptionHe: 'תיאור עברי מאושר לבדיקה',
+  });
+  assert.deepEqual(
+    [pearls.en.language, pearls.en.direction, pearls.he.language, pearls.he.direction],
+    ['en', 'ltr', 'he', 'rtl'],
   );
 });

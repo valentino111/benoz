@@ -30,11 +30,16 @@ The inspected production `Collections` sheet currently has these exact headers: 
 | `id` | Stable lowercase kebab-case identifier |
 | `titleEn`, `titleHe` | Localized titles |
 | `subtitleEn`, `subtitleHe` | Optional localized collection-page subtitle; local fallback is retained when empty |
-| `posterImage`, `posterVideo` | Local media filenames |
-| `descriptionEn`, `descriptionHe` | Localized collection-page introductory text |
+| `posterImage` | Collection-selection card image; never the collection-intro logo |
+| `posterVideo` | Optional collection poster-video metadata; never the collection-intro logo |
+| `descriptionEn`, `descriptionHe` | Exact English and Hebrew collection-introduction text fields |
 | `slug` | Optional public-facing slug; defaults to ID |
 
-The normalized local presentation model may additionally provide `heroImage`, `noteEn`, `noteHe`, and `pageId` to preserve approved collection-specific presentation. These are not parallel spreadsheet columns and are not editable through the current sheet.
+The normalized local presentation model may additionally provide `noteEn`, `noteHe`, and `pageId` to preserve approved collection-specific presentation. These are not parallel spreadsheet columns and are not editable through the current sheet.
+
+`posterImage` resolves to the `cover` used by the collection-selection card. It is deliberately not reused in the collection introduction. `posterVideo` remains normalized collection poster metadata but also does not replace the intro logo. Every collection introduction uses the same existing brand asset, `/assets/brand/ben-oz-logo-gold-transparent.png`; there is no editable logo column in Sheets.
+
+For localized intro text, a non-empty remote `descriptionEn` or `descriptionHe` value overrides the matching fallback. Empty or whitespace-only remote text preserves a valid fallback in the same language, and English is not copied into Hebrew. At the time of the 2026-07-18 inspection, the Pearls of Truth row had empty `descriptionEn` and `descriptionHe` cells. Its English intro therefore comes from local fallback content; no approved Hebrew fallback exists, so the `descriptionHe` cell in the Pearls row must be filled to publish Hebrew intro text.
 
 ## Works columns
 
