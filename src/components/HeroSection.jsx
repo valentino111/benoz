@@ -1,7 +1,51 @@
-import RawMarkup from './RawMarkup.jsx';
+import { Fragment } from 'react';
+import { getCollectionHeroModel } from '../data/collectionPresentation.js';
 
-const markup = "<section class=\"hero fade\" id=\"gallery\">\n<div>\n<img alt=\"Ben Oz\" class=\"hero-logo logo-shimmer parallax-item\" src=\"assets/brand/ben-oz-logo-gold-transparent.png\"/>\n<h1 class=\"parallax-item\"><span data-lang=\"he\">הגאומטריה הנסתרת של הנפש</span><span data-lang=\"en\">The Hidden Geometry<br/>of the Soul</span></h1>\n<div class=\"manifesto parallax-item\">\n<div data-lang=\"he\">\n<span>רעיונות הופכים לשירה</span>\n<span>שירה הופכת לאמנות</span>\n<span>אמנות הופכת למוזיקה</span>\n<span>מוזיקה הופכת לקולנוע</span>\n<span>קולנוע הופך לזיכרון</span>\n</div>\n<div data-lang=\"en\">\n<span>Ideas become Poetry</span>\n<span>Poetry becomes Art</span>\n<span>Art becomes Music</span>\n<span>Music becomes Cinema</span>\n<span>Cinema becomes Memory</span>\n</div>\n</div>\n</div>\n</section><div class=\"exhibition-note fade\">\n<span data-lang=\"he\">הסדרה המלאה כוללת שש עבודות. ארבע מתוכן משתתפות בתערוכה הנוכחית.</span>\n<span data-lang=\"en\">The complete series consists of six works. Four are presented in the current exhibition.</span>\n</div>";
+function TextLines({ text, title = false }) {
+  return String(text || '').split('\n').filter(Boolean).map((line, index) => (
+    <Fragment key={`${line}-${index}`}>
+      {title && index > 0 && <br />}
+      {title ? line : <span>{line}</span>}
+    </Fragment>
+  ));
+}
 
-export default function HeroSection() {
-  return <RawMarkup html={markup} />;
+function HeroLogo({ alt, src }) {
+  return (
+    <img
+      alt={alt}
+      className="hero-logo logo-shimmer parallax-item"
+      src={src}
+    />
+  );
+}
+
+export default function HeroSection({ collection }) {
+  const hero = getCollectionHeroModel(collection);
+
+  return (
+    <>
+      <section className="hero fade" id={collection.pageId}>
+        <div>
+          <HeroLogo alt={hero.logoAlt} src={hero.logoSrc} />
+          <h1 className="parallax-item" id={`collection-title-${collection.id}`} tabIndex="-1">
+            {hero.he.title && <span data-lang="he" lang={hero.he.language} dir={hero.he.direction}><TextLines text={hero.he.title} title /></span>}
+            {hero.en.title && <span data-lang="en" lang={hero.en.language} dir={hero.en.direction}><TextLines text={hero.en.title} title /></span>}
+          </h1>
+          {(hero.en.intro || hero.he.intro) && (
+            <div className="manifesto parallax-item">
+              {hero.he.intro && <div data-lang="he" lang={hero.he.language} dir={hero.he.direction}><TextLines text={hero.he.intro} /></div>}
+              {hero.en.intro && <div data-lang="en" lang={hero.en.language} dir={hero.en.direction}><TextLines text={hero.en.intro} /></div>}
+            </div>
+          )}
+        </div>
+      </section>
+      {(collection.noteEn || collection.noteHe) && (
+        <div className="exhibition-note fade">
+          {collection.noteHe && <span data-lang="he" lang="he" dir="rtl">{collection.noteHe}</span>}
+          {collection.noteEn && <span data-lang="en" lang="en" dir="ltr">{collection.noteEn}</span>}
+        </div>
+      )}
+    </>
+  );
 }

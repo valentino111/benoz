@@ -28,7 +28,7 @@ function ArtworkSoundtrack({ song }) {
 
 function Artwork({ work, index, total, songsById }) {
   return (
-    <section className="artwork fade" data-artwork-slug={work.id} data-img={work.image} id={work.id}>
+    <section className="artwork fade" data-artwork-slug={work.id} data-collection-id={work.collectionId} data-img={work.image} id={work.id}>
       <div className="art-media">
         <img
           alt={work.titleEn || work.titleHe}
@@ -70,10 +70,24 @@ function Artwork({ work, index, total, songsById }) {
 }
 
 export default function ArtworkGallery({ works = [], songs = [] }) {
-  const exhibitionWorks = works.filter((work) => work.collectionId === 'exhibition');
   const songsById = Object.fromEntries(songs.map((song) => [song.id, song]));
+  const worksByCollection = works.reduce((groups, work) => {
+    const collectionWorks = groups.get(work.collectionId) || [];
+    collectionWorks.push(work);
+    groups.set(work.collectionId, collectionWorks);
+    return groups;
+  }, new Map());
 
-  return exhibitionWorks.map((work, index) => (
-    <Artwork key={work.id} work={work} index={index} total={exhibitionWorks.length} songsById={songsById} />
-  ));
+  return works.map((work) => {
+    const collectionWorks = worksByCollection.get(work.collectionId);
+    return (
+      <Artwork
+        key={work.id}
+        work={work}
+        index={collectionWorks.indexOf(work)}
+        total={collectionWorks.length}
+        songsById={songsById}
+      />
+    );
+  });
 }

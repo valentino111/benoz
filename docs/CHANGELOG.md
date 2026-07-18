@@ -6,9 +6,20 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) conv
 
 ## [Unreleased]
 
+### Added
+
+- Dedicated, directly addressable pages for each enabled Collection.
+- Reusable bilingual collection introductions backed by normalized Collection data.
+- History API navigation between the collection selector and Collection pages.
+- Regression coverage for collection isolation, local ordering, intro fallback, bilingual content, and URL state.
+
+### Changed
+
+- Work `sort` values now control order only within each Work's Collection.
+- React now owns collection selection and back navigation while preserving existing gallery interactions.
+
 ### Planned
 
-- Content-pipeline validation and fallback parity.
 - Architecture, accessibility, performance, and production-readiness work described in [ROADMAP.md](ROADMAP.md).
 
 ## [0.1.0] - 2026-07-18

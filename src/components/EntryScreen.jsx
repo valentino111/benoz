@@ -1,10 +1,37 @@
-import RawMarkup from './RawMarkup.jsx';
-
-const markup = "<a class=\"skip-link\" href=\"#gallery\">Skip to gallery</a><div aria-hidden=\"true\" class=\"museum-loader\" id=\"museumLoader\">\n<div class=\"loader-inner\"><div class=\"loader-name\">BEN OZ</div><div class=\"loader-sub\">Digital Gallery</div><div class=\"loader-line\"></div></div>\n</div><section class=\"entry\" id=\"entry\">\n<div aria-hidden=\"true\" class=\"entry-visual\"></div>\n<div aria-hidden=\"true\" class=\"entry-overlay\"></div>\n<div class=\"entry-inner\">\n<img alt=\"Ben Oz Digital Gallery\" class=\"official-logo logo-shimmer\" src=\"assets/brand/ben-oz-logo-gold-transparent.png\"/>\n<div class=\"role\">Artist</div>\n<div class=\"tagline\">One Idea, Many Forms</div>\n<button class=\"enter\" id=\"enterBtn\">Enter Gallery</button>\n</div>\n</section>";
-
-export default function EntryScreen({ loading = false }) {
-  const html = loading
-    ? `${markup.replace('id="enterBtn"', 'id="enterBtn" disabled aria-describedby="galleryLoadingStatus"')}<p class="sr-only" id="galleryLoadingStatus" role="status">Loading gallery content</p>`
-    : markup;
-  return <RawMarkup html={html} />;
+export default function EntryScreen({ loading = false, active = true, onEnter }) {
+  return (
+    <>
+      <a className="skip-link" hidden={!active || loading} href="#projectHub" onClick={onEnter}>Skip to collections</a>
+      <div aria-hidden="true" className="museum-loader" id="museumLoader">
+        <div className="loader-inner">
+          <div className="loader-name">BEN OZ</div>
+          <div className="loader-sub">Digital Gallery</div>
+          <div className="loader-line" />
+        </div>
+      </div>
+      <section className="entry" hidden={!active} id="entry">
+        <div aria-hidden="true" className="entry-visual" />
+        <div aria-hidden="true" className="entry-overlay" />
+        <div className="entry-inner">
+          <img
+            alt="Ben Oz Digital Gallery"
+            className="official-logo logo-shimmer"
+            src="assets/brand/ben-oz-logo-gold-transparent.png"
+          />
+          <div className="role">Artist</div>
+          <div className="tagline">One Idea, Many Forms</div>
+          <button
+            aria-describedby={loading ? 'galleryLoadingStatus' : undefined}
+            className="enter"
+            disabled={loading}
+            id="enterBtn"
+            onClick={onEnter}
+          >
+            Enter Gallery
+          </button>
+        </div>
+      </section>
+      {loading && <p className="sr-only" id="galleryLoadingStatus" role="status">Loading gallery content</p>}
+    </>
+  );
 }

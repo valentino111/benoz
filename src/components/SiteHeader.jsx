@@ -1,7 +1,29 @@
-import RawMarkup from './RawMarkup.jsx';
+function LanguageLabel({ en, he }) {
+  return <><span data-lang="he">{he}</span><span data-lang="en">{en}</span></>;
+}
 
-const markup = "<header class=\"topbar\">\n<a aria-label=\"Ben Oz — Home\" class=\"brand brand-home\" href=\"#gallery\" id=\"brandHome\"><img alt=\"\" aria-hidden=\"true\" class=\"brand-logo-thumb\" src=\"assets/brand/ben-oz-logo-gold-transparent.png\"/><span>Ben Oz | בן עוז</span></a>\n<button aria-controls=\"mainMenu\" aria-expanded=\"false\" aria-label=\"Open menu\" class=\"mobile-menu-toggle\" id=\"mobileMenuBtn\">☰</button>\n<nav aria-label=\"Primary navigation\" class=\"main-menu\" id=\"mainMenu\">\n<button class=\"menu-link\" id=\"homeBtn\">\n<span data-lang=\"he\">בית</span><span data-lang=\"en\">Home</span>\n</button>\n<a class=\"menu-link\" href=\"#gallery\">\n<span data-lang=\"he\">גלריה</span><span data-lang=\"en\">Gallery</span>\n</a>\n<a class=\"menu-link\" href=\"#music\">\n<span data-lang=\"he\">מוזיקה</span><span data-lang=\"en\">Music</span>\n</a>\n<a class=\"menu-link\" href=\"#story\">\n<span data-lang=\"he\">הסיפור</span><span data-lang=\"en\">Story</span>\n</a>\n<a class=\"menu-link\" href=\"#exhibitions\">\n<span data-lang=\"he\">תערוכות</span><span data-lang=\"en\">Exhibitions</span>\n</a>\n<a class=\"menu-link\" href=\"#contact\">\n<span data-lang=\"he\">יצירת קשר</span><span data-lang=\"en\">Contact</span>\n</a>\n</nav>\n<div class=\"actions\">\n<button aria-pressed=\"false\" class=\"pill sound-toggle\" id=\"soundBtn\" title=\"Ambient sound\">◌</button>\n<button class=\"pill\" id=\"langBtn\">עברית</button>\n</div>\n</header>";
-
-export default function SiteHeader() {
-  return <RawMarkup html={markup} />;
+export default function SiteHeader({ galleryTarget = 'gallery', onBack }) {
+  return (
+    <header className="topbar">
+      <a aria-label="Ben Oz — Back to collections" className="brand brand-home" href="./" id="brandHome" onClick={onBack}>
+        <img alt="" aria-hidden="true" className="brand-logo-thumb" src="assets/brand/ben-oz-logo-gold-transparent.png" />
+        <span>Ben Oz | בן עוז</span>
+      </a>
+      <button aria-controls="mainMenu" aria-expanded="false" aria-label="Open menu" className="mobile-menu-toggle" id="mobileMenuBtn">☰</button>
+      <nav aria-label="Primary navigation" className="main-menu" id="mainMenu">
+        <button aria-label="Back to collections" className="menu-link" id="homeBtn" onClick={onBack}>
+          <LanguageLabel en="Home" he="בית" />
+        </button>
+        <a className="menu-link" href={`#${galleryTarget}`}><LanguageLabel en="Gallery" he="גלריה" /></a>
+        <a className="menu-link" href="#music"><LanguageLabel en="Music" he="מוזיקה" /></a>
+        <a className="menu-link" href="#story"><LanguageLabel en="Story" he="הסיפור" /></a>
+        <a className="menu-link" href="#exhibitions"><LanguageLabel en="Exhibitions" he="תערוכות" /></a>
+        <a className="menu-link" href="#contact"><LanguageLabel en="Contact" he="יצירת קשר" /></a>
+      </nav>
+      <div className="actions">
+        <button aria-pressed="false" className="pill sound-toggle" id="soundBtn" title="Ambient sound">◌</button>
+        <button className="pill" id="langBtn">עברית</button>
+      </div>
+    </header>
+  );
 }

@@ -1,5 +1,6 @@
 import { collections as localCollections } from './collections.js';
 import { songs as localSongs } from './songs.js';
+import { getCollectionWorks, normalizeCollectionId } from './collectionPages.js';
 import {
   ContentDataError,
   parseBoolean,
@@ -11,6 +12,7 @@ import {
 const SHEET_ID = '1qS2N_-BPKIP3zXuTYGSFe0zh18u7ECGdZxDspjJG0Ts';
 const SHEET_NAMES = ['Collections', 'Works', 'Songs'];
 const DEFAULT_TIMEOUT_MS = 8000;
+const localCollectionsById = new Map(localCollections.map((collection) => [collection.id, collection]));
 
 function csvUrl(sheetName) {
   return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
@@ -27,20 +29,42 @@ function sorted(rows) {
   return [...rows].sort((a, b) => Number(a.sort) - Number(b.sort));
 }
 
-function normalizeCollections(rows) {
-  return sorted(rows).map((row, index) => ({
+function nonEmpty(remoteValue, fallbackValue = '') {
+  if (remoteValue === null || remoteValue === undefined) return fallbackValue;
+  const value = String(remoteValue).trim();
+  return value || fallbackValue;
+}
+
+export function normalizeCollection(row, fallback = {}, index = 0) {
+  const remoteCover = assetPath(row.posterImage);
+  return {
+    ...fallback,
     id: row.id,
+    enabled: true,
+    order: Number(row.sort),
     number: String(index + 1).padStart(2, '0'),
-    title: row.titleEn,
-    titleHe: row.titleHe,
-    type: row.id === 'pearls-of-truth' ? 'Poetry · Art · Music' : 'Visual Collection',
-    description: row.descriptionEn || '',
-    descriptionHe: row.descriptionHe || '',
-    cover: assetPath(row.posterImage),
-    posterVideo: assetPath(row.posterVideo),
-    slug: row.slug || row.id,
-    target: row.id === 'pearls-of-truth' ? 'music' : 'gallery',
-  }));
+    title: nonEmpty(row.titleEn, fallback.title),
+    titleHe: nonEmpty(row.titleHe, fallback.titleHe),
+    subtitleEn: nonEmpty(row.subtitleEn, fallback.subtitleEn),
+    subtitleHe: nonEmpty(row.subtitleHe, fallback.subtitleHe),
+    type: fallback.type || 'Visual Collection',
+    description: nonEmpty(row.descriptionEn, fallback.description),
+    descriptionHe: nonEmpty(row.descriptionHe, fallback.descriptionHe),
+    noteEn: fallback.noteEn || '',
+    noteHe: fallback.noteHe || '',
+    cover: remoteCover || fallback.cover || '',
+    fallbackCover: fallback.cover || '',
+    posterVideo: assetPath(row.posterVideo) || fallback.posterVideo || '',
+    slug: nonEmpty(row.slug, fallback.slug || row.id),
+    pageId: fallback.pageId || `collection-${nonEmpty(row.slug, row.id)}`,
+    works: [],
+  };
+}
+
+export function normalizeCollections(rows) {
+  return sorted(rows).map((row, index) => (
+    normalizeCollection(row, localCollectionsById.get(row.id) ?? {}, index)
+  ));
 }
 
 function normalizeSongs(rows) {
@@ -70,9 +94,11 @@ function normalizeWorks(rows, songs) {
     });
   });
 
-  return sorted(rows).map((row) => ({
+  return rows.map((row, sourceOrder) => ({
     id: row.id,
-    collectionId: row.collectionId,
+    collectionId: normalizeCollectionId(row.collectionId),
+    order: Number(row.sort),
+    sourceOrder,
     titleEn: row.titleEn,
     titleHe: row.titleHe,
     image: assetPath(row.image),
@@ -93,11 +119,13 @@ function normalizeWorks(rows, songs) {
   }));
 }
 
-function normalizeLocalWork(work) {
+function normalizeLocalWork(work, sourceOrder) {
   const media = work.media ?? {};
   return {
     id: work.id,
-    collectionId: work.collectionId,
+    collectionId: normalizeCollectionId(work.collectionId),
+    order: Number.isFinite(Number(work.order)) ? Number(work.order) : (sourceOrder + 1) * 10,
+    sourceOrder,
     titleEn: work.titleEn,
     titleHe: work.titleHe,
     image: work.image || media.image || '',
@@ -119,7 +147,9 @@ function normalizeLocalWork(work) {
 }
 
 export function fallbackContent() {
-  const works = localCollections.flatMap((collection) => collection.works).map(normalizeLocalWork);
+  const works = localCollections.flatMap((collection) => (
+    collection.works.map((work, sourceOrder) => normalizeLocalWork(work, sourceOrder))
+  ));
   const songs = localSongs.map((song) => ({
     ...song,
     titleEn: song.titleEn || song.title,
@@ -131,8 +161,9 @@ export function fallbackContent() {
     ...collection,
     descriptionHe: collection.descriptionHe || '',
     posterVideo: collection.posterVideo || '',
+    fallbackCover: collection.cover || '',
     slug: collection.slug || collection.id,
-    works: works.filter((work) => work.collectionId === collection.id),
+    works: getCollectionWorks(works, collection.id),
   }));
   const content = { source: 'local-fallback', collections, works, songs };
   const diagnostics = validateCanonicalContent(content);
@@ -140,6 +171,16 @@ export function fallbackContent() {
     throw new ContentDataError('validation', 'Bundled fallback content is inconsistent.', { diagnostics });
   }
   return content;
+}
+
+export function buildRemoteContent(rows) {
+  const songs = normalizeSongs(rows.Songs);
+  const works = normalizeWorks(rows.Works, songs);
+  const collections = normalizeCollections(rows.Collections).map((collection) => ({
+    ...collection,
+    works: getCollectionWorks(works, collection.id),
+  }));
+  return { source: 'google-sheets', collections, works, songs };
 }
 
 function reportDiagnostic(error, onDiagnostic) {
@@ -179,21 +220,18 @@ export async function loadGalleryContent({ timeoutMs = DEFAULT_TIMEOUT_MS, fetch
     const parsed = Object.fromEntries(
       SHEET_NAMES.map((name, index) => [name, parseCsv(results[index].value, name)]),
     );
-    const { rows, diagnostics } = validateSheetRows(parsed);
+    const { rows, diagnostics, drafts } = validateSheetRows(parsed);
     if (diagnostics.length && import.meta.env?.DEV) {
-      console.warn('[Ben Oz Gallery] Invalid spreadsheet rows were ignored.', diagnostics);
+      console.warn('[Ben Oz Gallery] Spreadsheet validation diagnostics:', diagnostics);
+    }
+    if (drafts.length && import.meta.env?.DEV) {
+      console.info('[Ben Oz Gallery] Disabled spreadsheet draft rows remain unpublished:', drafts);
     }
     if (!rows.Collections.length || !rows.Works.length) {
       throw new ContentDataError('validation', 'Google Sheets returned no usable enabled collections or works.', { diagnostics });
     }
 
-    const songs = normalizeSongs(rows.Songs);
-    const works = normalizeWorks(rows.Works, songs);
-    const collections = normalizeCollections(rows.Collections).map((collection) => ({
-      ...collection,
-      works: works.filter((work) => work.collectionId === collection.id),
-    }));
-    const content = { source: 'google-sheets', collections, works, songs };
+    const content = buildRemoteContent(rows);
     const canonicalDiagnostics = validateCanonicalContent(content);
     if (canonicalDiagnostics.length) {
       throw new ContentDataError('validation', 'Normalized Google Sheets content is inconsistent.', {
