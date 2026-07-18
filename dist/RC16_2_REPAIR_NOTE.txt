@@ -1,0 +1,6 @@
+RC16.2 changes:
+- Zoom percentage now updates live on desktop and mobile.
+- Mobile fullscreen hides plus/minus and image counter, leaving only percentage.
+- Two-finger pinch zoom works from 100% to 400%.
+- One-finger artwork swipe remains available only at 100% zoom.
+- Existing context-menu, drag and long-press protections remain enabled.

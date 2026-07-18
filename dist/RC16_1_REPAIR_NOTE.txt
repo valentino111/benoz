@@ -1,0 +1,1 @@
+RC16.1: favicon files are physically present in the project root, index.html uses explicit root paths with cache-busting, and the mobile language/menu controls are locked to one header row.
