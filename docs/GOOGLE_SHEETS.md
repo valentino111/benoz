@@ -81,16 +81,28 @@ Before publishing spreadsheet changes:
 - Required English and Hebrew content is present.
 - `enabled` and `available` use explicit `TRUE` or `FALSE`.
 - `sort` values are numeric and intentional.
-- Referenced filenames exist under `public/assets/`.
+- Referenced filenames exist under `public/assets/`. A collection poster that fails to load falls back visually to the matching local collection cover.
 - Pricing and availability agree.
 - No unapproved remote URL or HTML is inserted.
 
-The current loader does not enforce all these rules automatically; validation is planned in [ROADMAP.md](ROADMAP.md).
+The loader validates these rules before normalization and reports rejected rows in the development console with the sheet, source row, row ID, field, classification, and exact reason.
+
+## Editorial row states
+
+The content pipeline distinguishes three row states:
+
+- **Published:** `enabled = TRUE` and all required public fields are valid.
+- **Draft:** `enabled = FALSE`; the row remains intentionally unpublished and is not treated as a validation error.
+- **Rejected public row:** `enabled = TRUE` but a required field is invalid or missing. The row is excluded and receives a development diagnostic.
+
+Artwork images are part of the existing Work presentation, and the gallery has no approved placeholder design. An enabled Work with an empty `image` is therefore excluded as `enabled-public-missing-media` until its real image filename is supplied. Its text is not substituted into another Work and no placeholder is invented.
+
+Remote Collection rows are merged with matching local Collections by `id`. Non-empty remote values override local values; empty or whitespace-only remote visual fields retain the local value. The local cover is also retained as a background fallback when a non-empty remote poster filename cannot be loaded.
 
 ## Fallback behavior
 
-If a request fails, a response is not successful, or no enabled Collections/Works are returned, the application logs a warning and uses local structured data from `src/data/` and `src/collections/`.
+If a request fails, a response is not successful, or no enabled Collections/Works are usable, the application logs a development warning and uses local structured data from `src/data/` and `src/collections/`.
 
-The fallback preserves basic gallery availability but is not currently identical to the complete remote model. Treat fallback parity as release work, not as finished functionality.
+The fallback uses the same normalized Collection, Work, and Song relationships as remote content and includes both Exhibition and Pearls of Truth.
 
 See [CONTENT_MODEL.md](CONTENT_MODEL.md) for entity relationships.

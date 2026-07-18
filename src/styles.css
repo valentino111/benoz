@@ -1273,7 +1273,7 @@ body.en .art-copy .en-title{display:none}
   height:clamp(240px,47vh,430px);
   max-height:52svh;
   overflow:hidden;
-  background-image:var(--museum-cover);
+  background-image:var(--museum-cover),var(--museum-fallback-cover);
   background-position:center;
   background-size:cover;
   filter:saturate(.8) brightness(.84);

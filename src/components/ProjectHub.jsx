@@ -17,8 +17,12 @@ export default function ProjectHub({ collections = [] }) {
             <button
               key={collection.id}
               className={`museum-poster museum-poster-${collection.id}`}
+              data-collection-id={collection.id}
               data-project-target={collection.target}
-              style={{ '--museum-cover': `url(${collection.cover})` }}
+              style={{
+                '--museum-cover': `url(${collection.cover})`,
+                '--museum-fallback-cover': `url(${collection.fallbackCover || collection.cover})`,
+              }}
               aria-label={`Enter ${collection.title}`}
             >
               <span className="museum-poster-image" aria-hidden="true">

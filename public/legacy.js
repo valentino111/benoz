@@ -103,7 +103,8 @@ const observer=new IntersectionObserver(entries=>{
 observers.push(observer);
 document.querySelectorAll('.fade').forEach(el=>observer.observe(el));
 
-const artImages=[...document.querySelectorAll('.art-media img')];
+const allArtImages=[...document.querySelectorAll('.art-media img')];
+let artImages=allArtImages;
 const lightbox=document.getElementById('lightbox');
 const lbImg=lightbox.querySelector('img');
 let current=0;
@@ -130,7 +131,12 @@ function showImage(i){
   document.body.classList.add('locked');
   if(opening) lightbox.querySelector('.close').focus();
 }
-artImages.forEach((img,i)=>img.addEventListener('click',()=>showImage(i)));
+function openArtworkImage(img){
+  const collectionId=img.closest('.artwork')?.dataset.collectionId;
+  artImages=allArtImages.filter(candidate=>candidate.closest('.artwork')?.dataset.collectionId===collectionId);
+  showImage(artImages.indexOf(img));
+}
+allArtImages.forEach(img=>img.addEventListener('click',()=>openArtworkImage(img)));
 lightbox.querySelector('.close').addEventListener('click',closeLightbox);
 lightbox.querySelector('.prev').addEventListener('click',e=>{e.stopPropagation();showImage(current-1)});
 lightbox.querySelector('.next').addEventListener('click',e=>{e.stopPropagation();showImage(current+1)});
@@ -198,7 +204,7 @@ document.addEventListener('dragstart',e=>{
 
 
 // RC12: discourage iOS Safari long-press saving while preserving normal taps.
-artImages.forEach((img,index)=>{
+allArtImages.forEach(img=>{
   const media=img.closest('.art-media');
   if(!media || media.querySelector('.image-shield')) return;
   img.setAttribute('draggable','false');
@@ -207,9 +213,9 @@ artImages.forEach((img,index)=>{
   shield.setAttribute('aria-label',img.alt || 'View artwork');
   shield.setAttribute('role','button');
   shield.tabIndex=0;
-  shield.addEventListener('click',()=>showImage(index));
+  shield.addEventListener('click',()=>openArtworkImage(img));
   shield.addEventListener('keydown',e=>{
-    if(e.key==='Enter' || e.key===' '){e.preventDefault();showImage(index)}
+    if(e.key==='Enter' || e.key===' '){e.preventDefault();openArtworkImage(img)}
   });
   shield.addEventListener('contextmenu',e=>e.preventDefault());
   media.appendChild(shield);
@@ -223,13 +229,21 @@ artImages.forEach((img,index)=>{
 
 // Artwork section navigation.
 const artworkSections=[...document.querySelectorAll('.artwork')];
-artworkSections.forEach((section,index)=>{
+const artworkSectionsByCollection=new Map();
+artworkSections.forEach(section=>{
+  const collectionSections=artworkSectionsByCollection.get(section.dataset.collectionId) || [];
+  collectionSections.push(section);
+  artworkSectionsByCollection.set(section.dataset.collectionId,collectionSections);
+});
+artworkSections.forEach(section=>{
+  const collectionSections=artworkSectionsByCollection.get(section.dataset.collectionId);
+  const index=collectionSections.indexOf(section);
   const prev=section.querySelector('.art-prev');
   const next=section.querySelector('.art-next');
   if(prev) prev.disabled=index===0;
-  if(next) next.disabled=index===artworkSections.length-1;
-  prev?.addEventListener('click',()=>artworkSections[index-1]?.scrollIntoView({behavior:'smooth',block:'center'}));
-  next?.addEventListener('click',()=>artworkSections[index+1]?.scrollIntoView({behavior:'smooth',block:'center'}));
+  if(next) next.disabled=index===collectionSections.length-1;
+  prev?.addEventListener('click',()=>collectionSections[index-1]?.scrollIntoView({behavior:'smooth',block:'center'}));
+  next?.addEventListener('click',()=>collectionSections[index+1]?.scrollIntoView({behavior:'smooth',block:'center'}));
 });
 
 // Collector details dialog.
@@ -532,7 +546,9 @@ if(location.hash && artworkBySlug.has(decodeURIComponent(location.hash.slice(1))
   handleArtworkHash();
 }
 
-artworkSections.forEach((section,index)=>{
+artworkSections.forEach(section=>{
+  const collectionSections=artworkSectionsByCollection.get(section.dataset.collectionId);
+  const index=collectionSections.indexOf(section);
   let sx=0,sy=0;
   section.addEventListener('touchstart',e=>{
     if(e.touches.length!==1)return;
@@ -543,7 +559,7 @@ artworkSections.forEach((section,index)=>{
     const dx=e.changedTouches[0].clientX-sx;
     const dy=e.changedTouches[0].clientY-sy;
     if(Math.abs(dx)<70 || Math.abs(dx)<Math.abs(dy)*1.35)return;
-    const target=dx<0?artworkSections[index+1]:artworkSections[index-1];
+    const target=dx<0?collectionSections[index+1]:collectionSections[index-1];
     if(target){
       history.replaceState(null,'','#'+target.dataset.artworkSlug);
       target.scrollIntoView({behavior:'smooth',block:'start'});

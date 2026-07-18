@@ -1,8 +1,19 @@
 const ENTITY_RULES = {
-  Collections: { assets: ['posterImage', 'posterVideo'], requiredAssets: ['posterImage'] },
+  Collections: { assets: ['posterImage', 'posterVideo'], requiredAssets: [] },
   Works: { assets: ['image', 'video', 'thumbnail'], requiredAssets: ['image'] },
   Songs: { assets: ['audio', 'cover', 'video'], requiredAssets: ['audio', 'cover'] },
 };
+
+const sourceRowNumbers = new WeakMap();
+
+function rememberSourceRow(row, rowNumber) {
+  sourceRowNumbers.set(row, rowNumber);
+  return row;
+}
+
+function sourceRowNumber(row, fallback) {
+  return sourceRowNumbers.get(row) ?? fallback;
+}
 
 export class ContentDataError extends Error {
   constructor(category, message, details = {}) {
@@ -66,7 +77,10 @@ export function parseCsv(text, sheetName = 'sheet') {
     if (values.length > headers.length && values.slice(headers.length).some((value) => value.trim())) {
       throw new ContentDataError('parsing', `${sheetName} row ${index + 2} contains values without headings.`);
     }
-    return Object.fromEntries(headers.map((header, column) => [header, values[column]?.trim() ?? '']));
+    return rememberSourceRow(
+      Object.fromEntries(headers.map((header, column) => [header, values[column]?.trim() ?? ''])),
+      index + 2,
+    );
   });
 }
 
@@ -95,67 +109,104 @@ export function parsePrice(value) {
   return { valid: true, value: Number(numeric), display };
 }
 
-function issue(sheet, row, field, code, message) {
-  return { sheet, row: row + 2, field, code, message };
+function normalizedRow(sheet, original, index) {
+  const row = {
+    ...original,
+    id: String(original.id ?? '').trim(),
+  };
+  if (sheet === 'Works') row.collectionId = String(original.collectionId ?? '').trim();
+  return rememberSourceRow(row, sourceRowNumber(original, index + 2));
 }
 
-function validateEntityRows(sheet, rows, diagnostics) {
+function issue(sheet, row, fallbackRow, field, code, reason, classification = 'invalid') {
+  return {
+    sheet,
+    row: sourceRowNumber(row, fallbackRow),
+    id: row.id || null,
+    field,
+    code,
+    classification,
+    reason,
+    message: reason,
+  };
+}
+
+function validateEntityRows(sheet, sourceRows, diagnostics, drafts) {
   const seenIds = new Set();
   const { assets, requiredAssets } = ENTITY_RULES[sheet];
+  const rows = sourceRows.map((row, index) => normalizedRow(sheet, row, index));
 
   return rows.filter((row, rowIndex) => {
+    const fallbackRow = rowIndex + 2;
     const enabled = parseBoolean(row.enabled);
     if (!enabled.valid) {
-      diagnostics.push(issue(sheet, rowIndex, 'enabled', 'invalid-boolean', 'Expected TRUE or FALSE.'));
+      diagnostics.push(issue(sheet, row, fallbackRow, 'enabled', 'invalid-boolean', 'Expected TRUE or FALSE.'));
       return false;
     }
-    if (!enabled.value) return false;
+    if (!enabled.value) {
+      drafts.push({
+        sheet,
+        row: sourceRowNumber(row, fallbackRow),
+        id: row.id || null,
+        classification: 'draft',
+        reason: 'enabled is FALSE; row remains unpublished.',
+      });
+      return false;
+    }
 
-    const id = String(row.id ?? '').trim();
+    const id = row.id;
     if (!id) {
-      diagnostics.push(issue(sheet, rowIndex, 'id', 'missing-id', 'Enabled rows require an id.'));
+      diagnostics.push(issue(sheet, row, fallbackRow, 'id', 'missing-id', 'Enabled rows require an id.'));
       return false;
     }
     if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(id)) {
-      diagnostics.push(issue(sheet, rowIndex, 'id', 'invalid-id', 'IDs must use lowercase kebab-case.'));
+      diagnostics.push(issue(sheet, row, fallbackRow, 'id', 'invalid-id', 'IDs must use lowercase kebab-case.'));
       return false;
     }
     if (seenIds.has(id)) {
-      diagnostics.push(issue(sheet, rowIndex, 'id', 'duplicate-id', `Duplicate id "${id}" was ignored.`));
+      diagnostics.push(issue(sheet, row, fallbackRow, 'id', 'duplicate-id', `Duplicate id "${id}" was ignored.`));
       return false;
     }
 
     const sort = Number(row.sort);
     if (!String(row.sort ?? '').trim() || !Number.isFinite(sort)) {
-      diagnostics.push(issue(sheet, rowIndex, 'sort', 'invalid-sort', 'Enabled rows require a numeric sort value.'));
+      diagnostics.push(issue(sheet, row, fallbackRow, 'sort', 'invalid-sort', 'Enabled rows require a numeric sort value.'));
       return false;
     }
 
     if (!String(row.titleEn ?? '').trim() || !String(row.titleHe ?? '').trim()) {
-      diagnostics.push(issue(sheet, rowIndex, 'title', 'missing-title', 'Enabled rows require English and Hebrew titles.'));
+      diagnostics.push(issue(sheet, row, fallbackRow, 'title', 'missing-title', 'Enabled rows require English and Hebrew titles.'));
       return false;
     }
 
     const unsafeAsset = assets.find((field) => !isSafeAssetPath(row[field]));
     if (unsafeAsset) {
-      diagnostics.push(issue(sheet, rowIndex, unsafeAsset, 'invalid-asset', 'Asset path is not safe.'));
+      diagnostics.push(issue(sheet, row, fallbackRow, unsafeAsset, 'invalid-asset', 'Asset path is not safe.'));
       return false;
     }
     const missingAsset = requiredAssets.find((field) => !String(row[field] ?? '').trim());
     if (missingAsset) {
-      diagnostics.push(issue(sheet, rowIndex, missingAsset, 'missing-asset', 'Enabled row requires this asset.'));
+      diagnostics.push(issue(
+        sheet,
+        row,
+        fallbackRow,
+        missingAsset,
+        'missing-required-media',
+        `Enabled public ${sheet.slice(0, -1)} is missing required ${missingAsset} media and was excluded.`,
+        'enabled-public-missing-media',
+      ));
       return false;
     }
 
     if (sheet === 'Works') {
       const available = parseBoolean(row.available);
       if (!available.valid) {
-        diagnostics.push(issue(sheet, rowIndex, 'available', 'invalid-boolean', 'Expected TRUE or FALSE.'));
+        diagnostics.push(issue(sheet, row, fallbackRow, 'available', 'invalid-boolean', 'Expected TRUE or FALSE.'));
         return false;
       }
       const price = parsePrice(row.price);
       if (!price.valid || (available.value && price.value === null)) {
-        diagnostics.push(issue(sheet, rowIndex, 'price', 'invalid-price', 'Price contains unsupported characters.'));
+        diagnostics.push(issue(sheet, row, fallbackRow, 'price', 'invalid-price', 'Price is missing or has an unsupported format.'));
         return false;
       }
     }
@@ -167,14 +218,15 @@ function validateEntityRows(sheet, rows, diagnostics) {
 
 export function validateSheetRows(sheetRows) {
   const diagnostics = [];
-  const collections = validateEntityRows('Collections', sheetRows.Collections ?? [], diagnostics);
-  const worksWithFields = validateEntityRows('Works', sheetRows.Works ?? [], diagnostics);
-  const songsWithFields = validateEntityRows('Songs', sheetRows.Songs ?? [], diagnostics);
+  const drafts = [];
+  const collections = validateEntityRows('Collections', sheetRows.Collections ?? [], diagnostics, drafts);
+  const worksWithFields = validateEntityRows('Works', sheetRows.Works ?? [], diagnostics, drafts);
+  const songsWithFields = validateEntityRows('Songs', sheetRows.Songs ?? [], diagnostics, drafts);
   const collectionIds = new Set(collections.map((row) => row.id));
 
   const works = worksWithFields.filter((row, index) => {
     if (collectionIds.has(row.collectionId)) return true;
-    diagnostics.push(issue('Works', index, 'collectionId', 'missing-reference', `Unknown collection "${row.collectionId}".`));
+    diagnostics.push(issue('Works', row, index + 2, 'collectionId', 'missing-reference', `Unknown collection "${row.collectionId}".`));
     return false;
   });
   const workIds = new Set(works.map((row) => row.id));
@@ -182,13 +234,13 @@ export function validateSheetRows(sheetRows) {
     const relatedWorkIds = String(row.relatedWorkIds ?? '').split(',').map((id) => id.trim()).filter(Boolean);
     const validIds = relatedWorkIds.filter((id) => {
       if (workIds.has(id)) return true;
-      diagnostics.push(issue('Songs', index, 'relatedWorkIds', 'missing-reference', `Unknown work "${id}" was ignored.`));
+      diagnostics.push(issue('Songs', row, index + 2, 'relatedWorkIds', 'missing-reference', `Unknown work "${id}" was ignored.`));
       return false;
     });
     return { ...row, relatedWorkIds: validIds.join(',') };
   });
 
-  return { rows: { Collections: collections, Works: works, Songs: songs }, diagnostics };
+  return { rows: { Collections: collections, Works: works, Songs: songs }, diagnostics, drafts };
 }
 
 export function validateCanonicalContent({ collections = [], works = [], songs = [] }) {
