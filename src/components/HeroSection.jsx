@@ -28,7 +28,7 @@ export default function HeroSection({ collection }) {
       <section className="hero fade" id={collection.pageId}>
         <div>
           <HeroLogo alt={hero.logoAlt} src={hero.logoSrc} />
-          <h1 className="parallax-item" id={`collection-title-${collection.id}`} tabIndex="-1">
+          <h1 className="collection-hero-heading parallax-item" id={`collection-title-${collection.id}`} tabIndex="-1">
             {hero.he.title && <span data-lang="he" lang={hero.he.language} dir={hero.he.direction}><TextLines text={hero.he.title} title /></span>}
             {hero.en.title && <span data-lang="en" lang={hero.en.language} dir={hero.en.direction}><TextLines text={hero.en.title} title /></span>}
           </h1>
