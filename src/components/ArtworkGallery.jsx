@@ -1,8 +1,8 @@
 function LanguageText({ en, he }) {
   return (
     <>
-      <span data-lang="he">{he}</span>
-      <span data-lang="en">{en}</span>
+      <span data-lang="he" lang="he" dir="rtl">{he}</span>
+      <span data-lang="en" lang="en" dir="ltr">{en}</span>
     </>
   );
 }
@@ -30,7 +30,14 @@ function Artwork({ work, index, total, songsById }) {
   return (
     <section className="artwork fade" data-artwork-slug={work.id} data-img={work.image} id={work.id}>
       <div className="art-media">
-        <img alt={work.titleHe || work.titleEn} src={work.image} />
+        <img
+          alt={work.titleEn || work.titleHe}
+          data-alt-en={work.titleEn}
+          data-alt-he={work.titleHe}
+          decoding="async"
+          loading="lazy"
+          src={work.image}
+        />
       </div>
 
       <div className="art-copy">

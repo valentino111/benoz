@@ -1,58 +1,19 @@
-import { collections as fallbackCollections } from './collections.js';
-import { exhibitionWorks as fallbackWorks } from '../collections/exhibition/works.js';
-import { songs as fallbackSongs } from './songs.js';
+import { collections as localCollections } from './collections.js';
+import { songs as localSongs } from './songs.js';
+import {
+  ContentDataError,
+  parseBoolean,
+  parseCsv,
+  validateCanonicalContent,
+  validateSheetRows,
+} from './contentValidation.js';
 
 const SHEET_ID = '1qS2N_-BPKIP3zXuTYGSFe0zh18u7ECGdZxDspjJG0Ts';
 const SHEET_NAMES = ['Collections', 'Works', 'Songs'];
+const DEFAULT_TIMEOUT_MS = 8000;
 
 function csvUrl(sheetName) {
   return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
-}
-
-function parseCsv(text) {
-  const rows = [];
-  let row = [];
-  let cell = '';
-  let quoted = false;
-
-  for (let i = 0; i < text.length; i += 1) {
-    const char = text[i];
-    const next = text[i + 1];
-
-    if (char === '"' && quoted && next === '"') {
-      cell += '"';
-      i += 1;
-    } else if (char === '"') {
-      quoted = !quoted;
-    } else if (char === ',' && !quoted) {
-      row.push(cell);
-      cell = '';
-    } else if ((char === '\n' || char === '\r') && !quoted) {
-      if (char === '\r' && next === '\n') i += 1;
-      row.push(cell);
-      if (row.some((value) => value !== '')) rows.push(row);
-      row = [];
-      cell = '';
-    } else {
-      cell += char;
-    }
-  }
-
-  row.push(cell);
-  if (row.some((value) => value !== '')) rows.push(row);
-  if (rows.length < 2) return [];
-
-  const headers = rows[0].map((header) => header.trim());
-  return rows.slice(1).map((values) => Object.fromEntries(headers.map((header, index) => [header, values[index] ?? ''])));
-}
-
-function isTrue(value) {
-  return String(value).trim().toLowerCase() === 'true';
-}
-
-function numberOr(value, fallback = 999) {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : fallback;
 }
 
 function assetPath(fileName) {
@@ -62,12 +23,12 @@ function assetPath(fileName) {
   return `assets/${value}`;
 }
 
-function enabledSorted(rows) {
-  return rows.filter((row) => isTrue(row.enabled)).sort((a, b) => numberOr(a.sort) - numberOr(b.sort));
+function sorted(rows) {
+  return [...rows].sort((a, b) => Number(a.sort) - Number(b.sort));
 }
 
 function normalizeCollections(rows) {
-  return enabledSorted(rows).map((row, index) => ({
+  return sorted(rows).map((row, index) => ({
     id: row.id,
     number: String(index + 1).padStart(2, '0'),
     title: row.titleEn,
@@ -83,7 +44,7 @@ function normalizeCollections(rows) {
 }
 
 function normalizeSongs(rows) {
-  return enabledSorted(rows).map((row) => ({
+  return sorted(rows).map((row) => ({
     id: row.id,
     domId: `track-${row.id}`,
     title: row.titleHe || row.titleEn,
@@ -109,7 +70,7 @@ function normalizeWorks(rows, songs) {
     });
   });
 
-  return enabledSorted(rows).map((row) => ({
+  return sorted(rows).map((row) => ({
     id: row.id,
     collectionId: row.collectionId,
     titleEn: row.titleEn,
@@ -126,46 +87,127 @@ function normalizeWorks(rows, songs) {
     collectorLabelHe: row.collectorLabelHe,
     availabilityEn: row.availabilityEn,
     availabilityHe: row.availabilityHe,
-    available: isTrue(row.available),
-    price: row.price,
+    available: parseBoolean(row.available).value,
+    price: String(row.price || '').trim(),
     songIds: songIdsByWork.get(row.id) || [],
   }));
 }
 
-function fallbackContent() {
-  const songs = fallbackSongs.map((song) => ({ ...song, relatedWorkIds: [] }));
-  fallbackWorks.forEach((work) => {
-    work.songIds?.forEach((songId) => {
-      const song = songs.find((item) => item.id === songId);
-      if (song) song.relatedWorkIds.push(work.id);
-    });
-  });
-
+function normalizeLocalWork(work) {
+  const media = work.media ?? {};
   return {
-    source: 'local-fallback',
-    collections: fallbackCollections,
-    works: fallbackWorks,
-    songs,
+    id: work.id,
+    collectionId: work.collectionId,
+    titleEn: work.titleEn,
+    titleHe: work.titleHe,
+    image: work.image || media.image || '',
+    video: work.video || media.animation || '',
+    thumbnail: work.thumbnail || '',
+    statusEn: work.statusEn || '',
+    statusHe: work.statusHe || '',
+    meta: work.meta || '',
+    descriptionEn: work.descriptionEn || work.textEn || '',
+    descriptionHe: work.descriptionHe || work.textHe || '',
+    collectorLabelEn: work.collectorLabelEn || '',
+    collectorLabelHe: work.collectorLabelHe || '',
+    availabilityEn: work.availabilityEn || '',
+    availabilityHe: work.availabilityHe || '',
+    available: Boolean(work.available),
+    price: work.price || '',
+    songIds: [...(work.songIds || media.songIds || [])],
   };
 }
 
-export async function loadGalleryContent() {
-  try {
-    const responses = await Promise.all(SHEET_NAMES.map((name) => fetch(csvUrl(name), { cache: 'no-store' })));
-    if (responses.some((response) => !response.ok)) throw new Error('Google Sheets content is not publicly readable.');
+export function fallbackContent() {
+  const works = localCollections.flatMap((collection) => collection.works).map(normalizeLocalWork);
+  const songs = localSongs.map((song) => ({
+    ...song,
+    titleEn: song.titleEn || song.title,
+    titleHe: song.titleHe || song.title,
+    artist: song.artist || 'Ben Oz',
+    relatedWorkIds: works.filter((work) => work.songIds.includes(song.id)).map((work) => work.id),
+  }));
+  const collections = localCollections.map((collection) => ({
+    ...collection,
+    descriptionHe: collection.descriptionHe || '',
+    posterVideo: collection.posterVideo || '',
+    slug: collection.slug || collection.id,
+    works: works.filter((work) => work.collectionId === collection.id),
+  }));
+  const content = { source: 'local-fallback', collections, works, songs };
+  const diagnostics = validateCanonicalContent(content);
+  if (diagnostics.length) {
+    throw new ContentDataError('validation', 'Bundled fallback content is inconsistent.', { diagnostics });
+  }
+  return content;
+}
 
-    const [collectionsCsv, worksCsv, songsCsv] = await Promise.all(responses.map((response) => response.text()));
-    const songs = normalizeSongs(parseCsv(songsCsv));
-    const works = normalizeWorks(parseCsv(worksCsv), songs);
-    const collections = normalizeCollections(parseCsv(collectionsCsv)).map((collection) => ({
+function reportDiagnostic(error, onDiagnostic) {
+  onDiagnostic?.({ category: error.category || 'unknown', message: error.message, ...error.details });
+  if (!import.meta.env?.DEV) return;
+  console.warn(`[Ben Oz Gallery] Content ${error.category || 'unknown'} failure; using local fallback.`, {
+    message: error.message,
+    ...error.details,
+  });
+}
+
+async function fetchSheet(name, fetchImpl, signal) {
+  const response = await fetchImpl(csvUrl(name), { cache: 'default', signal });
+  if (!response.ok) {
+    throw new ContentDataError('network', `${name} returned HTTP ${response.status}.`, { sheet: name, status: response.status });
+  }
+  return response.text();
+}
+
+export async function loadGalleryContent({ timeoutMs = DEFAULT_TIMEOUT_MS, fetchImpl = fetch, onDiagnostic } = {}) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const results = await Promise.allSettled(
+      SHEET_NAMES.map((name) => fetchSheet(name, fetchImpl, controller.signal)),
+    );
+    const rejected = results.find((result) => result.status === 'rejected');
+    if (rejected) {
+      if (controller.signal.aborted || rejected.reason?.name === 'AbortError') {
+        throw new ContentDataError('timeout', `Google Sheets did not respond within ${timeoutMs}ms.`);
+      }
+      if (rejected.reason instanceof ContentDataError) throw rejected.reason;
+      throw new ContentDataError('network', 'Google Sheets could not be reached.', { cause: rejected.reason?.message });
+    }
+
+    const parsed = Object.fromEntries(
+      SHEET_NAMES.map((name, index) => [name, parseCsv(results[index].value, name)]),
+    );
+    const { rows, diagnostics } = validateSheetRows(parsed);
+    if (diagnostics.length && import.meta.env?.DEV) {
+      console.warn('[Ben Oz Gallery] Invalid spreadsheet rows were ignored.', diagnostics);
+    }
+    if (!rows.Collections.length || !rows.Works.length) {
+      throw new ContentDataError('validation', 'Google Sheets returned no usable enabled collections or works.', { diagnostics });
+    }
+
+    const songs = normalizeSongs(rows.Songs);
+    const works = normalizeWorks(rows.Works, songs);
+    const collections = normalizeCollections(rows.Collections).map((collection) => ({
       ...collection,
       works: works.filter((work) => work.collectionId === collection.id),
     }));
-
-    if (!collections.length || !works.length) throw new Error('Google Sheets returned no enabled content.');
-    return { source: 'google-sheets', collections, works, songs };
-  } catch (error) {
-    console.warn('[Ben Oz Gallery] Using local content fallback:', error);
+    const content = { source: 'google-sheets', collections, works, songs };
+    const canonicalDiagnostics = validateCanonicalContent(content);
+    if (canonicalDiagnostics.length) {
+      throw new ContentDataError('validation', 'Normalized Google Sheets content is inconsistent.', {
+        diagnostics: canonicalDiagnostics,
+      });
+    }
+    return content;
+  } catch (caught) {
+    const error = caught instanceof ContentDataError
+      ? caught
+      : new ContentDataError('parsing', 'Google Sheets content could not be processed.', { cause: caught?.message });
+    reportDiagnostic(error, onDiagnostic);
     return fallbackContent();
+  } finally {
+    clearTimeout(timeout);
   }
 }

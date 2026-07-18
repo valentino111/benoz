@@ -729,6 +729,43 @@ footer{
   .parallax-item{transform:none!important}
 }
 
+/* Release foundation: keyboard and non-visual interaction support. */
+.sr-only{
+  position:absolute!important;
+  width:1px!important;
+  height:1px!important;
+  padding:0!important;
+  margin:-1px!important;
+  overflow:hidden!important;
+  clip:rect(0,0,0,0)!important;
+  white-space:nowrap!important;
+  border:0!important;
+}
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+[role="button"]:focus-visible{
+  outline:2px solid var(--gold);
+  outline-offset:4px;
+}
+.app-error{
+  min-height:100vh;
+  display:grid;
+  place-content:center;
+  gap:1rem;
+  padding:2rem;
+  text-align:center;
+  background:#050505;
+  color:#f1ead9;
+}
+.app-error button{
+  border:1px solid var(--gold);
+  padding:.7rem 1.2rem;
+  color:inherit;
+  background:transparent;
+  cursor:pointer;
+}
+
 
 /* RC10: logo shimmer only on hover */
 .hero-logo{
