@@ -26,7 +26,8 @@ function ArtworkSoundtrack({ song }) {
   );
 }
 
-function Artwork({ work, index, total, songsById }) {
+function Artwork({ active, work, index, total, songsById }) {
+  const isFirstVisibleArtwork = active && index === 0;
   return (
     <section className="artwork fade" data-artwork-slug={work.id} data-collection-id={work.collectionId} data-img={work.image} id={work.id}>
       <div className="art-media">
@@ -34,9 +35,13 @@ function Artwork({ work, index, total, songsById }) {
           alt={work.titleEn || work.titleHe}
           data-alt-en={work.titleEn}
           data-alt-he={work.titleHe}
+          data-full-src={work.image}
           decoding="async"
-          loading="lazy"
+          fetchPriority={isFirstVisibleArtwork ? 'high' : 'auto'}
+          height={work.imageHeight}
+          loading={isFirstVisibleArtwork ? 'eager' : 'lazy'}
           src={work.image}
+          width={work.imageWidth}
         />
       </div>
 
@@ -69,7 +74,7 @@ function Artwork({ work, index, total, songsById }) {
   );
 }
 
-export default function ArtworkGallery({ works = [], songs = [] }) {
+export default function ArtworkGallery({ active = false, works = [], songs = [] }) {
   const songsById = Object.fromEntries(songs.map((song) => [song.id, song]));
   const worksByCollection = works.reduce((groups, work) => {
     const collectionWorks = groups.get(work.collectionId) || [];
@@ -83,6 +88,7 @@ export default function ArtworkGallery({ works = [], songs = [] }) {
     return (
       <Artwork
         key={work.id}
+        active={active}
         work={work}
         index={collectionWorks.indexOf(work)}
         total={collectionWorks.length}

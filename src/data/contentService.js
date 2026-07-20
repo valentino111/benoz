@@ -1,6 +1,7 @@
 import { collections as localCollections } from './collections.js';
 import { songs as localSongs } from './songs.js';
 import { getCollectionWorks, normalizeCollectionId } from './collectionPages.js';
+import { optimizedImage } from './imageAssets.js';
 import {
   ContentDataError,
   parseBoolean,
@@ -36,7 +37,8 @@ function nonEmpty(remoteValue, fallbackValue = '') {
 }
 
 export function normalizeCollection(row, fallback = {}, index = 0) {
-  const remoteCover = assetPath(row.posterImage);
+  const remoteCover = optimizedImage(row.posterImage, 'thumbnail').src;
+  const fallbackCover = optimizedImage(fallback.cover, 'thumbnail').src;
   return {
     ...fallback,
     id: row.id,
@@ -52,8 +54,8 @@ export function normalizeCollection(row, fallback = {}, index = 0) {
     descriptionHe: nonEmpty(row.descriptionHe, fallback.descriptionHe),
     noteEn: fallback.noteEn || '',
     noteHe: fallback.noteHe || '',
-    cover: remoteCover || fallback.cover || '',
-    fallbackCover: fallback.cover || '',
+    cover: remoteCover || fallbackCover,
+    fallbackCover,
     posterVideo: assetPath(row.posterVideo) || fallback.posterVideo || '',
     slug: nonEmpty(row.slug, fallback.slug || row.id),
     pageId: fallback.pageId || `collection-${nonEmpty(row.slug, row.id)}`,
@@ -68,20 +70,25 @@ export function normalizeCollections(rows) {
 }
 
 function normalizeSongs(rows) {
-  return sorted(rows).map((row) => ({
-    id: row.id,
-    domId: `track-${row.id}`,
-    title: row.titleHe || row.titleEn,
-    titleEn: row.titleEn,
-    titleHe: row.titleHe,
-    artist: row.artist || 'Ben Oz',
-    audio: assetPath(row.audio),
-    cover: assetPath(row.cover),
-    animation: assetPath(row.video),
-    noteEn: row.noteEn || '',
-    noteHe: row.noteHe || '',
-    relatedWorkIds: String(row.relatedWorkIds || '').split(',').map((id) => id.trim()).filter(Boolean),
-  }));
+  return sorted(rows).map((row) => {
+    const cover = optimizedImage(row.cover, 'thumbnail');
+    return {
+      id: row.id,
+      domId: `track-${row.id}`,
+      title: row.titleHe || row.titleEn,
+      titleEn: row.titleEn,
+      titleHe: row.titleHe,
+      artist: row.artist || 'Ben Oz',
+      audio: assetPath(row.audio),
+      cover: cover.src,
+      coverWidth: cover.width,
+      coverHeight: cover.height,
+      animation: assetPath(row.video),
+      noteEn: row.noteEn || '',
+      noteHe: row.noteHe || '',
+      relatedWorkIds: String(row.relatedWorkIds || '').split(',').map((id) => id.trim()).filter(Boolean),
+    };
+  });
 }
 
 function normalizeWorks(rows, songs) {
@@ -94,33 +101,43 @@ function normalizeWorks(rows, songs) {
     });
   });
 
-  return rows.map((row, sourceOrder) => ({
-    id: row.id,
-    collectionId: normalizeCollectionId(row.collectionId),
-    order: Number(row.sort),
-    sourceOrder,
-    titleEn: row.titleEn,
-    titleHe: row.titleHe,
-    image: assetPath(row.image),
-    video: assetPath(row.video),
-    thumbnail: assetPath(row.thumbnail),
-    statusEn: row.statusEn,
-    statusHe: row.statusHe,
-    meta: row.meta,
-    descriptionEn: row.descriptionEn,
-    descriptionHe: row.descriptionHe,
-    collectorLabelEn: row.collectorLabelEn,
-    collectorLabelHe: row.collectorLabelHe,
-    availabilityEn: row.availabilityEn,
-    availabilityHe: row.availabilityHe,
-    available: parseBoolean(row.available).value,
-    price: String(row.price || '').trim(),
-    songIds: songIdsByWork.get(row.id) || [],
-  }));
+  return rows.map((row, sourceOrder) => {
+    const image = optimizedImage(row.image);
+    const thumbnail = optimizedImage(row.thumbnail || row.image, 'thumbnail');
+    return {
+      id: row.id,
+      collectionId: normalizeCollectionId(row.collectionId),
+      order: Number(row.sort),
+      sourceOrder,
+      titleEn: row.titleEn,
+      titleHe: row.titleHe,
+      image: image.src,
+      imageWidth: image.width,
+      imageHeight: image.height,
+      video: assetPath(row.video),
+      thumbnail: thumbnail.src,
+      thumbnailWidth: thumbnail.width,
+      thumbnailHeight: thumbnail.height,
+      statusEn: row.statusEn,
+      statusHe: row.statusHe,
+      meta: row.meta,
+      descriptionEn: row.descriptionEn,
+      descriptionHe: row.descriptionHe,
+      collectorLabelEn: row.collectorLabelEn,
+      collectorLabelHe: row.collectorLabelHe,
+      availabilityEn: row.availabilityEn,
+      availabilityHe: row.availabilityHe,
+      available: parseBoolean(row.available).value,
+      price: String(row.price || '').trim(),
+      songIds: songIdsByWork.get(row.id) || [],
+    };
+  });
 }
 
 function normalizeLocalWork(work, sourceOrder) {
   const media = work.media ?? {};
+  const image = optimizedImage(work.image || media.image);
+  const thumbnail = optimizedImage(work.thumbnail || work.image || media.image, 'thumbnail');
   return {
     id: work.id,
     collectionId: normalizeCollectionId(work.collectionId),
@@ -128,9 +145,13 @@ function normalizeLocalWork(work, sourceOrder) {
     sourceOrder,
     titleEn: work.titleEn,
     titleHe: work.titleHe,
-    image: work.image || media.image || '',
+    image: image.src,
+    imageWidth: image.width,
+    imageHeight: image.height,
     video: work.video || media.animation || '',
-    thumbnail: work.thumbnail || '',
+    thumbnail: thumbnail.src,
+    thumbnailWidth: thumbnail.width,
+    thumbnailHeight: thumbnail.height,
     statusEn: work.statusEn || '',
     statusHe: work.statusHe || '',
     meta: work.meta || '',
@@ -150,18 +171,25 @@ export function fallbackContent() {
   const works = localCollections.flatMap((collection) => (
     collection.works.map((work, sourceOrder) => normalizeLocalWork(work, sourceOrder))
   ));
-  const songs = localSongs.map((song) => ({
-    ...song,
-    titleEn: song.titleEn || song.title,
-    titleHe: song.titleHe || song.title,
-    artist: song.artist || 'Ben Oz',
-    relatedWorkIds: works.filter((work) => work.songIds.includes(song.id)).map((work) => work.id),
-  }));
+  const songs = localSongs.map((song) => {
+    const cover = optimizedImage(song.cover, 'thumbnail');
+    return {
+      ...song,
+      cover: cover.src,
+      coverWidth: cover.width,
+      coverHeight: cover.height,
+      titleEn: song.titleEn || song.title,
+      titleHe: song.titleHe || song.title,
+      artist: song.artist || 'Ben Oz',
+      relatedWorkIds: works.filter((work) => work.songIds.includes(song.id)).map((work) => work.id),
+    };
+  });
   const collections = localCollections.map((collection) => ({
     ...collection,
+    cover: optimizedImage(collection.cover, 'thumbnail').src,
     descriptionHe: collection.descriptionHe || '',
     posterVideo: collection.posterVideo || '',
-    fallbackCover: collection.cover || '',
+    fallbackCover: optimizedImage(collection.cover, 'thumbnail').src,
     slug: collection.slug || collection.id,
     works: getCollectionWorks(works, collection.id),
   }));

@@ -214,7 +214,7 @@ test('Pearls collection card keeps its remote poster while its intro uses the lo
     posterImage: 'pearls-of-truth-poster.jpg',
     slug: 'pearls-of-truth',
   }), fallback, 1);
-  assert.equal(pearls.cover, '/assets/pearls-of-truth-poster.jpg');
+  assert.equal(pearls.cover, '/images/web/pearls-of-truth-poster-thumb.webp');
   assert.equal(getCollectionHeroModel(pearls).logoSrc, COLLECTION_HERO_LOGO);
   assert.notEqual(pearls.cover, getCollectionHeroModel(pearls).logoSrc);
 });

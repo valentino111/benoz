@@ -31,9 +31,13 @@ export default function ProjectHub({ active = false, collections = [], onAbout, 
       <div className="museum-hub-inner">
         <header className="museum-hub-header">
           <img
-            className="museum-hub-logo"
-            src="/assets/brand/ben-oz-logo-gold-transparent.png"
             alt="Ben Oz"
+            className="museum-hub-logo"
+            decoding="async"
+            height="1254"
+            loading="lazy"
+            src="/assets/brand/ben-oz-logo-gold-transparent.png"
+            width="1254"
           />
           <p className="museum-hub-name">Ben Oz Digital Gallery</p>
           <p className="museum-hub-label">Collections</p>

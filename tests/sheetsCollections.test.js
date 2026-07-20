@@ -41,14 +41,14 @@ function validatedContent(Collections, Works) {
 
 test('an empty remote collection cover preserves the matching local cover', () => {
   const [normalized] = normalizeCollections([collection({ posterImage: '   ' })]);
-  assert.equal(normalized.cover, '/assets/hidden-harmony.jpg');
-  assert.equal(normalized.fallbackCover, '/assets/hidden-harmony.jpg');
+  assert.equal(normalized.cover, '/images/web/hidden-harmony-thumb.webp');
+  assert.equal(normalized.fallbackCover, '/images/web/hidden-harmony-thumb.webp');
 });
 
 test('a non-empty remote collection cover overrides while retaining the local fallback layer', () => {
   const [normalized] = normalizeCollections([collection({ posterImage: 'approved-poster.jpg' })]);
   assert.equal(normalized.cover, '/assets/approved-poster.jpg');
-  assert.equal(normalized.fallbackCover, '/assets/hidden-harmony.jpg');
+  assert.equal(normalized.fallbackCover, '/images/web/hidden-harmony-thumb.webp');
 });
 
 test('an enabled Work assigned to the second collection is attached to its collection page', () => {
@@ -125,10 +125,10 @@ test('fallback keeps Exhibition and Pearls of Truth works and covers intact', ()
   const exhibition = content.collections.find(({ id }) => id === 'exhibition');
   const pearls = content.collections.find(({ id }) => id === 'pearls-of-truth');
 
-  assert.equal(exhibition.cover, '/assets/hidden-harmony.jpg');
+  assert.equal(exhibition.cover, '/images/web/hidden-harmony-thumb.webp');
   assert.equal(exhibition.works.length, 6);
   assert.equal(exhibition.pageId, 'gallery');
-  assert.equal(pearls.cover, '/assets/cover-lachayot.jpg');
+  assert.equal(pearls.cover, '/images/web/cover-lachayot-thumb.webp');
   assert.equal(pearls.works.length, 3);
   assert.equal(pearls.pageId, 'collection-pearls-of-truth');
 });

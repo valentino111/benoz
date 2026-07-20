@@ -11,7 +11,15 @@ function Track({ song }) {
   return (
     <article className="track" id={song.domId}>
       <div className="track-media" role="button" tabIndex="0" aria-label={`Preview ${song.titleEn || song.title}`}>
-        <img alt={song.titleEn || song.title} className="track-cover-image" decoding="async" loading="lazy" src={song.cover} />
+        <img
+          alt={song.titleEn || song.title}
+          className="track-cover-image"
+          decoding="async"
+          height={song.coverHeight}
+          loading="lazy"
+          src={song.cover}
+          width={song.coverWidth}
+        />
         {song.animation && (
           <video aria-hidden="true" className="track-hover-video" muted playsInline preload="metadata">
             <source src={song.animation} type="video/mp4" />

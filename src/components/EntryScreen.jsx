@@ -16,7 +16,11 @@ export default function EntryScreen({ loading = false, active = true, onEnter })
           <img
             alt="Ben Oz Digital Gallery"
             className="official-logo logo-shimmer"
+            decoding="async"
+            fetchPriority="high"
+            height="1254"
             src="assets/brand/ben-oz-logo-gold-transparent.png"
+            width="1254"
           />
           <div className="role">Artist</div>
           <div className="tagline">One Idea, Many Forms</div>

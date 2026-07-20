@@ -6,7 +6,7 @@ export default function SiteHeader({ galleryTarget = 'gallery', onBack }) {
   return (
     <header className="topbar">
       <a aria-label="Ben Oz — Back to collections" className="brand brand-home" href="./" id="brandHome" onClick={onBack}>
-        <img alt="" aria-hidden="true" className="brand-logo-thumb" src="assets/brand/ben-oz-logo-gold-transparent.png" />
+        <img alt="" aria-hidden="true" className="brand-logo-thumb" decoding="async" height="1254" loading="lazy" src="assets/brand/ben-oz-logo-gold-transparent.png" width="1254" />
         <span>Ben Oz | בן עוז</span>
       </a>
       <button aria-controls="mainMenu" aria-expanded="false" aria-label="Open menu" className="mobile-menu-toggle" id="mobileMenuBtn">☰</button>

@@ -192,7 +192,7 @@ body.en .logo,body.en .hero h1,body.en .art-copy h2{font-family:Georgia,"Times N
 .entry{background:#050505}
 .entry-visual{
   position:absolute;inset:0;
-  background:url("/assets/ben-oz-brand-hero.jpg") center/cover no-repeat;
+  background:url("/images/web/ben-oz-brand-hero.webp") center/cover no-repeat;
   filter:saturate(.9) contrast(1.04);
   transform:scale(1.02);
 }
@@ -1173,10 +1173,10 @@ body.en .art-copy .en-title{display:none}
 }
 .project-card:before{content:"";position:absolute;inset:0;z-index:-2;background-position:center;background-size:cover;filter:saturate(.72);transform:scale(1.01);transition:transform .8s ease,filter .5s ease}
 .project-card:after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(0,0,0,.08) 15%,rgba(0,0,0,.86) 88%)}
-.project-card-art:before{background-image:url('/assets/hidden-harmony.jpg')}
-.project-card-music:before{background-image:url('/assets/cover-lachayot.jpg')}
-.project-card-video:before{background-image:url('/assets/gate-to-infinity.jpg')}
-.project-card-about:before{background-image:url('/assets/ben-oz-brand-hero.jpg')}
+.project-card-art:before{background-image:url('/images/web/hidden-harmony-thumb.webp')}
+.project-card-music:before{background-image:url('/images/web/cover-lachayot-thumb.webp')}
+.project-card-video:before{background-image:url('/images/web/gate-to-infinity-thumb.webp')}
+.project-card-about:before{background-image:url('/images/web/ben-oz-brand-hero-thumb.webp')}
 .project-card:hover,.project-card:focus-visible{transform:translateY(-5px);border-color:rgba(231,213,165,.55);outline:none}
 .project-card:hover:before,.project-card:focus-visible:before{transform:scale(1.055);filter:saturate(.95)}
 .project-number{position:absolute;top:22px;left:24px;color:#d1b979;font-size:12px;letter-spacing:.2em}
@@ -1200,7 +1200,7 @@ body.en .art-copy .en-title{display:none}
 .project-grid-collections .project-card{background:#111}
 .project-grid-collections .project-card:before{background-image:var(--collection-cover)}
 .project-grid-collections .project-card-about{grid-column:1/-1;min-height:300px}
-.project-grid-collections .project-card-about:before{background-image:url('/assets/ben-oz-brand-hero.jpg')}
+.project-grid-collections .project-card-about:before{background-image:url('/images/web/ben-oz-brand-hero-thumb.webp')}
 .project-type{position:absolute;top:22px;right:24px;color:#d8c68f;text-transform:uppercase;letter-spacing:.16em;font-size:10px}
 .collection-eyebrow{text-align:center;color:#bda66d;text-transform:uppercase;letter-spacing:.22em;font-size:11px;margin:0 0 12px}
 .collection-intro{text-align:center;max-width:680px;margin:0 auto 42px;color:#aaa49a;line-height:1.7}

@@ -9,8 +9,8 @@ export default function CollectionPage({ active, collection, songs }) {
       data-collection-page={collection.id}
       hidden={!active}
     >
-      <HeroSection collection={collection} />
-      <ArtworkGallery works={collection.works} songs={songs} />
+      <HeroSection active={active} collection={collection} />
+      <ArtworkGallery active={active} works={collection.works} songs={songs} />
     </section>
   );
 }

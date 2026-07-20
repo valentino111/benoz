@@ -10,24 +10,29 @@ function TextLines({ text, title = false }) {
   ));
 }
 
-function HeroLogo({ alt, src }) {
+function HeroLogo({ active, alt, src }) {
   return (
     <img
       alt={alt}
       className="hero-logo logo-shimmer parallax-item"
+      decoding="async"
+      fetchPriority={active ? 'high' : 'auto'}
+      height="1254"
+      loading={active ? 'eager' : 'lazy'}
       src={src}
+      width="1254"
     />
   );
 }
 
-export default function HeroSection({ collection }) {
+export default function HeroSection({ active = false, collection }) {
   const hero = getCollectionHeroModel(collection);
 
   return (
     <>
       <section className="hero fade" id={collection.pageId}>
         <div>
-          <HeroLogo alt={hero.logoAlt} src={hero.logoSrc} />
+          <HeroLogo active={active} alt={hero.logoAlt} src={hero.logoSrc} />
           <h1 className="collection-hero-heading parallax-item" id={`collection-title-${collection.id}`} tabIndex="-1">
             {hero.he.title && <span data-lang="he" lang={hero.he.language} dir={hero.he.direction}><TextLines text={hero.he.title} title /></span>}
             {hero.en.title && <span data-lang="en" lang={hero.en.language} dir={hero.en.direction}><TextLines text={hero.en.title} title /></span>}

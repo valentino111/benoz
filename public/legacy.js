@@ -32,7 +32,7 @@ window.addEventListener('load',()=>schedule(()=>museumLoader?.classList.add('is-
 schedule(()=>museumLoader?.classList.add('is-hidden'),2200);
 
 document.querySelectorAll('img').forEach((img,i)=>{
-  if(i>2) img.loading='lazy';
+  if(i>2 && !img.hasAttribute('loading')) img.loading='lazy';
   img.decoding='async';
 });
 
@@ -84,7 +84,7 @@ function showImage(i){
   const opening=!lightbox.classList.contains('open');
   if(opening) lightboxOpener=document.activeElement;
   current=(i+artImages.length)%artImages.length;
-  lbImg.src=artImages[current].src;
+  lbImg.src=artImages[current].dataset.fullSrc || artImages[current].src;
   lbImg.alt=artImages[current].alt;
   lightbox.classList.add('open');
   lightbox.setAttribute('aria-hidden','false');
