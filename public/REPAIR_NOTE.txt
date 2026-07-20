@@ -1,0 +1,16 @@
+RC2 repair
+
+Restored all six artwork images, two cover images, and two MP3 files.
+Verified that every local asset referenced by index.html exists.
+
+Restored files:
+- human-creator.jpg
+- compassion.jpg
+- inner-light.jpg
+- hidden-harmony.jpg
+- fragility-of-love.jpg
+- gate-to-infinity.jpg
+- lachayot-remastered.mp3
+- yofi-hu-koach-atzum-remastered.mp3
+- cover-lachayot.jpg
+- cover-yofi.jpg
