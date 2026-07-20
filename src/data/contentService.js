@@ -22,7 +22,7 @@ function assetPath(fileName) {
   const value = String(fileName || '').trim();
   if (!value) return '';
   if (/^(https?:)?\/\//.test(value) || value.startsWith('/')) return value;
-  return `assets/${value}`;
+  return `/assets/${value}`;
 }
 
 function sorted(rows) {

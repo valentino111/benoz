@@ -47,7 +47,7 @@ test('an empty remote collection cover preserves the matching local cover', () =
 
 test('a non-empty remote collection cover overrides while retaining the local fallback layer', () => {
   const [normalized] = normalizeCollections([collection({ posterImage: 'approved-poster.jpg' })]);
-  assert.equal(normalized.cover, 'assets/approved-poster.jpg');
+  assert.equal(normalized.cover, '/assets/approved-poster.jpg');
   assert.equal(normalized.fallbackCover, '/assets/hidden-harmony.jpg');
 });
 
