@@ -28,6 +28,9 @@ function ArtworkSoundtrack({ song }) {
 
 function Artwork({ active, work, index, total, songsById }) {
   const isFirstVisibleArtwork = active && index === 0;
+  const previewImage = work.thumbnail || work.image;
+  const previewWidth = work.thumbnailWidth || work.imageWidth;
+  const previewHeight = work.thumbnailHeight || work.imageHeight;
   return (
     <section className="artwork fade" data-artwork-slug={work.id} data-collection-id={work.collectionId} data-img={work.image} id={work.id}>
       <div className="art-media">
@@ -38,10 +41,10 @@ function Artwork({ active, work, index, total, songsById }) {
           data-full-src={work.image}
           decoding="async"
           fetchPriority={isFirstVisibleArtwork ? 'high' : 'auto'}
-          height={work.imageHeight}
+          height={previewHeight}
           loading={isFirstVisibleArtwork ? 'eager' : 'lazy'}
-          src={work.image}
-          width={work.imageWidth}
+          src={previewImage}
+          width={previewWidth}
         />
       </div>
 
