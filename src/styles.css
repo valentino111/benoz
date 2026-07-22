@@ -117,7 +117,7 @@ button{font:inherit}
 }
 .art-copy .en-title{color:var(--muted);margin-bottom:22px}
 .meta{font-size:var(--small);color:var(--gold-deep);letter-spacing:.04em}
-.desc{color:var(--muted);line-height:1.8}
+.desc{color:var(--muted);line-height:1.8;white-space:pre-line}
 .price{font-size:var(--heading);margin-top:22px}
 .status{display:inline-block;margin-bottom:16px;border:1px solid var(--line);border-radius:999px;padding:6px 10px;font-size:var(--small)}
 
