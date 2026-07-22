@@ -19,6 +19,7 @@ import {
   PAGE_EXHIBITIONS,
   PAGE_MUSIC,
   PAGE_STORY,
+  revealRoutePage,
   resolveSiteRoute,
   SITE_PATHS,
   sitePageUrl,
@@ -84,6 +85,8 @@ export default function App() {
         document.getElementById('projectHub')?.focus({ preventScroll: true });
         return;
       }
+
+      if (view === VIEW_PAGE) revealRoutePage(document, activePage);
 
       const hashTarget = view === VIEW_COLLECTION && window.location.hash
         ? document.getElementById(decodeURIComponent(window.location.hash.slice(1)))

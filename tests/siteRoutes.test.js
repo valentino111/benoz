@@ -7,6 +7,7 @@ import {
   PAGE_EXHIBITIONS,
   PAGE_MUSIC,
   PAGE_STORY,
+  revealRoutePage,
   resolveSiteRoute,
   sitePageUrl,
   VIEW_COLLECTION,
@@ -63,6 +64,16 @@ test('legacy root collection links remain valid while page navigation removes co
     sitePageUrl('/contact', { href: 'https://gallery.example/gallery?preview=true&collection=exhibition#work' }),
     '/contact?preview=true',
   );
+});
+
+test('client-side page navigation reveals content that was hidden when the observer started', () => {
+  const addedClasses = [];
+  const pageElement = { classList: { add: (className) => addedClasses.push(className) } };
+  const documentLike = { getElementById: (id) => (id === PAGE_STORY ? pageElement : null) };
+
+  assert.equal(revealRoutePage(documentLike, PAGE_STORY), true);
+  assert.deepEqual(addedClasses, ['show']);
+  assert.equal(revealRoutePage(documentLike, 'missing'), false);
 });
 
 test('navigation exposes every restored route and Netlify serves them through the SPA entry', async () => {
