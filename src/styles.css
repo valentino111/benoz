@@ -1124,6 +1124,8 @@ body.en .art-copy .en-title{display:none}
   }
 }
 
+body:not(.en) .main-menu .menu-link{font-size:15px}
+
 /* RC3 — entry screen reliability and mobile fit */
 @media(max-width:700px){
   .entry{
