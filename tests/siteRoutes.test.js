@@ -1,0 +1,97 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import { collectionPageUrl } from '../src/data/collectionPages.js';
+import {
+  PAGE_CONTACT,
+  PAGE_EXHIBITIONS,
+  PAGE_MUSIC,
+  PAGE_STORY,
+  resolveSiteRoute,
+  sitePageUrl,
+  VIEW_COLLECTION,
+  VIEW_COLLECTIONS,
+  VIEW_ENTRY,
+  VIEW_PAGE,
+} from '../src/data/siteRoutes.js';
+
+const collections = [
+  { id: 'exhibition', slug: 'exhibition' },
+  { id: 'pearls-of-truth', slug: 'pearls-of-truth' },
+];
+
+function route(url) {
+  return resolveSiteRoute(collections, new URL(url, 'https://gallery.example'));
+}
+
+test('direct site routes resolve to complete page views', () => {
+  assert.deepEqual(route('/'), { view: VIEW_ENTRY, collectionId: '', page: '' });
+  assert.deepEqual(route('/gallery'), { view: VIEW_COLLECTIONS, collectionId: '', page: '' });
+  assert.deepEqual(route('/music'), { view: VIEW_PAGE, collectionId: '', page: PAGE_MUSIC });
+  assert.deepEqual(route('/exhibitions'), { view: VIEW_PAGE, collectionId: '', page: PAGE_EXHIBITIONS });
+  assert.deepEqual(route('/contact'), { view: VIEW_PAGE, collectionId: '', page: PAGE_CONTACT });
+});
+
+test('About Ben Oz and Story are aliases for the same shared page', () => {
+  const storyRoute = { view: VIEW_PAGE, collectionId: '', page: PAGE_STORY };
+  assert.deepEqual(route('/about'), storyRoute);
+  assert.deepEqual(route('/about-ben-oz'), storyRoute);
+  assert.deepEqual(route('/story'), storyRoute);
+  assert.deepEqual(route('/story/'), storyRoute);
+});
+
+test('direct collection URLs resolve every enabled collection independently', () => {
+  assert.deepEqual(route('/gallery?collection=exhibition'), {
+    view: VIEW_COLLECTION,
+    collectionId: 'exhibition',
+    page: '',
+  });
+  assert.deepEqual(route('/gallery?collection=pearls-of-truth'), {
+    view: VIEW_COLLECTION,
+    collectionId: 'pearls-of-truth',
+    page: '',
+  });
+  assert.equal(
+    collectionPageUrl(collections[1], { href: 'https://gallery.example/?preview=true' }, '', '/gallery'),
+    '/gallery?preview=true&collection=pearls-of-truth',
+  );
+});
+
+test('legacy root collection links remain valid while page navigation removes collection state', () => {
+  assert.equal(route('/?collection=exhibition').view, VIEW_COLLECTION);
+  assert.equal(
+    sitePageUrl('/contact', { href: 'https://gallery.example/gallery?preview=true&collection=exhibition#work' }),
+    '/contact?preview=true',
+  );
+});
+
+test('navigation exposes every restored route and Netlify serves them through the SPA entry', async () => {
+  const [header, hub, redirects] = await Promise.all([
+    readFile(new URL('../src/components/SiteHeader.jsx', import.meta.url), 'utf8'),
+    readFile(new URL('../src/components/ProjectHub.jsx', import.meta.url), 'utf8'),
+    readFile(new URL('../public/_redirects', import.meta.url), 'utf8'),
+  ]);
+  ['/gallery', '/music', '/story', '/exhibitions', '/contact'].forEach((href) => {
+    assert.match(header, new RegExp(`href="${href}"`));
+  });
+  assert.match(hub, /href="\/about"/);
+  assert.equal(redirects.trim(), '/* /index.html 200');
+});
+
+test('restored Story, Exhibitions, Contact, and Music retain English and Hebrew content', async () => {
+  const files = await Promise.all([
+    'StorySection.jsx',
+    'ExhibitionsSection.jsx',
+    'ContactSection.jsx',
+    'MusicSection.jsx',
+  ].map((file) => readFile(new URL(`../src/components/${file}`, import.meta.url), 'utf8')));
+
+  files.forEach((source) => {
+    assert.match(source, /data-lang=\\?"he\\?"/);
+    assert.match(source, /data-lang=\\?"en\\?"/);
+  });
+  assert.match(files[0], /The Story Behind the Series/);
+  assert.match(files[1], /Artists of the South/);
+  assert.match(files[2], /https:\/\/wa\.me\/972544520987/);
+  assert.match(files[3], /Beyond the Canvas/);
+});

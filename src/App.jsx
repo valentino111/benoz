@@ -13,17 +13,26 @@ import { fallbackContent, loadGalleryContent } from './data/contentService.js';
 import {
   collectionPageUrl,
   collectionSelectionUrl,
-  resolveCollectionFromSearch,
 } from './data/collectionPages.js';
-
-const VIEW_ENTRY = 'entry';
-const VIEW_COLLECTIONS = 'collections';
-const VIEW_COLLECTION = 'collection';
+import {
+  PAGE_CONTACT,
+  PAGE_EXHIBITIONS,
+  PAGE_MUSIC,
+  PAGE_STORY,
+  resolveSiteRoute,
+  SITE_PATHS,
+  sitePageUrl,
+  VIEW_COLLECTION,
+  VIEW_COLLECTIONS,
+  VIEW_ENTRY,
+  VIEW_PAGE,
+} from './data/siteRoutes.js';
 
 export default function App() {
   const [content, setContent] = useState(null);
   const [view, setView] = useState(VIEW_ENTRY);
   const [selectedCollectionId, setSelectedCollectionId] = useState('');
+  const [activePage, setActivePage] = useState('');
 
   useEffect(() => {
     let active = true;
@@ -41,24 +50,21 @@ export default function App() {
   useEffect(() => {
     if (!content) return undefined;
 
-    function applyLocation({ initial = false } = {}) {
-      const collection = resolveCollectionFromSearch(content.collections, window.location.search);
-      if (collection) {
-        setSelectedCollectionId(collection.id);
-        setView(VIEW_COLLECTION);
-        if (initial && window.history.state?.benOzView !== VIEW_COLLECTION) {
-          window.history.replaceState(
-            { benOzView: VIEW_COLLECTION, collectionId: collection.id, direct: true },
-            '',
-            window.location.href,
-          );
-        }
-        return;
-      }
+    function applyRoute(route) {
+      setSelectedCollectionId(route.collectionId);
+      setActivePage(route.page);
+      setView(route.view);
+    }
 
-      setSelectedCollectionId('');
-      if (!initial || window.history.state?.benOzView === VIEW_COLLECTIONS) {
-        setView(VIEW_COLLECTIONS);
+    function applyLocation({ initial = false } = {}) {
+      const route = resolveSiteRoute(content.collections, window.location);
+      applyRoute(route);
+      if (initial) {
+        window.history.replaceState(
+          { benOzView: route.view, collectionId: route.collectionId, page: route.page, direct: true },
+          '',
+          window.location.href,
+        );
       }
     }
 
@@ -79,15 +85,17 @@ export default function App() {
         return;
       }
 
-      const hashTarget = window.location.hash
+      const hashTarget = view === VIEW_COLLECTION && window.location.hash
         ? document.getElementById(decodeURIComponent(window.location.hash.slice(1)))
         : null;
       if (hashTarget) hashTarget.scrollIntoView({ behavior: 'auto', block: 'start' });
       else window.scrollTo(0, 0);
-      document.getElementById(`collection-title-${selectedCollectionId}`)?.focus({ preventScroll: true });
+      if (view === VIEW_COLLECTION) {
+        document.getElementById(`collection-title-${selectedCollectionId}`)?.focus({ preventScroll: true });
+      }
     });
     return () => window.cancelAnimationFrame(frame);
-  }, [selectedCollectionId, view]);
+  }, [activePage, selectedCollectionId, view]);
 
   useEffect(() => {
     if (!content) return undefined;
@@ -126,13 +134,16 @@ export default function App() {
     };
   }, [content]);
 
-  function enterGallery() {
+  function enterGallery(event) {
+    event?.preventDefault();
+    const url = collectionSelectionUrl(window.location, SITE_PATHS.gallery);
     window.history.replaceState(
       { benOzView: VIEW_COLLECTIONS },
       '',
-      collectionSelectionUrl(window.location),
+      url,
     );
     setSelectedCollectionId('');
+    setActivePage('');
     setView(VIEW_COLLECTIONS);
   }
 
@@ -143,38 +154,34 @@ export default function App() {
     window.history.pushState(
       { benOzView: VIEW_COLLECTION, collectionId, returnToCollections: view === VIEW_COLLECTIONS },
       '',
-      collectionPageUrl(collection, window.location, hash),
+      collectionPageUrl(collection, window.location, hash, SITE_PATHS.gallery),
     );
     setSelectedCollectionId(collectionId);
+    setActivePage('');
     setView(VIEW_COLLECTION);
   }
 
-  function returnToCollections(event) {
+  function navigateTo(path, event, { replace = false } = {}) {
+    if (event && (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)) return;
     event?.preventDefault();
-    if (window.history.state?.returnToCollections) {
-      window.history.back();
-      return;
-    }
-
-    window.history.replaceState(
-      { benOzView: VIEW_COLLECTIONS },
+    const url = sitePageUrl(path, window.location);
+    const route = resolveSiteRoute(content.collections, new URL(url, window.location.origin));
+    window.history[replace ? 'replaceState' : 'pushState'](
+      { benOzView: route.view, collectionId: route.collectionId, page: route.page },
       '',
-      collectionSelectionUrl(window.location),
+      url,
     );
-    setSelectedCollectionId('');
-    setView(VIEW_COLLECTIONS);
-  }
-
-  function openAbout() {
-    const firstCollection = content.collections[0];
-    if (firstCollection) openCollection(firstCollection.id, 'story');
+    setSelectedCollectionId(route.collectionId);
+    setActivePage(route.page);
+    setView(route.view);
   }
 
   if (!content) {
     return <div id="reactMigrationRoot" data-react-migration="loading" aria-busy="true"><EntryScreen loading /></div>;
   }
 
-  const selectedCollection = content.collections.find((collection) => collection.id === selectedCollectionId);
+  const siteActive = view === VIEW_COLLECTION || view === VIEW_PAGE;
+  const showSharedSection = (page) => view === VIEW_COLLECTION || activePage === page;
 
   return (
     <div id="reactMigrationRoot" data-react-migration="loading">
@@ -182,23 +189,23 @@ export default function App() {
       <ProjectHub
         active={view === VIEW_COLLECTIONS}
         collections={content.collections}
-        onAbout={openAbout}
+        onNavigate={navigateTo}
         onSelect={openCollection}
       />
-      <main className={`site${view === VIEW_COLLECTION ? ' active' : ''}`} hidden={view !== VIEW_COLLECTION} id="site">
-        <SiteHeader galleryTarget={selectedCollection?.pageId} onBack={returnToCollections} />
+      <main className={`site${siteActive ? ' active' : ''}`} hidden={!siteActive} id="site">
+        <SiteHeader onNavigate={navigateTo} />
         {content.collections.map((collection) => (
           <CollectionPage
-            active={collection.id === selectedCollectionId}
+            active={view === VIEW_COLLECTION && collection.id === selectedCollectionId}
             collection={collection}
             key={collection.id}
             songs={content.songs}
           />
         ))}
-        <MusicSection songs={content.songs} />
-        <StorySection />
-        <ExhibitionsSection />
-        <ContactSection />
+        <div hidden={!showSharedSection(PAGE_MUSIC)}><MusicSection songs={content.songs} /></div>
+        <div hidden={!showSharedSection(PAGE_STORY)}><StorySection /></div>
+        <div hidden={!showSharedSection(PAGE_EXHIBITIONS)}><ExhibitionsSection /></div>
+        <div hidden={!showSharedSection(PAGE_CONTACT)}><ContactSection /></div>
         <SiteFooter />
       </main>
       <Overlays />
