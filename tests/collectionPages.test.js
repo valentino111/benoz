@@ -153,8 +153,8 @@ test('the first collection retains its established hero structure and content da
     {
       pageId: 'gallery',
       heroImage: '/assets/brand/ben-oz-logo-gold-transparent.png',
-      noteEn: 'The complete series consists of six works. Four are presented in the current exhibition. Each artwork is available in its original artistic version with integrated text, where typography is an essential part of the composition, or as a clean image without text, according to the collector’s preference.',
-      noteHe: 'הסדרה המלאה כוללת שש עבודות. ארבע מתוכן משתתפות בתערוכה הנוכחית. כל יצירה זמינה בגרסתה האמנותית המקורית, שבה הטקסט מהווה חלק בלתי נפרד מהקומפוזיציה, או בגרסה נקייה ללא טקסט – בהתאם להעדפת האספן.',
+      noteEn: 'The complete series consists of six works.\nFour are presented in the current exhibition.\nEach artwork is available in its original artistic version with integrated text, where typography is an essential part of the composition, or as a clean image without text, according to the collector’s preference.',
+      noteHe: 'הסדרה המלאה כוללת שש עבודות.\nארבע מתוכן משתתפות בתערוכה הנוכחית.\nכל יצירה זמינה בגרסתה האמנותית המקורית, שבה הטקסט מהווה חלק בלתי נפרד מהקומפוזיציה, או בגרסה נקייה ללא טקסט – בהתאם להעדפת האספן.',
       workIds: [
         'human-creator',
         'gaze-of-compassion',
