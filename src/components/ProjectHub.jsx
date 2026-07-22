@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-export default function ProjectHub({ active = false, collections = [], onAbout, onSelect }) {
+export default function ProjectHub({ active = false, collections = [], onNavigate, onSelect }) {
   const [leavingId, setLeavingId] = useState('');
   const transitionTimer = useRef(null);
 
@@ -70,9 +70,9 @@ export default function ProjectHub({ active = false, collections = [], onAbout, 
           ))}
         </div>
 
-        <button className="museum-about-link" onClick={onAbout}>
+        <a className="museum-about-link" href="/about" onClick={(event) => onNavigate?.('/about', event)}>
           About Ben Oz
-        </button>
+        </a>
       </div>
     </main>
   );

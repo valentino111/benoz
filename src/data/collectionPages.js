@@ -55,17 +55,18 @@ function localUrl(url) {
   return `${url.pathname}${url.search}${url.hash}`;
 }
 
-export function collectionSelectionUrl(locationLike) {
+export function collectionSelectionUrl(locationLike, pathname) {
   const url = locationUrl(locationLike);
+  if (pathname) url.pathname = pathname;
   url.searchParams.delete(COLLECTION_QUERY_PARAM);
   url.hash = '';
   return localUrl(url);
 }
 
-export function collectionPageUrl(collection, locationLike, hash = '') {
+export function collectionPageUrl(collection, locationLike, hash = '', pathname) {
   const url = locationUrl(locationLike);
+  if (pathname) url.pathname = pathname;
   url.searchParams.set(COLLECTION_QUERY_PARAM, normalizeCollectionId(collection.slug || collection.id));
   url.hash = hash ? `#${String(hash).replace(/^#/, '')}` : '';
   return localUrl(url);
 }
-
