@@ -172,6 +172,8 @@ test('Pearls of Truth English intro renders its English text', () => {
   const hero = getCollectionHeroModel(pearls);
   assert.equal(hero.en.intro, 'A collection where words, images, music and motion meet.');
   assert.equal(hero.he.intro, '');
+  assert.equal(pearls.noteEn, 'Each artwork is available in its original artistic version with integrated text, where typography is an essential part of the composition, or as a clean image without text, according to the collector’s preference.');
+  assert.equal(pearls.noteHe, 'כל יצירה זמינה בגרסתה האמנותית המקורית, שבה הטקסט מהווה חלק בלתי נפרד מהקומפוזיציה, או בגרסה נקייה ללא טקסט – בהתאם להעדפת האספן.');
 });
 
 test('Pearls of Truth Hebrew intro renders approved descriptionHe text', () => {

@@ -29,6 +29,8 @@ export const collections = [
     titleHe: 'פניני אמת',
     type: 'Poetry · Art · Music',
     description: 'A collection where words, images, music and motion meet.',
+    noteEn: 'Each artwork is available in its original artistic version with integrated text, where typography is an essential part of the composition, or as a clean image without text, according to the collector’s preference.',
+    noteHe: 'כל יצירה זמינה בגרסתה האמנותית המקורית, שבה הטקסט מהווה חלק בלתי נפרד מהקומפוזיציה, או בגרסה נקייה ללא טקסט – בהתאם להעדפת האספן.',
     cover: '/assets/cover-lachayot.jpg',
     pageId: 'collection-pearls-of-truth',
     works: pearlsOfTruthWorks,
