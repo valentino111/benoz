@@ -72,7 +72,8 @@ let current=0;
 let lightboxOpener=null;
 let lightboxLoadId=0;
 let pendingDetailImage=null;
-const lightboxBackground=[entry,site,projectHub].filter(Boolean);
+const interactionRoots=[entry,site,projectHub].filter(Boolean);
+interactionRoots.forEach(element=>{element.inert=false});
 function cancelPendingDetailImage(){
   if(!pendingDetailImage) return;
   pendingDetailImage.onload=null;
@@ -86,7 +87,7 @@ function closeLightbox(){
   cancelPendingDetailImage();
   lightbox.classList.remove('open');
   lightbox.setAttribute('aria-hidden','true');
-  lightboxBackground.forEach(element=>{element.inert=false});
+  interactionRoots.forEach(element=>{element.inert=false});
   document.body.classList.remove('lightbox-open');
   document.body.classList.toggle('locked',entry?.classList.contains('active'));
   lbImg.removeAttribute('src');
@@ -107,7 +108,6 @@ function showImage(i){
   lbImg.alt=sourceImage.alt;
   lightbox.classList.add('open');
   lightbox.setAttribute('aria-hidden','false');
-  lightboxBackground.forEach(element=>{element.inert=true});
   document.body.classList.add('locked','lightbox-open');
   if(opening) lightbox.querySelector('.close').focus();
 
