@@ -70,27 +70,69 @@ const lightbox=document.getElementById('lightbox');
 const lbImg=lightbox.querySelector('img');
 let current=0;
 let lightboxOpener=null;
+let lightboxLoadId=0;
+let pendingDetailImage=null;
 const lightboxBackground=[entry,site,projectHub].filter(Boolean);
+function cancelPendingDetailImage(){
+  if(!pendingDetailImage) return;
+  pendingDetailImage.onload=null;
+  pendingDetailImage.onerror=null;
+  pendingDetailImage.removeAttribute('src');
+  pendingDetailImage=null;
+}
 function closeLightbox(){
-  if(!lightbox.classList.contains('open')) return;
+  const wasOpen=lightbox.classList.contains('open');
+  lightboxLoadId+=1;
+  cancelPendingDetailImage();
   lightbox.classList.remove('open');
   lightbox.setAttribute('aria-hidden','true');
   lightboxBackground.forEach(element=>{element.inert=false});
-  document.body.classList.remove('locked');
-  lightboxOpener?.focus?.();
+  document.body.classList.remove('lightbox-open');
+  document.body.classList.toggle('locked',entry?.classList.contains('active'));
+  lbImg.removeAttribute('src');
+  if(wasOpen && lightboxOpener?.isConnected) lightboxOpener.focus?.();
   lightboxOpener=null;
 }
 function showImage(i){
+  if(!artImages.length) return;
+  cancelPendingDetailImage();
   const opening=!lightbox.classList.contains('open');
   if(opening) lightboxOpener=document.activeElement;
   current=(i+artImages.length)%artImages.length;
-  lbImg.src=artImages[current].dataset.fullSrc || artImages[current].src;
-  lbImg.alt=artImages[current].alt;
+  const sourceImage=artImages[current];
+  const previewSrc=sourceImage.currentSrc || sourceImage.src;
+  const fullSrc=sourceImage.dataset.fullSrc || previewSrc;
+  const loadId=++lightboxLoadId;
+  lbImg.src=previewSrc;
+  lbImg.alt=sourceImage.alt;
   lightbox.classList.add('open');
   lightbox.setAttribute('aria-hidden','false');
   lightboxBackground.forEach(element=>{element.inert=true});
-  document.body.classList.add('locked');
+  document.body.classList.add('locked','lightbox-open');
   if(opening) lightbox.querySelector('.close').focus();
+
+  if(fullSrc!==previewSrc){
+    const detailImage=new Image();
+    pendingDetailImage=detailImage;
+    detailImage.decoding='async';
+    let decoded;
+    if(typeof detailImage.decode==='function'){
+      detailImage.src=fullSrc;
+      decoded=detailImage.decode();
+    }else{
+      decoded=new Promise((resolve,reject)=>{
+        detailImage.onload=resolve;
+        detailImage.onerror=reject;
+      });
+      detailImage.src=fullSrc;
+    }
+    decoded.then(()=>{
+      if(loadId===lightboxLoadId && lightbox.classList.contains('open')) lbImg.src=fullSrc;
+      if(pendingDetailImage===detailImage) pendingDetailImage=null;
+    }).catch(()=>{
+      if(pendingDetailImage===detailImage) pendingDetailImage=null;
+    });
+  }
 }
 function openArtworkImage(img){
   const collectionId=img.closest('.artwork')?.dataset.collectionId;
@@ -102,6 +144,8 @@ lightbox.querySelector('.close').addEventListener('click',closeLightbox);
 lightbox.querySelector('.prev').addEventListener('click',e=>{e.stopPropagation();showImage(current-1)});
 lightbox.querySelector('.next').addEventListener('click',e=>{e.stopPropagation();showImage(current+1)});
 lightbox.addEventListener('click',e=>{if(e.target===lightbox)closeLightbox()});
+window.addEventListener('pagehide',closeLightbox);
+window.addEventListener('popstate',closeLightbox);
 document.addEventListener('keydown',e=>{
   if(!lightbox.classList.contains('open'))return;
   if(e.key==='Escape') closeLightbox();
@@ -328,6 +372,10 @@ lbStage.addEventListener('touchend',e=>{
     dx<0?showImage(current+1):showImage(current-1);
   }
 },{passive:true});
+lbStage.addEventListener('touchcancel',()=>{pinching=false});
+lbStage.addEventListener('click',e=>{
+  if(e.target===lbStage && zoom<=1.01) closeLightbox();
+});
 
 
 // Animate music covers on hover. On touch devices, tap to play.

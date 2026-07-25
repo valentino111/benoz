@@ -22,6 +22,7 @@ body{
   font-size:var(--body);
 }
 body.locked{overflow:hidden}
+body.lightbox-open:before{animation-play-state:paused}
 a{color:inherit}
 button{font:inherit}
 [hidden]{display:none!important}
@@ -862,7 +863,8 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9998;o
 .contact-role{font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--gold-deep)}
 .contact-name{font-size:clamp(40px,7vw,74px);margin:12px 0 6px}
 .contact-disciplines{color:var(--muted);letter-spacing:.08em;margin-bottom:24px}
-.lightbox{backdrop-filter:blur(3px)}
+.lightbox{isolation:isolate;contain:layout paint}
+.lightbox .close,.lightbox .prev,.lightbox .next,.lightbox .lb-toolbar{z-index:2}
 .lightbox .close{font-size:25px}
 .fade{opacity:0;transform:translateY(28px);transition:opacity 1s var(--ease),transform 1s var(--ease)}
 .fade.show{opacity:1;transform:none}
@@ -1120,8 +1122,12 @@ body.en .art-copy .en-title{display:none}
   }
   .lightbox img{
     transition:none;
-    will-change:transform;
   }
+  .lightbox .close{
+    top:calc(12px + env(safe-area-inset-top));
+    right:calc(12px + env(safe-area-inset-right));
+  }
+  .lb-toolbar{bottom:calc(12px + env(safe-area-inset-bottom))}
 }
 
 body:not(.en) .main-menu .menu-link{font-size:15px}
