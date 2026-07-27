@@ -154,6 +154,7 @@ test('artwork previews use the optional Work video without replacing the lightbo
   assert.match(gallery, /Boolean\(work\.video\)/);
   assert.match(gallery, /<source src=\{work\.video\} type="video\/mp4" \/>/);
   assert.match(gallery, /className=\{`artwork-preview-video/);
+  assert.doesNotMatch(gallery, /\smuted\s/);
   assert.match(gallery, /\}, 550\)/);
   assert.match(gallery, /data-full-src=\{work\.image\}/);
   assert.match(styles, /\.artwork-preview-video\.is-playing\{opacity:1\}/);

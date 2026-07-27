@@ -147,7 +147,6 @@ function ArtworkMedia({ active, isFirstVisibleArtwork, work }) {
             aria-hidden="true"
             className={`artwork-preview-video${previewPlaying ? ' is-playing' : ''}`}
             draggable={false}
-            muted
             onEnded={stopPreview}
             onError={stopPreview}
             onPlay={() => setPreviewPlaying(true)}
