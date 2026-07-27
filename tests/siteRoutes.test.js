@@ -89,9 +89,8 @@ test('navigation exposes every restored route and Netlify serves them through th
   assert.match(hub, /aria-label="Return to Ben Oz hero"/);
   assert.match(hub, /href="\/"/);
   assert.match(hub, /onClick=\{\(event\) => onNavigate\?\.\('\/', event\)\}/);
-  assert.match(hub, /COLLECTION_COVER_ANIMATIONS\[collection\.id\]/);
-  assert.match(hub, /ExhibitionCoverAnimation\.MP4/);
-  assert.match(hub, /PearlsOfTruthAnimation\.MP4/);
+  assert.match(hub, /const animationSrc = collection\.posterVideo/);
+  assert.doesNotMatch(hub, /COLLECTION_COVER_ANIMATIONS/);
   assert.match(hub, /has-cover-animation/);
   assert.match(hub, /className=\{`museum-poster-video/);
   assert.doesNotMatch(hub, /\smuted\s/);
@@ -143,4 +142,25 @@ test('animated mobile collection covers suppress browser copy and callout behavi
   assert.match(styles, /-webkit-touch-callout:none/);
   assert.match(styles, /-webkit-user-select:none/);
   assert.match(styles, /touch-action:pan-y/);
+});
+
+test('artwork previews use the optional Work video without replacing the lightbox image', async () => {
+  const [gallery, styles, asset] = await Promise.all([
+    readFile(new URL('../src/components/ArtworkGallery.jsx', import.meta.url), 'utf8'),
+    readFile(new URL('../src/styles.css', import.meta.url), 'utf8'),
+    readFile(new URL('../public/assets/AJugOfWineAnimate.MP4', import.meta.url)),
+  ]);
+
+  assert.match(gallery, /Boolean\(work\.video\)/);
+  assert.match(gallery, /<source src=\{work\.video\} type="video\/mp4" \/>/);
+  assert.match(gallery, /className=\{`artwork-preview-video/);
+  assert.doesNotMatch(gallery, /\smuted\s/);
+  assert.match(gallery, /\}, 550\)/);
+  assert.match(gallery, /longPressReady\.current = true/);
+  assert.match(gallery, /function handlePointerUp\(\)/);
+  assert.match(gallery, /const shouldStartPreview = longPressReady\.current/);
+  assert.match(gallery, /onPointerUp=\{handlePointerUp\}/);
+  assert.match(gallery, /data-full-src=\{work\.image\}/);
+  assert.match(styles, /\.artwork-preview-video\.is-playing\{opacity:1\}/);
+  assert.ok(asset.byteLength > 0);
 });

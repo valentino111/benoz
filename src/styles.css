@@ -113,6 +113,36 @@ button{font:inherit}
   user-select:none;
   -webkit-user-drag:none;
 }
+.art-media-frame{
+  position:relative;
+  display:inline-grid;
+  place-items:center;
+  max-width:100%;
+  overflow:hidden;
+}
+.artwork-preview-video{
+  position:absolute;
+  inset:0;
+  z-index:1;
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .4s ease,transform 1.1s var(--ease);
+}
+.artwork-preview-video.is-playing{opacity:1}
+.art-media.has-artwork-animation,
+.art-media.has-artwork-animation *{
+  -webkit-touch-callout:none;
+  -webkit-user-select:none;
+  user-select:none;
+}
+.art-media.has-artwork-animation{touch-action:pan-y}
+.art-media.has-artwork-animation .artwork-preview-video{
+  -webkit-user-drag:none;
+}
 .art-copy h2{
   font-size:var(--heading);margin:0 0 12px;
   font-family:"Noto Serif Hebrew","Frank Ruhl Libre","David Libre","Times New Roman",serif
@@ -847,10 +877,11 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9998;o
 .loader-line{width:0;height:1px;background:var(--gold);margin:24px auto 0;animation:loaderLine 1.15s var(--ease) forwards}
 @keyframes loaderLine{to{width:180px}}
 .art-media{position:relative;overflow:hidden}
-.art-media:after{content:"VIEW WORK";position:absolute;inset:auto 50% 26px auto;transform:translateX(50%) translateY(10px);opacity:0;border:1px solid rgba(232,214,165,.55);border-radius:999px;padding:10px 16px;font-size:11px;letter-spacing:.18em;background:rgba(7,7,7,.58);backdrop-filter:blur(10px);transition:.35s var(--ease);pointer-events:none}
+.art-media:after{content:"VIEW WORK";position:absolute;z-index:3;inset:auto 50% 26px auto;transform:translateX(50%) translateY(10px);opacity:0;border:1px solid rgba(232,214,165,.55);border-radius:999px;padding:10px 16px;font-size:11px;letter-spacing:.18em;background:rgba(7,7,7,.58);backdrop-filter:blur(10px);transition:.35s var(--ease);pointer-events:none}
 .art-media:hover:after{opacity:1;transform:translateX(50%) translateY(0)}
 .art-media img{transition:transform 1.1s var(--ease),filter .8s var(--ease)}
 .art-media:hover img{transform:scale(1.012);filter:brightness(1.03)}
+.art-media:hover .artwork-preview-video{transform:scale(1.012)}
 .artwork{scroll-margin-top:84px}
 .art-copy:before{content:"ARTWORK";display:block;font-size:10px;letter-spacing:.28em;color:var(--gold-deep);margin-bottom:20px}
 .art-copy h2{font-size:clamp(30px,3.4vw,52px);line-height:1.06}

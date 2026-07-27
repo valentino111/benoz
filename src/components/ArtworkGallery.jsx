@@ -1,3 +1,5 @@
+import { useEffect, useRef, useState } from 'react';
+
 function LanguageText({ en, he }) {
   return (
     <>
@@ -26,14 +28,118 @@ function ArtworkSoundtrack({ song }) {
   );
 }
 
-function Artwork({ active, work, index, total, songsById }) {
-  const isFirstVisibleArtwork = active && index === 0;
+function ArtworkMedia({ active, isFirstVisibleArtwork, work }) {
+  const videoRef = useRef(null);
+  const longPressTimer = useRef(null);
+  const longPressStart = useRef(null);
+  const longPressReady = useRef(false);
+  const suppressNextClick = useRef(false);
+  const suppressResetTimer = useRef(null);
+  const [previewPlaying, setPreviewPlaying] = useState(false);
   const previewImage = work.thumbnail || work.image;
   const previewWidth = work.thumbnailWidth || work.imageWidth;
   const previewHeight = work.thumbnailHeight || work.imageHeight;
+  const hasAnimation = Boolean(work.video);
+
+  function clearLongPress() {
+    window.clearTimeout(longPressTimer.current);
+    longPressTimer.current = null;
+    longPressStart.current = null;
+    longPressReady.current = false;
+  }
+
+  function stopPreview() {
+    const video = videoRef.current;
+    if (!video) return;
+    video.pause();
+    video.currentTime = 0;
+    setPreviewPlaying(false);
+  }
+
+  function startPreview() {
+    const video = videoRef.current;
+    if (!video || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    video.currentTime = 0;
+    video.play()?.catch(() => setPreviewPlaying(false));
+  }
+
+  function isTouchPreview() {
+    return window.matchMedia('(hover: none), (pointer: coarse)').matches;
+  }
+
+  useEffect(() => {
+    if (!hasAnimation || !active) {
+      clearLongPress();
+      stopPreview();
+      return undefined;
+    }
+
+    return () => {
+      clearLongPress();
+      window.clearTimeout(suppressResetTimer.current);
+      stopPreview();
+    };
+  }, [active, hasAnimation]);
+
+  function handlePointerDown(event) {
+    if (!hasAnimation || !isTouchPreview() || event.button !== 0) return;
+    clearLongPress();
+    longPressStart.current = { x: event.clientX, y: event.clientY };
+    longPressTimer.current = window.setTimeout(() => {
+      longPressReady.current = true;
+      longPressTimer.current = null;
+    }, 550);
+  }
+
+  function handlePointerMove(event) {
+    const start = longPressStart.current;
+    if (!start) return;
+    if (Math.hypot(event.clientX - start.x, event.clientY - start.y) > 12) clearLongPress();
+  }
+
+  function handlePointerUp() {
+    const shouldStartPreview = longPressReady.current;
+    clearLongPress();
+    if (!shouldStartPreview) return;
+
+    suppressNextClick.current = true;
+    startPreview();
+    window.clearTimeout(suppressResetTimer.current);
+    suppressResetTimer.current = window.setTimeout(() => {
+      suppressNextClick.current = false;
+    }, 900);
+  }
+
+  function handlePreviewClick(event) {
+    if (!suppressNextClick.current) return;
+    event.preventDefault();
+    event.stopPropagation();
+    suppressNextClick.current = false;
+  }
+
   return (
-    <article className="artwork fade" data-artwork-slug={work.id} data-collection-id={work.collectionId} data-img={work.image} id={work.id}>
-      <div className="art-media">
+    <div
+      className={`art-media${hasAnimation ? ' has-artwork-animation' : ''}`}
+      onClickCapture={handlePreviewClick}
+      onContextMenu={(event) => {
+        if (hasAnimation && isTouchPreview()) event.preventDefault();
+      }}
+      onMouseEnter={() => {
+        if (hasAnimation && !isTouchPreview()) startPreview();
+      }}
+      onMouseLeave={() => {
+        if (hasAnimation && !isTouchPreview()) stopPreview();
+      }}
+      onPointerCancel={() => {
+        clearLongPress();
+        suppressNextClick.current = false;
+        stopPreview();
+      }}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+    >
+      <span className="art-media-frame">
         <img
           alt={work.titleEn || work.titleHe}
           data-alt-en={work.titleEn}
@@ -46,7 +152,31 @@ function Artwork({ active, work, index, total, songsById }) {
           src={previewImage}
           width={previewWidth}
         />
-      </div>
+        {hasAnimation && (
+          <video
+            aria-hidden="true"
+            className={`artwork-preview-video${previewPlaying ? ' is-playing' : ''}`}
+            draggable={false}
+            onEnded={stopPreview}
+            onError={stopPreview}
+            onPlay={() => setPreviewPlaying(true)}
+            playsInline
+            preload="metadata"
+            ref={videoRef}
+          >
+            <source src={work.video} type="video/mp4" />
+          </video>
+        )}
+      </span>
+    </div>
+  );
+}
+
+function Artwork({ active, work, index, total, songsById }) {
+  const isFirstVisibleArtwork = active && index === 0;
+  return (
+    <article className="artwork fade" data-artwork-slug={work.id} data-collection-id={work.collectionId} data-img={work.image} id={work.id}>
+      <ArtworkMedia active={active} isFirstVisibleArtwork={isFirstVisibleArtwork} work={work} />
 
       <div className="art-copy">
         <span className="status"><LanguageText en={work.statusEn} he={work.statusHe} /></span>

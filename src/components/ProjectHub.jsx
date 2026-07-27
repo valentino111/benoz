@@ -1,17 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 
-const COLLECTION_COVER_ANIMATIONS = {
-  exhibition: '/assets/ExhibitionCoverAnimation.MP4',
-  'pearls-of-truth': '/assets/PearlsOfTruthAnimation.MP4',
-};
-
 function CollectionPoster({ active, collection, leavingId, onSelect }) {
   const videoRef = useRef(null);
   const longPressTimer = useRef(null);
   const longPressStart = useRef(null);
   const suppressNextClick = useRef(false);
   const [previewPlaying, setPreviewPlaying] = useState(false);
-  const animationSrc = COLLECTION_COVER_ANIMATIONS[collection.id];
+  const animationSrc = collection.posterVideo;
   const hasAnimation = Boolean(animationSrc);
 
   function clearLongPress() {
