@@ -109,3 +109,16 @@ test('restored Story, Exhibitions, Contact, and Music retain English and Hebrew 
   assert.match(files[2], /https:\/\/wa\.me\/972544520987/);
   assert.match(files[3], /Beyond the Canvas/);
 });
+
+test('portrait mobile hero uses the square video crop while desktop keeps the original video', async () => {
+  const [entry, styles] = await Promise.all([
+    readFile(new URL('../src/components/EntryScreen.jsx', import.meta.url), 'utf8'),
+    readFile(new URL('../src/styles.css', import.meta.url), 'utf8'),
+  ]);
+
+  assert.match(entry, /media="\(max-width: 700px\) and \(orientation: portrait\)"/);
+  assert.match(entry, /src="\/assets\/BenOzHero-mobile\.mp4"/);
+  assert.match(entry, /src="\/assets\/BenOzHero\.MP4"/);
+  assert.match(styles, /@media\(max-width:700px\) and \(orientation:portrait\)/);
+  assert.match(styles, /object-position:center top/);
+});

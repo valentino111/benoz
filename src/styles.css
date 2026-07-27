@@ -1166,9 +1166,7 @@ body:not(.en) .main-menu .menu-link{font-size:15px}
 }
 @media(max-width:700px) and (orientation:portrait){
   .entry-visual-video{
-    object-fit:contain;
-    -webkit-mask-image:linear-gradient(to bottom,transparent 34%,#000 40%,#000 60%,transparent 66%);
-    mask-image:linear-gradient(to bottom,transparent 34%,#000 40%,#000 60%,transparent 66%);
+    object-position:center top;
   }
 }
 
