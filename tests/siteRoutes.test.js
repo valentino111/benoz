@@ -89,6 +89,15 @@ test('navigation exposes every restored route and Netlify serves them through th
   assert.match(hub, /aria-label="Return to Ben Oz hero"/);
   assert.match(hub, /href="\/"/);
   assert.match(hub, /onClick=\{\(event\) => onNavigate\?\.\('\/', event\)\}/);
+  assert.match(hub, /COLLECTION_COVER_ANIMATIONS\[collection\.id\]/);
+  assert.match(hub, /ExhibitionCoverAnimation\.MP4/);
+  assert.match(hub, /PearlsOfTruthAnimation\.MP4/);
+  assert.match(hub, /has-cover-animation/);
+  assert.match(hub, /className=\{`museum-poster-video/);
+  assert.doesNotMatch(hub, /\smuted\s/);
+  assert.match(hub, /window\.setTimeout\(\(\) => \{/);
+  assert.match(hub, /\}, 550\)/);
+  assert.match(hub, /suppressNextClick/);
   assert.equal(redirects.trim(), '/* /index.html 200');
 });
 
@@ -121,4 +130,17 @@ test('portrait mobile hero uses the dedicated mobile crop while desktop keeps th
   assert.match(entry, /src="\/assets\/BenOzHero\.MP4"/);
   assert.match(styles, /@media\(max-width:700px\) and \(orientation:portrait\)/);
   assert.match(styles, /object-position:center top/);
+});
+
+test('animated mobile collection covers suppress browser copy and callout behavior', async () => {
+  const [hub, styles] = await Promise.all([
+    readFile(new URL('../src/components/ProjectHub.jsx', import.meta.url), 'utf8'),
+    readFile(new URL('../src/styles.css', import.meta.url), 'utf8'),
+  ]);
+
+  assert.match(hub, /onContextMenu=/);
+  assert.match(hub, /draggable=\{false\}/);
+  assert.match(styles, /-webkit-touch-callout:none/);
+  assert.match(styles, /-webkit-user-select:none/);
+  assert.match(styles, /touch-action:pan-y/);
 });

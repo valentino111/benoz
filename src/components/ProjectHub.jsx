@@ -1,5 +1,150 @@
 import { useEffect, useRef, useState } from 'react';
 
+const COLLECTION_COVER_ANIMATIONS = {
+  exhibition: '/assets/ExhibitionCoverAnimation.MP4',
+  'pearls-of-truth': '/assets/PearlsOfTruthAnimation.MP4',
+};
+
+function CollectionPoster({ active, collection, leavingId, onSelect }) {
+  const videoRef = useRef(null);
+  const longPressTimer = useRef(null);
+  const longPressStart = useRef(null);
+  const suppressNextClick = useRef(false);
+  const [previewPlaying, setPreviewPlaying] = useState(false);
+  const animationSrc = COLLECTION_COVER_ANIMATIONS[collection.id];
+  const hasAnimation = Boolean(animationSrc);
+
+  function clearLongPress() {
+    window.clearTimeout(longPressTimer.current);
+    longPressTimer.current = null;
+    longPressStart.current = null;
+  }
+
+  function stopPreview() {
+    const video = videoRef.current;
+    if (!video) return;
+    video.pause();
+    video.currentTime = 0;
+    setPreviewPlaying(false);
+  }
+
+  function startPreview() {
+    const video = videoRef.current;
+    if (!video || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    video.currentTime = 0;
+    const playback = video.play();
+    playback?.catch(() => setPreviewPlaying(false));
+  }
+
+  useEffect(() => {
+    if (!hasAnimation || !active) {
+      clearLongPress();
+      stopPreview();
+      return undefined;
+    }
+
+    return () => {
+      clearLongPress();
+      stopPreview();
+    };
+  }, [active, hasAnimation]);
+
+  function isTouchPreview() {
+    return window.matchMedia('(hover: none), (pointer: coarse)').matches;
+  }
+
+  function handlePointerDown(event) {
+    if (!hasAnimation || !isTouchPreview() || event.button !== 0) return;
+    clearLongPress();
+    longPressStart.current = { x: event.clientX, y: event.clientY };
+    longPressTimer.current = window.setTimeout(() => {
+      suppressNextClick.current = true;
+      startPreview();
+      longPressTimer.current = null;
+    }, 550);
+  }
+
+  function handlePointerMove(event) {
+    const start = longPressStart.current;
+    if (!start) return;
+    if (Math.hypot(event.clientX - start.x, event.clientY - start.y) > 12) clearLongPress();
+  }
+
+  function handlePointerEnd() {
+    clearLongPress();
+  }
+
+  function handlePointerCancel() {
+    clearLongPress();
+    suppressNextClick.current = false;
+    stopPreview();
+  }
+
+  function handleClick(event) {
+    if (suppressNextClick.current) {
+      event.preventDefault();
+      suppressNextClick.current = false;
+      return;
+    }
+    onSelect(collection.id);
+  }
+
+  return (
+    <button
+      className={`museum-poster museum-poster-${collection.id}${hasAnimation ? ' has-cover-animation' : ''}${leavingId === collection.id ? ' is-selected' : ''}`}
+      data-collection-id={collection.id}
+      onBlur={stopPreview}
+      onClick={handleClick}
+      onContextMenu={(event) => {
+        if (isTouchPreview()) event.preventDefault();
+      }}
+      onFocus={() => {
+        if (!isTouchPreview()) startPreview();
+      }}
+      onMouseEnter={() => {
+        if (!isTouchPreview()) startPreview();
+      }}
+      onMouseLeave={() => {
+        if (!isTouchPreview()) stopPreview();
+      }}
+      onPointerCancel={handlePointerCancel}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerEnd}
+      style={{
+        '--museum-cover': `url(${collection.cover})`,
+        '--museum-fallback-cover': `url(${collection.fallbackCover || collection.cover})`,
+      }}
+      aria-label={`Enter ${collection.title}`}
+    >
+      <span className="museum-poster-image" aria-hidden="true">
+        {hasAnimation && (
+          <video
+            className={`museum-poster-video${previewPlaying ? ' is-playing' : ''}`}
+            draggable={false}
+            onEnded={stopPreview}
+            onError={stopPreview}
+            onPlay={() => setPreviewPlaying(true)}
+            playsInline
+            preload="metadata"
+            ref={videoRef}
+          >
+            <source src={animationSrc} type="video/mp4" />
+          </video>
+        )}
+        <span className="museum-poster-enter">Enter collection</span>
+      </span>
+      <span className="museum-poster-caption">
+        <span className="museum-poster-title">{collection.title}</span>
+        {collection.titleHe && (
+          <span className="museum-poster-title-he" lang="he" dir="rtl">{collection.titleHe}</span>
+        )}
+        <span className="museum-poster-type">{collection.type}</span>
+      </span>
+    </button>
+  );
+}
+
 export default function ProjectHub({ active = false, collections = [], onNavigate, onSelect }) {
   const [leavingId, setLeavingId] = useState('');
   const transitionTimer = useRef(null);
@@ -51,28 +196,13 @@ export default function ProjectHub({ active = false, collections = [], onNavigat
 
         <div className="museum-posters">
           {collections.map((collection) => (
-            <button
+            <CollectionPoster
+              active={active}
+              collection={collection}
               key={collection.id}
-              className={`museum-poster museum-poster-${collection.id}${leavingId === collection.id ? ' is-selected' : ''}`}
-              data-collection-id={collection.id}
-              onClick={() => selectCollection(collection.id)}
-              style={{
-                '--museum-cover': `url(${collection.cover})`,
-                '--museum-fallback-cover': `url(${collection.fallbackCover || collection.cover})`,
-              }}
-              aria-label={`Enter ${collection.title}`}
-            >
-              <span className="museum-poster-image" aria-hidden="true">
-                <span className="museum-poster-enter">Enter collection</span>
-              </span>
-              <span className="museum-poster-caption">
-                <span className="museum-poster-title">{collection.title}</span>
-                {collection.titleHe && (
-                  <span className="museum-poster-title-he" lang="he" dir="rtl">{collection.titleHe}</span>
-                )}
-                <span className="museum-poster-type">{collection.type}</span>
-              </span>
-            </button>
+              leavingId={leavingId}
+              onSelect={selectCollection}
+            />
           ))}
         </div>
 
