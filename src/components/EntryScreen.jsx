@@ -52,7 +52,6 @@ export default function EntryScreen({ loading = false, active = true, onEnter })
           <video
             aria-hidden="true"
             className={`entry-visual-video${heroPlaying ? ' is-playing' : ''}`}
-            muted
             onEnded={resetHeroAnimation}
             onError={resetHeroAnimation}
             onPlay={() => setHeroPlaying(true)}
