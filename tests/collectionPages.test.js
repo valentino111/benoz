@@ -108,6 +108,17 @@ test('remote intro fields preserve fallback values when empty and override when 
   assert.equal(overridden.description, 'Remote exhibition intro');
 });
 
+test('a collection posterVideo filename resolves from Google Sheets with a local fallback', () => {
+  const fallback = fallbackContent().collections.find(({ id }) => id === 'exhibition');
+  const remote = normalizeCollection(collectionRow({
+    posterVideo: 'ExhibitionCoverAnimation.MP4',
+  }), fallback);
+  const preserved = normalizeCollection(collectionRow({ posterVideo: '   ' }), fallback);
+
+  assert.equal(remote.posterVideo, '/assets/ExhibitionCoverAnimation.MP4');
+  assert.equal(preserved.posterVideo, '/assets/ExhibitionCoverAnimation.MP4');
+});
+
 test('query navigation resolves a selected collection and browser-back selection URL', () => {
   const initialLocation = { href: 'https://gallery.example/gallery?preview=true' };
   const pageUrl = collectionPageUrl(baseCollections[1], initialLocation);
@@ -128,6 +139,16 @@ test('disabled collections and works remain absent from collection pages', () =>
   const content = buildRemoteContent(validated.rows);
   assert.deepEqual(content.collections.map(({ id }) => id), ['exhibition']);
   assert.deepEqual(content.collections[0].works.map(({ id }) => id), ['work']);
+});
+
+test('a Work video filename from Google Sheets resolves to a local preview asset', () => {
+  const validated = validateSheetRows({
+    Collections: [collectionRow()],
+    Works: [workRow({ video: 'AJugOfWineAnimate.MP4' })],
+    Songs: [],
+  });
+  const content = buildRemoteContent(validated.rows);
+  assert.equal(content.collections[0].works[0].video, '/assets/AJugOfWineAnimate.MP4');
 });
 
 test('English and Hebrew collection intro content remains available to the page', () => {
