@@ -69,6 +69,7 @@ export default function EntryScreen({ loading = false, active = true, onEnter })
         </button>
         <div aria-hidden="true" className="entry-overlay" />
         <div className="entry-inner">
+          <h1 className="sr-only">Ben Oz — Contemporary Digital Artist and Music Creator</h1>
           <img
             alt="Ben Oz Digital Gallery"
             className="official-logo logo-shimmer"

@@ -43,11 +43,12 @@ function Track({ song }) {
   );
 }
 
-export default function MusicSection({ songs = [] }) {
+export default function MusicSection({ songs = [], standalone = false }) {
+  const Heading = standalone ? 'h1' : 'h2';
   return (
     <section className="music fade" id="music">
       <div className="music-wrap">
-        <h2><LanguageText en="Beyond the Canvas" he="מעבר לקנבס" /></h2>
+        <Heading><LanguageText en="Beyond the Canvas" he="מעבר לקנבס" /></Heading>
         <div className="tracks">
           {songs.map((song) => <Track key={song.id} song={song} />)}
         </div>

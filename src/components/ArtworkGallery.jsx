@@ -32,7 +32,7 @@ function Artwork({ active, work, index, total, songsById }) {
   const previewWidth = work.thumbnailWidth || work.imageWidth;
   const previewHeight = work.thumbnailHeight || work.imageHeight;
   return (
-    <section className="artwork fade" data-artwork-slug={work.id} data-collection-id={work.collectionId} data-img={work.image} id={work.id}>
+    <article className="artwork fade" data-artwork-slug={work.id} data-collection-id={work.collectionId} data-img={work.image} id={work.id}>
       <div className="art-media">
         <img
           alt={work.titleEn || work.titleHe}
@@ -73,7 +73,7 @@ function Artwork({ active, work, index, total, songsById }) {
         <span className="art-count">{index + 1} / {total}</span>
         <button className="art-next"><LanguageText en="Next" he="הבאה" /> →</button>
       </nav>
-    </section>
+    </article>
   );
 }
 
