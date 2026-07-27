@@ -61,7 +61,7 @@ export default function EntryScreen({ loading = false, active = true, onEnter })
           >
             <source
               media="(max-width: 700px) and (orientation: portrait)"
-              src="/assets/BenOzHero-mobile.mp4"
+              src="/assets/BenOzHero-mobile.mp4?v=2"
               type="video/mp4"
             />
             <source src="/assets/BenOzHero.MP4" type="video/mp4" />
