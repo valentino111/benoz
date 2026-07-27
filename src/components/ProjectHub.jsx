@@ -117,6 +117,7 @@ function CollectionPoster({ active, collection, leavingId, onSelect }) {
         {hasAnimation && (
           <video
             className={`museum-poster-video${previewPlaying ? ' is-playing' : ''}`}
+            draggable={false}
             muted
             onEnded={stopPreview}
             onError={stopPreview}

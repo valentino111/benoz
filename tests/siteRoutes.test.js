@@ -129,3 +129,16 @@ test('portrait mobile hero uses the dedicated mobile crop while desktop keeps th
   assert.match(styles, /@media\(max-width:700px\) and \(orientation:portrait\)/);
   assert.match(styles, /object-position:center top/);
 });
+
+test('mobile Exhibition long press suppresses browser copy and callout behavior', async () => {
+  const [hub, styles] = await Promise.all([
+    readFile(new URL('../src/components/ProjectHub.jsx', import.meta.url), 'utf8'),
+    readFile(new URL('../src/styles.css', import.meta.url), 'utf8'),
+  ]);
+
+  assert.match(hub, /onContextMenu=/);
+  assert.match(hub, /draggable=\{false\}/);
+  assert.match(styles, /-webkit-touch-callout:none/);
+  assert.match(styles, /-webkit-user-select:none/);
+  assert.match(styles, /touch-action:pan-y/);
+});
