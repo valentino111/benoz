@@ -86,6 +86,9 @@ test('navigation exposes every restored route and Netlify serves them through th
     assert.match(header, new RegExp(`href="${href}"`));
   });
   assert.match(hub, /href="\/about"/);
+  assert.match(hub, /aria-label="Return to Ben Oz hero"/);
+  assert.match(hub, /href="\/"/);
+  assert.match(hub, /onClick=\{\(event\) => onNavigate\?\.\('\/', event\)\}/);
   assert.equal(redirects.trim(), '/* /index.html 200');
 });
 

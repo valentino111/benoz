@@ -30,15 +30,21 @@ export default function ProjectHub({ active = false, collections = [], onNavigat
     >
       <div className="museum-hub-inner">
         <header className="museum-hub-header">
-          <img
-            alt="Ben Oz"
-            className="museum-hub-logo"
-            decoding="async"
-            height="1254"
-            loading="lazy"
-            src="/assets/brand/ben-oz-logo-gold-transparent.png"
-            width="1254"
-          />
+          <a
+            aria-label="Return to Ben Oz hero"
+            className="museum-hub-home"
+            href="/"
+            onClick={(event) => onNavigate?.('/', event)}
+          >
+            <img
+              alt="Ben Oz"
+              className="museum-hub-logo"
+              decoding="async"
+              height="1254"
+              src="/assets/brand/ben-oz-logo-gold-transparent.png"
+              width="1254"
+            />
+          </a>
           <p className="museum-hub-name">Ben Oz Digital Gallery</p>
           <p className="museum-hub-label">Collections</p>
         </header>
