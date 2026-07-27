@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 
-const EXHIBITION_COVER_ANIMATION = '/assets/ExhibitionCoverAnimation.MP4';
+const COLLECTION_COVER_ANIMATIONS = {
+  exhibition: '/assets/ExhibitionCoverAnimation.MP4',
+  'pearls-of-truth': '/assets/PearlsOfTruthAnimation.MP4',
+};
 
 function CollectionPoster({ active, collection, leavingId, onSelect }) {
   const videoRef = useRef(null);
@@ -8,7 +11,8 @@ function CollectionPoster({ active, collection, leavingId, onSelect }) {
   const longPressStart = useRef(null);
   const suppressNextClick = useRef(false);
   const [previewPlaying, setPreviewPlaying] = useState(false);
-  const hasAnimation = collection.id === 'exhibition';
+  const animationSrc = COLLECTION_COVER_ANIMATIONS[collection.id];
+  const hasAnimation = Boolean(animationSrc);
 
   function clearLongPress() {
     window.clearTimeout(longPressTimer.current);
@@ -87,7 +91,7 @@ function CollectionPoster({ active, collection, leavingId, onSelect }) {
 
   return (
     <button
-      className={`museum-poster museum-poster-${collection.id}${leavingId === collection.id ? ' is-selected' : ''}`}
+      className={`museum-poster museum-poster-${collection.id}${hasAnimation ? ' has-cover-animation' : ''}${leavingId === collection.id ? ' is-selected' : ''}`}
       data-collection-id={collection.id}
       onBlur={stopPreview}
       onClick={handleClick}
@@ -126,7 +130,7 @@ function CollectionPoster({ active, collection, leavingId, onSelect }) {
             preload="metadata"
             ref={videoRef}
           >
-            <source src={EXHIBITION_COVER_ANIMATION} type="video/mp4" />
+            <source src={animationSrc} type="video/mp4" />
           </video>
         )}
         <span className="museum-poster-enter">Enter collection</span>

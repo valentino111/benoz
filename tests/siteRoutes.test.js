@@ -89,8 +89,10 @@ test('navigation exposes every restored route and Netlify serves them through th
   assert.match(hub, /aria-label="Return to Ben Oz hero"/);
   assert.match(hub, /href="\/"/);
   assert.match(hub, /onClick=\{\(event\) => onNavigate\?\.\('\/', event\)\}/);
-  assert.match(hub, /collection\.id === 'exhibition'/);
+  assert.match(hub, /COLLECTION_COVER_ANIMATIONS\[collection\.id\]/);
   assert.match(hub, /ExhibitionCoverAnimation\.MP4/);
+  assert.match(hub, /PearlsOfTruthAnimation\.MP4/);
+  assert.match(hub, /has-cover-animation/);
   assert.match(hub, /className=\{`museum-poster-video/);
   assert.match(hub, /\smuted\s/);
   assert.match(hub, /window\.setTimeout\(\(\) => \{/);
@@ -130,7 +132,7 @@ test('portrait mobile hero uses the dedicated mobile crop while desktop keeps th
   assert.match(styles, /object-position:center top/);
 });
 
-test('mobile Exhibition long press suppresses browser copy and callout behavior', async () => {
+test('animated mobile collection covers suppress browser copy and callout behavior', async () => {
   const [hub, styles] = await Promise.all([
     readFile(new URL('../src/components/ProjectHub.jsx', import.meta.url), 'utf8'),
     readFile(new URL('../src/styles.css', import.meta.url), 'utf8'),

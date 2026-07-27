@@ -1326,14 +1326,14 @@ body:not(.en) .main-menu .menu-link{font-size:15px}
   transition:opacity .45s ease;
 }
 .museum-poster-video.is-playing{opacity:1}
-.museum-poster-exhibition,
-.museum-poster-exhibition *{
+.museum-poster.has-cover-animation,
+.museum-poster.has-cover-animation *{
   -webkit-touch-callout:none;
   -webkit-user-select:none;
   user-select:none;
 }
-.museum-poster-exhibition{touch-action:pan-y}
-.museum-poster-exhibition .museum-poster-video{
+.museum-poster.has-cover-animation{touch-action:pan-y}
+.museum-poster.has-cover-animation .museum-poster-video{
   -webkit-user-drag:none;
 }
 .museum-poster-image:after{
