@@ -1164,6 +1164,11 @@ body:not(.en) .main-menu .menu-link{font-size:15px}
   .entry .tagline{font-size:15px}
   .entry .enter{margin-top:24px;padding:13px 22px;flex:none}
 }
+@media(max-width:700px) and (orientation:portrait){
+  .entry-visual-video{
+    object-position:center top;
+  }
+}
 
 /* RC6 — project lobby */
 .project-hub{
@@ -1243,6 +1248,16 @@ body:not(.en) .main-menu .menu-link{font-size:15px}
 .museum-hub-header{
   text-align:center;
   flex:0 0 auto;
+}
+.museum-hub-home{
+  display:block;
+  width:max-content;
+  margin:0 auto;
+  border-radius:50%;
+}
+.museum-hub-home:focus-visible{
+  outline:1px solid rgba(219,195,133,.72);
+  outline-offset:4px;
 }
 .museum-hub-logo{
   display:block;

@@ -52,7 +52,6 @@ export default function EntryScreen({ loading = false, active = true, onEnter })
           <video
             aria-hidden="true"
             className={`entry-visual-video${heroPlaying ? ' is-playing' : ''}`}
-            muted
             onEnded={resetHeroAnimation}
             onError={resetHeroAnimation}
             onPlay={() => setHeroPlaying(true)}
@@ -60,6 +59,11 @@ export default function EntryScreen({ loading = false, active = true, onEnter })
             preload="metadata"
             ref={heroVideoRef}
           >
+            <source
+              media="(max-width: 700px) and (orientation: portrait)"
+              src="/assets/BenOzHero-mobile.mp4?v=2"
+              type="video/mp4"
+            />
             <source src="/assets/BenOzHero.MP4" type="video/mp4" />
           </video>
         </button>

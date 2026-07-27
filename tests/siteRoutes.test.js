@@ -86,6 +86,9 @@ test('navigation exposes every restored route and Netlify serves them through th
     assert.match(header, new RegExp(`href="${href}"`));
   });
   assert.match(hub, /href="\/about"/);
+  assert.match(hub, /aria-label="Return to Ben Oz hero"/);
+  assert.match(hub, /href="\/"/);
+  assert.match(hub, /onClick=\{\(event\) => onNavigate\?\.\('\/', event\)\}/);
   assert.equal(redirects.trim(), '/* /index.html 200');
 });
 
@@ -105,4 +108,17 @@ test('restored Story, Exhibitions, Contact, and Music retain English and Hebrew 
   assert.match(files[1], /Artists of the South/);
   assert.match(files[2], /https:\/\/wa\.me\/972544520987/);
   assert.match(files[3], /Beyond the Canvas/);
+});
+
+test('portrait mobile hero uses the dedicated mobile crop while desktop keeps the original video', async () => {
+  const [entry, styles] = await Promise.all([
+    readFile(new URL('../src/components/EntryScreen.jsx', import.meta.url), 'utf8'),
+    readFile(new URL('../src/styles.css', import.meta.url), 'utf8'),
+  ]);
+
+  assert.match(entry, /media="\(max-width: 700px\) and \(orientation: portrait\)"/);
+  assert.match(entry, /src="\/assets\/BenOzHero-mobile\.mp4\?v=2"/);
+  assert.match(entry, /src="\/assets\/BenOzHero\.MP4"/);
+  assert.match(styles, /@media\(max-width:700px\) and \(orientation:portrait\)/);
+  assert.match(styles, /object-position:center top/);
 });
