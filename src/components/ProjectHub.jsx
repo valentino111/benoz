@@ -86,13 +86,16 @@ function CollectionPoster({ active, collection, leavingId, onSelect }) {
       suppressNextClick.current = false;
       return;
     }
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
     onSelect(collection.id);
   }
 
   return (
-    <button
+    <a
       className={`museum-poster museum-poster-${collection.id}${hasAnimation ? ' has-cover-animation' : ''}${leavingId === collection.id ? ' is-selected' : ''}`}
       data-collection-id={collection.id}
+      href={`/gallery?collection=${encodeURIComponent(collection.slug || collection.id)}`}
       onBlur={stopPreview}
       onClick={handleClick}
       onContextMenu={(event) => {
@@ -115,7 +118,7 @@ function CollectionPoster({ active, collection, leavingId, onSelect }) {
         '--museum-cover': `url(${collection.cover})`,
         '--museum-fallback-cover': `url(${collection.fallbackCover || collection.cover})`,
       }}
-      aria-label={`Enter ${collection.title}`}
+      aria-label={`Enter ${collection.title}${collection.titleHe ? ` — ${collection.titleHe}` : ''}`}
     >
       <span className="museum-poster-image" aria-hidden="true">
         {hasAnimation && (
@@ -141,7 +144,7 @@ function CollectionPoster({ active, collection, leavingId, onSelect }) {
         )}
         <span className="museum-poster-type">{collection.type}</span>
       </span>
-    </button>
+    </a>
   );
 }
 
@@ -190,7 +193,7 @@ export default function ProjectHub({ active = false, collections = [], onNavigat
               width="1254"
             />
           </a>
-          <p className="museum-hub-name">Ben Oz Digital Gallery</p>
+          <h1 className="museum-hub-name">Ben Oz Digital Gallery</h1>
           <p className="museum-hub-label">Collections</p>
         </header>
 

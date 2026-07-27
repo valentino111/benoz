@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://ben-oz-art-v8.netlify.app/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://ben-oz-art-v8.netlify.app/" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ben-oz-art-v8.netlify.app/?lang=he" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ben-oz-art-v8.netlify.app/" />
+  </url>
+  <url>
+    <loc>https://ben-oz-art-v8.netlify.app/?lang=he</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://ben-oz-art-v8.netlify.app/" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ben-oz-art-v8.netlify.app/?lang=he" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ben-oz-art-v8.netlify.app/" />
+  </url>
+  <url>
+    <loc>https://ben-oz-art-v8.netlify.app/gallery</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://ben-oz-art-v8.netlify.app/gallery" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ben-oz-art-v8.netlify.app/gallery?lang=he" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ben-oz-art-v8.netlify.app/gallery" />
+  </url>
+  <url>
+    <loc>https://ben-oz-art-v8.netlify.app/gallery?lang=he</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://ben-oz-art-v8.netlify.app/gallery" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ben-oz-art-v8.netlify.app/gallery?lang=he" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ben-oz-art-v8.netlify.app/gallery" />
+  </url>
+  <url>
+    <loc>https://ben-oz-art-v8.netlify.app/music</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://ben-oz-art-v8.netlify.app/music" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ben-oz-art-v8.netlify.app/music?lang=he" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ben-oz-art-v8.netlify.app/music" />
+  </url>
+  <url>
+    <loc>https://ben-oz-art-v8.netlify.app/music?lang=he</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://ben-oz-art-v8.netlify.app/music" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ben-oz-art-v8.netlify.app/music?lang=he" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ben-oz-art-v8.netlify.app/music" />
+  </url>
+  <url>
+    <loc>https://ben-oz-art-v8.netlify.app/story</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://ben-oz-art-v8.netlify.app/story" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ben-oz-art-v8.netlify.app/story?lang=he" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ben-oz-art-v8.netlify.app/story" />
+  </url>
+  <url>
+    <loc>https://ben-oz-art-v8.netlify.app/story?lang=he</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://ben-oz-art-v8.netlify.app/story" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ben-oz-art-v8.netlify.app/story?lang=he" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ben-oz-art-v8.netlify.app/story" />
+  </url>
+  <url>
+    <loc>https://ben-oz-art-v8.netlify.app/exhibitions</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://ben-oz-art-v8.netlify.app/exhibitions" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ben-oz-art-v8.netlify.app/exhibitions?lang=he" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ben-oz-art-v8.netlify.app/exhibitions" />
+  </url>
+  <url>
+    <loc>https://ben-oz-art-v8.netlify.app/exhibitions?lang=he</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://ben-oz-art-v8.netlify.app/exhibitions" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ben-oz-art-v8.netlify.app/exhibitions?lang=he" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ben-oz-art-v8.netlify.app/exhibitions" />
+  </url>
+  <url>
+    <loc>https://ben-oz-art-v8.netlify.app/contact</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://ben-oz-art-v8.netlify.app/contact" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ben-oz-art-v8.netlify.app/contact?lang=he" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ben-oz-art-v8.netlify.app/contact" />
+  </url>
+  <url>
+    <loc>https://ben-oz-art-v8.netlify.app/contact?lang=he</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://ben-oz-art-v8.netlify.app/contact" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ben-oz-art-v8.netlify.app/contact?lang=he" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ben-oz-art-v8.netlify.app/contact" />
+  </url>
+  <url>
+    <loc>https://ben-oz-art-v8.netlify.app/gallery?collection=exhibition</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://ben-oz-art-v8.netlify.app/gallery?collection=exhibition" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ben-oz-art-v8.netlify.app/gallery?collection=exhibition&amp;lang=he" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ben-oz-art-v8.netlify.app/gallery?collection=exhibition" />
+  </url>
+  <url>
+    <loc>https://ben-oz-art-v8.netlify.app/gallery?collection=exhibition&amp;lang=he</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://ben-oz-art-v8.netlify.app/gallery?collection=exhibition" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ben-oz-art-v8.netlify.app/gallery?collection=exhibition&amp;lang=he" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ben-oz-art-v8.netlify.app/gallery?collection=exhibition" />
+  </url>
+  <url>
+    <loc>https://ben-oz-art-v8.netlify.app/gallery?collection=pearls-of-truth</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://ben-oz-art-v8.netlify.app/gallery?collection=pearls-of-truth" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ben-oz-art-v8.netlify.app/gallery?collection=pearls-of-truth&amp;lang=he" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ben-oz-art-v8.netlify.app/gallery?collection=pearls-of-truth" />
+  </url>
+  <url>
+    <loc>https://ben-oz-art-v8.netlify.app/gallery?collection=pearls-of-truth&amp;lang=he</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://ben-oz-art-v8.netlify.app/gallery?collection=pearls-of-truth" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://ben-oz-art-v8.netlify.app/gallery?collection=pearls-of-truth&amp;lang=he" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ben-oz-art-v8.netlify.app/gallery?collection=pearls-of-truth" />
+  </url>
+</urlset>

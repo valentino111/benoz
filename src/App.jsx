@@ -9,7 +9,9 @@ import ExhibitionsSection from './components/ExhibitionsSection.jsx';
 import ContactSection from './components/ContactSection.jsx';
 import SiteFooter from './components/SiteFooter.jsx';
 import Overlays from './components/Overlays.jsx';
+import SeoHead from './components/SeoHead.jsx';
 import { fallbackContent, loadGalleryContent } from './data/contentService.js';
+import { languageFromLocation } from './seo/seo.js';
 import {
   collectionPageUrl,
   collectionSelectionUrl,
@@ -29,11 +31,20 @@ import {
   VIEW_PAGE,
 } from './data/siteRoutes.js';
 
+const INITIAL_SEO_CONTENT = fallbackContent();
+
 export default function App() {
   const [content, setContent] = useState(null);
   const [view, setView] = useState(VIEW_ENTRY);
   const [selectedCollectionId, setSelectedCollectionId] = useState('');
   const [activePage, setActivePage] = useState('');
+  const [language, setLanguage] = useState(() => languageFromLocation(window.location));
+
+  useEffect(() => {
+    const handleLanguageChange = (event) => setLanguage(event.detail?.language || languageFromLocation(window.location));
+    window.addEventListener('benoz:languagechange', handleLanguageChange);
+    return () => window.removeEventListener('benoz:languagechange', handleLanguageChange);
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -60,6 +71,7 @@ export default function App() {
     function applyLocation({ initial = false } = {}) {
       const route = resolveSiteRoute(content.collections, window.location);
       applyRoute(route);
+      setLanguage(languageFromLocation(window.location));
       if (initial) {
         window.history.replaceState(
           { benOzView: route.view, collectionId: route.collectionId, page: route.page, direct: true },
@@ -180,7 +192,13 @@ export default function App() {
   }
 
   if (!content) {
-    return <div id="reactMigrationRoot" data-react-migration="loading" aria-busy="true"><EntryScreen loading /></div>;
+    const initialRoute = resolveSiteRoute(INITIAL_SEO_CONTENT.collections, window.location);
+    return (
+      <div id="reactMigrationRoot" data-react-migration="loading" aria-busy="true">
+        <SeoHead content={INITIAL_SEO_CONTENT} language={language} route={initialRoute} />
+        <EntryScreen loading />
+      </div>
+    );
   }
 
   const siteActive = view === VIEW_COLLECTION || view === VIEW_PAGE;
@@ -188,6 +206,11 @@ export default function App() {
 
   return (
     <div id="reactMigrationRoot" data-react-migration="loading">
+      <SeoHead
+        content={content}
+        language={language}
+        route={{ view, collectionId: selectedCollectionId, page: activePage }}
+      />
       <EntryScreen active={view === VIEW_ENTRY} onEnter={enterGallery} />
       <ProjectHub
         active={view === VIEW_COLLECTIONS}
@@ -205,10 +228,18 @@ export default function App() {
             songs={content.songs}
           />
         ))}
-        <div hidden={!showSharedSection(PAGE_MUSIC)}><MusicSection songs={content.songs} /></div>
-        <div hidden={!showSharedSection(PAGE_STORY)}><StorySection /></div>
-        <div hidden={!showSharedSection(PAGE_EXHIBITIONS)}><ExhibitionsSection /></div>
-        <div hidden={!showSharedSection(PAGE_CONTACT)}><ContactSection /></div>
+        <div hidden={!showSharedSection(PAGE_MUSIC)}>
+          <MusicSection songs={content.songs} standalone={view === VIEW_PAGE && activePage === PAGE_MUSIC} />
+        </div>
+        <div hidden={!showSharedSection(PAGE_STORY)}>
+          <StorySection standalone={view === VIEW_PAGE && activePage === PAGE_STORY} />
+        </div>
+        <div hidden={!showSharedSection(PAGE_EXHIBITIONS)}>
+          <ExhibitionsSection standalone={view === VIEW_PAGE && activePage === PAGE_EXHIBITIONS} />
+        </div>
+        <div hidden={!showSharedSection(PAGE_CONTACT)}>
+          <ContactSection standalone={view === VIEW_PAGE && activePage === PAGE_CONTACT} />
+        </div>
         <SiteFooter />
       </main>
       <Overlays />

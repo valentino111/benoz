@@ -36,26 +36,35 @@ document.querySelectorAll('img').forEach((img,i)=>{
   img.decoding='async';
 });
 
-// English is the default language on first load.
-document.documentElement.lang='en';
-document.documentElement.dir='ltr';
-
 const entry=document.getElementById('entry');
 const site=document.getElementById('site');
 const projectHub=document.getElementById('projectHub');
 
 const langBtn=document.getElementById('langBtn');
 const originalLangLabel=langBtn.textContent;
+const requestedLanguage=new URLSearchParams(location.search).get('lang')==='he'?'he':'en';
+document.body.classList.toggle('en',requestedLanguage==='en');
+document.documentElement.lang=requestedLanguage;
+document.documentElement.dir=requestedLanguage==='he'?'rtl':'ltr';
+langBtn.textContent=requestedLanguage==='en'?'עברית':'English';
+document.querySelectorAll('[data-alt-en][data-alt-he]').forEach(img=>{
+  img.alt=requestedLanguage==='en'?img.dataset.altEn:img.dataset.altHe;
+});
 langBtn.addEventListener('click',()=>{
   document.body.classList.toggle('en');
   const en=document.body.classList.contains('en');
-  document.documentElement.lang=en?'en':'he';
+  const language=en?'en':'he';
+  document.documentElement.lang=language;
   document.documentElement.dir=en?'ltr':'rtl';
   langBtn.textContent=en?'עברית':'English';
+  const url=new URL(location.href);
+  if(en) url.searchParams.delete('lang'); else url.searchParams.set('lang','he');
+  history.replaceState(history.state,'',`${url.pathname}${url.search}${url.hash}`);
   document.querySelectorAll('[data-alt-en][data-alt-he]').forEach(img=>{
     img.alt=en?img.dataset.altEn:img.dataset.altHe;
   });
   if(lightbox.classList.contains('open')) lbImg.alt=artImages[current]?.alt || '';
+  window.dispatchEvent(new CustomEvent('benoz:languagechange',{detail:{language}}));
 });
 
 const observer=new IntersectionObserver(entries=>{
