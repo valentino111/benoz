@@ -94,7 +94,7 @@ test('navigation exposes every restored route and Netlify serves them through th
   assert.match(hub, /PearlsOfTruthAnimation\.MP4/);
   assert.match(hub, /has-cover-animation/);
   assert.match(hub, /className=\{`museum-poster-video/);
-  assert.match(hub, /\smuted\s/);
+  assert.doesNotMatch(hub, /\smuted\s/);
   assert.match(hub, /window\.setTimeout\(\(\) => \{/);
   assert.match(hub, /\}, 550\)/);
   assert.match(hub, /suppressNextClick/);
