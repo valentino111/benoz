@@ -32,6 +32,7 @@ function ArtworkMedia({ active, isFirstVisibleArtwork, work }) {
   const videoRef = useRef(null);
   const longPressTimer = useRef(null);
   const longPressStart = useRef(null);
+  const longPressReady = useRef(false);
   const suppressNextClick = useRef(false);
   const suppressResetTimer = useRef(null);
   const [previewPlaying, setPreviewPlaying] = useState(false);
@@ -44,6 +45,7 @@ function ArtworkMedia({ active, isFirstVisibleArtwork, work }) {
     window.clearTimeout(longPressTimer.current);
     longPressTimer.current = null;
     longPressStart.current = null;
+    longPressReady.current = false;
   }
 
   function stopPreview() {
@@ -84,13 +86,8 @@ function ArtworkMedia({ active, isFirstVisibleArtwork, work }) {
     clearLongPress();
     longPressStart.current = { x: event.clientX, y: event.clientY };
     longPressTimer.current = window.setTimeout(() => {
-      suppressNextClick.current = true;
-      startPreview();
+      longPressReady.current = true;
       longPressTimer.current = null;
-      window.clearTimeout(suppressResetTimer.current);
-      suppressResetTimer.current = window.setTimeout(() => {
-        suppressNextClick.current = false;
-      }, 900);
     }, 550);
   }
 
@@ -98,6 +95,19 @@ function ArtworkMedia({ active, isFirstVisibleArtwork, work }) {
     const start = longPressStart.current;
     if (!start) return;
     if (Math.hypot(event.clientX - start.x, event.clientY - start.y) > 12) clearLongPress();
+  }
+
+  function handlePointerUp() {
+    const shouldStartPreview = longPressReady.current;
+    clearLongPress();
+    if (!shouldStartPreview) return;
+
+    suppressNextClick.current = true;
+    startPreview();
+    window.clearTimeout(suppressResetTimer.current);
+    suppressResetTimer.current = window.setTimeout(() => {
+      suppressNextClick.current = false;
+    }, 900);
   }
 
   function handlePreviewClick(event) {
@@ -127,7 +137,7 @@ function ArtworkMedia({ active, isFirstVisibleArtwork, work }) {
       }}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
-      onPointerUp={clearLongPress}
+      onPointerUp={handlePointerUp}
     >
       <span className="art-media-frame">
         <img

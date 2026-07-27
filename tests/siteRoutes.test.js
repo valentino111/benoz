@@ -156,6 +156,10 @@ test('artwork previews use the optional Work video without replacing the lightbo
   assert.match(gallery, /className=\{`artwork-preview-video/);
   assert.doesNotMatch(gallery, /\smuted\s/);
   assert.match(gallery, /\}, 550\)/);
+  assert.match(gallery, /longPressReady\.current = true/);
+  assert.match(gallery, /function handlePointerUp\(\)/);
+  assert.match(gallery, /const shouldStartPreview = longPressReady\.current/);
+  assert.match(gallery, /onPointerUp=\{handlePointerUp\}/);
   assert.match(gallery, /data-full-src=\{work\.image\}/);
   assert.match(styles, /\.artwork-preview-video\.is-playing\{opacity:1\}/);
   assert.ok(asset.byteLength > 0);
