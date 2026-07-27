@@ -92,8 +92,10 @@ test('navigation exposes every restored route and Netlify serves them through th
   assert.match(hub, /collection\.id === 'exhibition'/);
   assert.match(hub, /ExhibitionCoverAnimation\.MP4/);
   assert.match(hub, /className=\{`museum-poster-video/);
-  assert.match(hub, /\sloop\s/);
   assert.match(hub, /\smuted\s/);
+  assert.match(hub, /window\.setTimeout\(\(\) => \{/);
+  assert.match(hub, /\}, 550\)/);
+  assert.match(hub, /suppressNextClick/);
   assert.equal(redirects.trim(), '/* /index.html 200');
 });
 

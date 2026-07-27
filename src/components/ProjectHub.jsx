@@ -4,8 +4,17 @@ const EXHIBITION_COVER_ANIMATION = '/assets/ExhibitionCoverAnimation.MP4';
 
 function CollectionPoster({ active, collection, leavingId, onSelect }) {
   const videoRef = useRef(null);
+  const longPressTimer = useRef(null);
+  const longPressStart = useRef(null);
+  const suppressNextClick = useRef(false);
   const [previewPlaying, setPreviewPlaying] = useState(false);
   const hasAnimation = collection.id === 'exhibition';
+
+  function clearLongPress() {
+    window.clearTimeout(longPressTimer.current);
+    longPressTimer.current = null;
+    longPressStart.current = null;
+  }
 
   function stopPreview() {
     const video = videoRef.current;
@@ -25,19 +34,79 @@ function CollectionPoster({ active, collection, leavingId, onSelect }) {
 
   useEffect(() => {
     if (!hasAnimation || !active) {
+      clearLongPress();
       stopPreview();
       return undefined;
     }
 
-    startPreview();
-    return stopPreview;
+    return () => {
+      clearLongPress();
+      stopPreview();
+    };
   }, [active, hasAnimation]);
+
+  function isTouchPreview() {
+    return window.matchMedia('(hover: none), (pointer: coarse)').matches;
+  }
+
+  function handlePointerDown(event) {
+    if (!hasAnimation || !isTouchPreview() || event.button !== 0) return;
+    clearLongPress();
+    longPressStart.current = { x: event.clientX, y: event.clientY };
+    longPressTimer.current = window.setTimeout(() => {
+      suppressNextClick.current = true;
+      startPreview();
+      longPressTimer.current = null;
+    }, 550);
+  }
+
+  function handlePointerMove(event) {
+    const start = longPressStart.current;
+    if (!start) return;
+    if (Math.hypot(event.clientX - start.x, event.clientY - start.y) > 12) clearLongPress();
+  }
+
+  function handlePointerEnd() {
+    clearLongPress();
+  }
+
+  function handlePointerCancel() {
+    clearLongPress();
+    suppressNextClick.current = false;
+    stopPreview();
+  }
+
+  function handleClick(event) {
+    if (suppressNextClick.current) {
+      event.preventDefault();
+      suppressNextClick.current = false;
+      return;
+    }
+    onSelect(collection.id);
+  }
 
   return (
     <button
       className={`museum-poster museum-poster-${collection.id}${leavingId === collection.id ? ' is-selected' : ''}`}
       data-collection-id={collection.id}
-      onClick={() => onSelect(collection.id)}
+      onBlur={stopPreview}
+      onClick={handleClick}
+      onContextMenu={(event) => {
+        if (isTouchPreview()) event.preventDefault();
+      }}
+      onFocus={() => {
+        if (!isTouchPreview()) startPreview();
+      }}
+      onMouseEnter={() => {
+        if (!isTouchPreview()) startPreview();
+      }}
+      onMouseLeave={() => {
+        if (!isTouchPreview()) stopPreview();
+      }}
+      onPointerCancel={handlePointerCancel}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerEnd}
       style={{
         '--museum-cover': `url(${collection.cover})`,
         '--museum-fallback-cover': `url(${collection.fallbackCover || collection.cover})`,
@@ -48,8 +117,8 @@ function CollectionPoster({ active, collection, leavingId, onSelect }) {
         {hasAnimation && (
           <video
             className={`museum-poster-video${previewPlaying ? ' is-playing' : ''}`}
-            loop
             muted
+            onEnded={stopPreview}
             onError={stopPreview}
             onPlay={() => setPreviewPlaying(true)}
             playsInline
