@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import VideoPreviewButton from './VideoPreviewButton.jsx';
 
 function LanguageText({ en, he }) {
   return (
@@ -32,7 +33,6 @@ function ArtworkMedia({ active, isFirstVisibleArtwork, work }) {
   const videoRef = useRef(null);
   const longPressTimer = useRef(null);
   const longPressStart = useRef(null);
-  const longPressReady = useRef(false);
   const suppressNextClick = useRef(false);
   const suppressResetTimer = useRef(null);
   const [previewPlaying, setPreviewPlaying] = useState(false);
@@ -45,7 +45,6 @@ function ArtworkMedia({ active, isFirstVisibleArtwork, work }) {
     window.clearTimeout(longPressTimer.current);
     longPressTimer.current = null;
     longPressStart.current = null;
-    longPressReady.current = false;
   }
 
   function stopPreview() {
@@ -82,32 +81,29 @@ function ArtworkMedia({ active, isFirstVisibleArtwork, work }) {
   }, [active, hasAnimation]);
 
   function handlePointerDown(event) {
-    if (!hasAnimation || !isTouchPreview() || event.button !== 0) return;
+    if (
+      !hasAnimation
+      || !isTouchPreview()
+      || event.button !== 0
+      || event.target.closest('.video-preview-trigger')
+    ) return;
     clearLongPress();
     longPressStart.current = { x: event.clientX, y: event.clientY };
     longPressTimer.current = window.setTimeout(() => {
-      longPressReady.current = true;
+      suppressNextClick.current = true;
+      startPreview();
       longPressTimer.current = null;
-    }, 550);
+      window.clearTimeout(suppressResetTimer.current);
+      suppressResetTimer.current = window.setTimeout(() => {
+        suppressNextClick.current = false;
+      }, 900);
+    }, 150);
   }
 
   function handlePointerMove(event) {
     const start = longPressStart.current;
     if (!start) return;
     if (Math.hypot(event.clientX - start.x, event.clientY - start.y) > 12) clearLongPress();
-  }
-
-  function handlePointerUp() {
-    const shouldStartPreview = longPressReady.current;
-    clearLongPress();
-    if (!shouldStartPreview) return;
-
-    suppressNextClick.current = true;
-    startPreview();
-    window.clearTimeout(suppressResetTimer.current);
-    suppressResetTimer.current = window.setTimeout(() => {
-      suppressNextClick.current = false;
-    }, 900);
   }
 
   function handlePreviewClick(event) {
@@ -137,7 +133,7 @@ function ArtworkMedia({ active, isFirstVisibleArtwork, work }) {
       }}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
-      onPointerUp={handlePointerUp}
+      onPointerUp={clearLongPress}
     >
       <span className="art-media-frame">
         <img
@@ -156,6 +152,8 @@ function ArtworkMedia({ active, isFirstVisibleArtwork, work }) {
           <video
             aria-hidden="true"
             className={`artwork-preview-video${previewPlaying ? ' is-playing' : ''}`}
+            controls={false}
+            disablePictureInPicture
             draggable={false}
             onEnded={stopPreview}
             onError={stopPreview}
@@ -166,6 +164,13 @@ function ArtworkMedia({ active, isFirstVisibleArtwork, work }) {
           >
             <source src={work.video} type="video/mp4" />
           </video>
+        )}
+        {hasAnimation && (
+          <VideoPreviewButton
+            label={`${previewPlaying ? 'Pause' : 'Play'} animation for ${work.titleEn || work.titleHe}`}
+            onActivate={previewPlaying ? stopPreview : startPreview}
+            playing={previewPlaying}
+          />
         )}
       </span>
     </div>

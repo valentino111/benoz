@@ -95,9 +95,21 @@ test('navigation exposes every restored route and Netlify serves them through th
   assert.match(hub, /className=\{`museum-poster-video/);
   assert.doesNotMatch(hub, /\smuted\s/);
   assert.match(hub, /window\.setTimeout\(\(\) => \{/);
-  assert.match(hub, /\}, 550\)/);
+  assert.match(hub, /\}, 150\)/);
   assert.match(hub, /suppressNextClick/);
   assert.equal(redirects.trim(), '/* /index.html 200');
+});
+
+test('the mobile Collections logo is not blocked by the loader and has a stable tap target', async () => {
+  const [app, styles] = await Promise.all([
+    readFile(new URL('../src/App.jsx', import.meta.url), 'utf8'),
+    readFile(new URL('../src/styles.css', import.meta.url), 'utf8'),
+  ]);
+
+  assert.match(app, /if \(view === VIEW_COLLECTIONS\) \{\s*document\.getElementById\('museumLoader'\)\?\.classList\.add\('is-hidden'\)/);
+  assert.match(app, /function enterGallery\(event\) \{\s*event\?\.preventDefault\(\);\s*document\.getElementById\('museumLoader'\)\?\.classList\.add\('is-hidden'\)/);
+  assert.match(styles, /\.museum-hub-home\{\s*position:relative;\s*z-index:3;\s*padding:6px;/);
+  assert.match(styles, /touch-action:manipulation/);
 });
 
 test('restored Story, Exhibitions, Contact, and Music retain English and Hebrew content', async () => {
@@ -144,9 +156,11 @@ test('animated mobile collection covers suppress browser copy and callout behavi
   assert.match(styles, /touch-action:pan-y/);
 });
 
-test('artwork previews use the optional Work video without replacing the lightbox image', async () => {
-  const [gallery, styles, asset] = await Promise.all([
+test('mobile video previews use custom controls and start during a 150ms hold', async () => {
+  const [gallery, hub, button, styles, asset] = await Promise.all([
     readFile(new URL('../src/components/ArtworkGallery.jsx', import.meta.url), 'utf8'),
+    readFile(new URL('../src/components/ProjectHub.jsx', import.meta.url), 'utf8'),
+    readFile(new URL('../src/components/VideoPreviewButton.jsx', import.meta.url), 'utf8'),
     readFile(new URL('../src/styles.css', import.meta.url), 'utf8'),
     readFile(new URL('../public/assets/AJugOfWineAnimate.MP4', import.meta.url)),
   ]);
@@ -155,12 +169,19 @@ test('artwork previews use the optional Work video without replacing the lightbo
   assert.match(gallery, /<source src=\{work\.video\} type="video\/mp4" \/>/);
   assert.match(gallery, /className=\{`artwork-preview-video/);
   assert.doesNotMatch(gallery, /\smuted\s/);
-  assert.match(gallery, /\}, 550\)/);
-  assert.match(gallery, /longPressReady\.current = true/);
-  assert.match(gallery, /function handlePointerUp\(\)/);
-  assert.match(gallery, /const shouldStartPreview = longPressReady\.current/);
-  assert.match(gallery, /onPointerUp=\{handlePointerUp\}/);
+  assert.match(gallery, /startPreview\(\);\s*longPressTimer\.current = null;/);
+  assert.match(gallery, /\}, 150\)/);
+  assert.doesNotMatch(gallery, /longPressReady/);
+  assert.match(gallery, /onPointerUp=\{clearLongPress\}/);
   assert.match(gallery, /data-full-src=\{work\.image\}/);
+  assert.match(gallery, /<VideoPreviewButton/);
+  assert.match(hub, /<VideoPreviewButton/);
+  assert.match(button, /className=\{`video-preview-trigger/);
+  assert.match(button, /aria-pressed=\{playing\}/);
   assert.match(styles, /\.artwork-preview-video\.is-playing\{opacity:1\}/);
+  assert.match(styles, /\.video-preview-trigger\{[\s\S]*?display:none/);
+  assert.match(styles, /@media \(max-width:720px\)\{[\s\S]*?\.video-preview-trigger\{display:grid\}/);
+  assert.match(styles, /border:1px solid rgba\(225,195,116,.82\)/);
+  assert.match(styles, /::-webkit-media-controls-start-playback-button/);
   assert.ok(asset.byteLength > 0);
 });
