@@ -34,7 +34,9 @@ function Track({ song }) {
         </p>
         <audio preload="metadata" src={song.audio}></audio>
         <div className="player">
-          <button aria-label={`Play ${song.titleEn || song.title}`} aria-pressed="false" className="play">▶</button>
+          <button aria-label={`Play ${song.titleEn || song.title}`} aria-pressed="false" className="play">
+            <span aria-hidden="true" className="gold-play-glyph" />
+          </button>
           <input aria-label={`Seek in ${song.titleEn || song.title}`} className="range" max="100" min="0" type="range" defaultValue="0" />
           <span className="time">0:00</span>
         </div>

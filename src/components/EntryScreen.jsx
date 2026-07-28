@@ -42,7 +42,12 @@ export default function EntryScreen({ loading = false, active = true, onEnter })
           <div className="loader-line" />
         </div>
       </div>
-      <section className="entry" hidden={!active} id="entry" onClick={handleEntryInteraction}>
+      <section
+        className={`entry${heroPlaying ? ' is-hero-playing' : ''}`}
+        hidden={!active}
+        id="entry"
+        onClick={handleEntryInteraction}
+      >
         <button
           aria-label="Play Ben Oz hero animation"
           className="entry-visual"
@@ -54,6 +59,7 @@ export default function EntryScreen({ loading = false, active = true, onEnter })
             className={`entry-visual-video${heroPlaying ? ' is-playing' : ''}`}
             onEnded={resetHeroAnimation}
             onError={resetHeroAnimation}
+            onPause={() => setHeroPlaying(false)}
             onPlay={() => setHeroPlaying(true)}
             playsInline
             preload="metadata"
@@ -79,17 +85,19 @@ export default function EntryScreen({ loading = false, active = true, onEnter })
             src="assets/brand/ben-oz-logo-gold-transparent.png"
             width="1254"
           />
-          <div className="role">Artist</div>
-          <div className="tagline">One Idea, Many Forms</div>
-          <button
-            aria-describedby={loading ? 'galleryLoadingStatus' : undefined}
-            className="enter"
-            disabled={loading}
-            id="enterBtn"
-            onClick={onEnter}
-          >
-            Enter Gallery
-          </button>
+          <div className="entry-callout">
+            <div className="role">Artist</div>
+            <div className="tagline">One Idea, Many Forms</div>
+            <button
+              aria-describedby={loading ? 'galleryLoadingStatus' : undefined}
+              className="enter"
+              disabled={loading}
+              id="enterBtn"
+              onClick={onEnter}
+            >
+              Enter Gallery
+            </button>
+          </div>
         </div>
       </section>
       {loading && <p className="sr-only" id="galleryLoadingStatus" role="status">Loading gallery content</p>}

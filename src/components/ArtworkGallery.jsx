@@ -16,7 +16,9 @@ function ArtworkSoundtrack({ song }) {
   return (
     <div className="artwork-soundtrack">
       <a aria-label={`Listen to ${song.title}`} href={`#${song.domId}`}>
-        <span aria-hidden="true" className="soundtrack-icon">▶</span>
+        <span aria-hidden="true" className="soundtrack-icon">
+          <span className="gold-play-glyph" />
+        </span>
         <span>
           <span className="soundtrack-kicker">
             <LanguageText en="Music of the Artwork" he="המוזיקה של היצירה" />

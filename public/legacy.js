@@ -181,18 +181,18 @@ document.querySelectorAll('.track').forEach(track=>{
       audios.forEach(a=>{if(a!==audio)a.pause()});
       const playback=audio.play();
       if(playback) playback.catch(()=>{
-        play.textContent='▶';
+        play.classList.remove('is-playing');
         play.setAttribute('aria-pressed','false');
       });
     }else audio.pause();
   });
   audio.addEventListener('play',()=>{
-    play.textContent='❚❚';
+    play.classList.add('is-playing');
     play.setAttribute('aria-pressed','true');
     play.setAttribute('aria-label',play.getAttribute('aria-label').replace(/^Play /,'Pause '));
   });
   audio.addEventListener('pause',()=>{
-    play.textContent='▶';
+    play.classList.remove('is-playing');
     play.setAttribute('aria-pressed','false');
     play.setAttribute('aria-label',play.getAttribute('aria-label').replace(/^Pause /,'Play '));
   });
@@ -610,7 +610,7 @@ cleanup=()=>{
     const range=track.querySelector('.range');
     const time=track.querySelector('.time');
     if(play){
-      play.textContent='▶';
+      play.classList.remove('is-playing');
       play.setAttribute('aria-pressed','false');
       play.setAttribute('aria-label',play.getAttribute('aria-label').replace(/^Pause /,'Play '));
     }
