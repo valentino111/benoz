@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { formatEdition } from '../data/edition.js';
 import VideoPreviewButton from './VideoPreviewButton.jsx';
 
 function LanguageText({ en, he }) {
@@ -181,6 +182,8 @@ function ArtworkMedia({ active, isFirstVisibleArtwork, work }) {
 
 function Artwork({ active, work, index, total, songsById }) {
   const isFirstVisibleArtwork = active && index === 0;
+  const editionEn = formatEdition(work.editionNumber, work.editionTotal, 'en');
+  const editionHe = formatEdition(work.editionNumber, work.editionTotal, 'he');
   return (
     <article className="artwork fade" data-artwork-slug={work.id} data-collection-id={work.collectionId} data-img={work.image} id={work.id}>
       <ArtworkMedia active={active} isFirstVisibleArtwork={isFirstVisibleArtwork} work={work} />
@@ -199,7 +202,27 @@ function Artwork({ active, work, index, total, songsById }) {
           <div className={`availability${work.available ? '' : ' muted-status'}`}>
             <LanguageText en={work.availabilityEn} he={work.availabilityHe} />
           </div>
-          <button className="details-btn" data-available={String(work.available)} data-price={work.price} data-title-en={work.titleEn} data-title-he={work.titleHe}>
+          {editionEn && editionHe && (
+            <div className="edition-info">
+              <span data-lang="he" lang="he" dir="rtl">
+                {editionHe.label}: <bdi dir="ltr">{editionHe.fraction}</bdi>
+                {editionHe.isUnique && ` (${editionHe.uniqueLabel})`}
+              </span>
+              <span data-lang="en" lang="en" dir="ltr">
+                {editionEn.label}: <bdi dir="ltr">{editionEn.fraction}</bdi>
+                {editionEn.isUnique && ` (${editionEn.uniqueLabel})`}
+              </span>
+            </div>
+          )}
+          <button
+            className="details-btn"
+            data-available={String(work.available)}
+            data-edition-fraction={editionEn?.fraction || ''}
+            data-edition-unique={String(Boolean(editionEn?.isUnique))}
+            data-price={work.price}
+            data-title-en={work.titleEn}
+            data-title-he={work.titleHe}
+          >
             <LanguageText en="View Details" he="פרטים" />
           </button>
         </div>

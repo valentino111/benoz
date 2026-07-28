@@ -1,6 +1,7 @@
 import { collections as localCollections } from './collections.js';
 import { songs as localSongs } from './songs.js';
 import { getCollectionWorks, normalizeCollectionId } from './collectionPages.js';
+import { normalizeEdition } from './edition.js';
 import { optimizedImage } from './imageAssets.js';
 import {
   ContentDataError,
@@ -104,6 +105,7 @@ function normalizeWorks(rows, songs) {
   return rows.map((row, sourceOrder) => {
     const image = optimizedImage(row.image);
     const thumbnail = optimizedImage(row.thumbnail || row.image, 'thumbnail');
+    const edition = normalizeEdition(row.editionNumber, row.editionTotal);
     return {
       id: row.id,
       collectionId: normalizeCollectionId(row.collectionId),
@@ -129,6 +131,8 @@ function normalizeWorks(rows, songs) {
       availabilityHe: row.availabilityHe,
       available: parseBoolean(row.available).value,
       price: String(row.price || '').trim(),
+      editionNumber: edition?.editionNumber ?? null,
+      editionTotal: edition?.editionTotal ?? null,
       songIds: songIdsByWork.get(row.id) || [],
     };
   });
@@ -138,6 +142,7 @@ function normalizeLocalWork(work, sourceOrder) {
   const media = work.media ?? {};
   const image = optimizedImage(work.image || media.image);
   const thumbnail = optimizedImage(work.thumbnail || work.image || media.image, 'thumbnail');
+  const edition = normalizeEdition(work.editionNumber, work.editionTotal);
   return {
     id: work.id,
     collectionId: normalizeCollectionId(work.collectionId),
@@ -163,6 +168,8 @@ function normalizeLocalWork(work, sourceOrder) {
     availabilityHe: work.availabilityHe || '',
     available: Boolean(work.available),
     price: work.price || '',
+    editionNumber: edition?.editionNumber ?? null,
+    editionTotal: edition?.editionTotal ?? null,
     songIds: [...(work.songIds || media.songIds || [])],
   };
 }

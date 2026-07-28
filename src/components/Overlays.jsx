@@ -1,6 +1,51 @@
 import RawMarkup from './RawMarkup.jsx';
+import { getEditionTranslations } from '../data/edition.js';
 
-const markup = "<dialog class=\"details-dialog\" id=\"detailsDialog\">\n<button aria-label=\"Close\" class=\"dialog-close\">×</button>\n<div class=\"dialog-content\">\n<div class=\"dialog-kicker\">\n<span data-lang=\"he\">פרטי היצירה</span><span data-lang=\"en\">Artwork Details</span>\n</div>\n<h2>\n<span data-lang=\"he\" id=\"dialogTitleHe\"></span>\n<span data-lang=\"en\" id=\"dialogTitleEn\"></span>\n</h2>\n<div class=\"dialog-status\" id=\"dialogStatus\"></div>\n<p>\n<span data-lang=\"he\">Fine Art Canvas בגודל 40×60 ס״מ, מתוח על מסגרת עץ ומוכן לתלייה.</span>\n<span data-lang=\"en\">Fine Art Canvas, 40×60 cm, stretched on a wooden frame and ready to hang.</span>\n</p>\n<p>\n<span data-lang=\"he\">העבודה תימסר חתומה על ידי האמן.</span>\n<span data-lang=\"en\">The work will be delivered signed by the artist.</span>\n</p>\n<div class=\"dialog-price\" id=\"dialogPrice\"></div>\n<a class=\"whatsapp\" href=\"https://wa.me/972544520987\" id=\"dialogWhatsapp\" rel=\"noopener\" target=\"_blank\">\n<span data-lang=\"he\">יצירת קשר ב-WhatsApp</span>\n<span data-lang=\"en\">Contact on WhatsApp</span>\n</a>\n</div>\n</dialog><div class=\"lightbox\" id=\"lightbox\">\n<button class=\"close\">×</button>\n<button class=\"prev\">‹</button>\n<div class=\"lb-stage\">\n<img alt=\"\" decoding=\"async\"/>\n</div>\n<div class=\"lb-toolbar\">\n<button aria-label=\"Zoom out\" class=\"zoom-out\">−</button>\n<span class=\"lb-count\">1 / 6</span>\n<button aria-label=\"Zoom in\" class=\"zoom-in\">+</button>\n<button aria-label=\"Reset zoom\" class=\"zoom-reset\">100%</button>\n</div>\n<button class=\"next\">›</button>\n</div>";
+const editionEn = getEditionTranslations('en');
+const editionHe = getEditionTranslations('he');
+const markup = `<dialog class="details-dialog" id="detailsDialog">
+<button aria-label="Close" class="dialog-close">×</button>
+<div class="dialog-content">
+<div class="dialog-kicker">
+<span data-lang="he">פרטי היצירה</span><span data-lang="en">Artwork Details</span>
+</div>
+<h2>
+<span data-lang="he" id="dialogTitleHe"></span>
+<span data-lang="en" id="dialogTitleEn"></span>
+</h2>
+<div class="dialog-status" id="dialogStatus"></div>
+<div class="dialog-edition" hidden id="dialogEdition">
+<div class="dialog-edition-label"><span data-lang="he">${editionHe.label}</span><span data-lang="en">${editionEn.label}</span></div>
+<div class="dialog-edition-value"><bdi dir="ltr" id="dialogEditionFraction"></bdi><span data-lang="he" id="dialogEditionUniqueHe"> (${editionHe.unique})</span><span data-lang="en" id="dialogEditionUniqueEn"> (${editionEn.unique})</span></div>
+</div>
+<p>
+<span data-lang="he">Fine Art Canvas בגודל 40×60 ס״מ, מתוח על מסגרת עץ ומוכן לתלייה.</span>
+<span data-lang="en">Fine Art Canvas, 40×60 cm, stretched on a wooden frame and ready to hang.</span>
+</p>
+<p>
+<span data-lang="he">העבודה תימסר חתומה על ידי האמן.</span>
+<span data-lang="en">The work will be delivered signed by the artist.</span>
+</p>
+<div class="dialog-price" id="dialogPrice"></div>
+<a class="whatsapp" href="https://wa.me/972544520987" id="dialogWhatsapp" rel="noopener" target="_blank">
+<span data-lang="he">יצירת קשר ב-WhatsApp</span>
+<span data-lang="en">Contact on WhatsApp</span>
+</a>
+</div>
+</dialog><div class="lightbox" id="lightbox">
+<button class="close">×</button>
+<button class="prev">‹</button>
+<div class="lb-stage">
+<img alt="" decoding="async"/>
+</div>
+<div class="lb-toolbar">
+<button aria-label="Zoom out" class="zoom-out">−</button>
+<span class="lb-count">1 / 6</span>
+<button aria-label="Zoom in" class="zoom-in">+</button>
+<button aria-label="Reset zoom" class="zoom-reset">100%</button>
+</div>
+<button class="next">›</button>
+</div>`;
 
 export default function Overlays() {
   const accessibleMarkup = markup

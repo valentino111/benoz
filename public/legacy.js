@@ -266,6 +266,10 @@ const dialogTitleHe=document.getElementById('dialogTitleHe');
 const dialogTitleEn=document.getElementById('dialogTitleEn');
 const dialogStatus=document.getElementById('dialogStatus');
 const dialogPrice=document.getElementById('dialogPrice');
+const dialogEdition=document.getElementById('dialogEdition');
+const dialogEditionFraction=document.getElementById('dialogEditionFraction');
+const dialogEditionUniqueHe=document.getElementById('dialogEditionUniqueHe');
+const dialogEditionUniqueEn=document.getElementById('dialogEditionUniqueEn');
 const dialogWhatsapp=document.getElementById('dialogWhatsapp');
 
 document.querySelectorAll('.details-btn').forEach(btn=>btn.addEventListener('click',()=>{
@@ -279,6 +283,13 @@ document.querySelectorAll('.details-btn').forEach(btn=>btn.addEventListener('cli
 
   dialogPrice.textContent=isAvailable ? btn.dataset.price : '';
   dialogPrice.hidden=!isAvailable;
+
+  const editionFraction=btn.dataset.editionFraction || '';
+  const isUniqueEdition=btn.dataset.editionUnique==='true';
+  dialogEditionFraction.textContent=editionFraction;
+  dialogEdition.hidden=!editionFraction;
+  dialogEditionUniqueHe.hidden=!isUniqueEdition;
+  dialogEditionUniqueEn.hidden=!isUniqueEdition;
 
   const message=isAvailable
     ? `Hello, I am interested in "${btn.dataset.titleEn}" (${btn.dataset.price}).`
