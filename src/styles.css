@@ -1441,6 +1441,14 @@ body:not(.en) .main-menu .menu-link{font-size:15px}
 @media (max-width:720px){
   .project-hub-museum{padding:14px 14px 18px}
   .museum-hub-inner{min-height:calc(100svh - 32px)}
+  .museum-hub-home{
+    position:relative;
+    z-index:3;
+    padding:6px;
+    margin:-6px auto;
+    touch-action:manipulation;
+    -webkit-tap-highlight-color:transparent;
+  }
   .museum-hub-logo{width:68px}
   .museum-hub-name{font-size:19px}
   .museum-hub-label{margin-top:5px}

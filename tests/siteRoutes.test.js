@@ -100,6 +100,18 @@ test('navigation exposes every restored route and Netlify serves them through th
   assert.equal(redirects.trim(), '/* /index.html 200');
 });
 
+test('the mobile Collections logo is not blocked by the loader and has a stable tap target', async () => {
+  const [app, styles] = await Promise.all([
+    readFile(new URL('../src/App.jsx', import.meta.url), 'utf8'),
+    readFile(new URL('../src/styles.css', import.meta.url), 'utf8'),
+  ]);
+
+  assert.match(app, /if \(view === VIEW_COLLECTIONS\) \{\s*document\.getElementById\('museumLoader'\)\?\.classList\.add\('is-hidden'\)/);
+  assert.match(app, /function enterGallery\(event\) \{\s*event\?\.preventDefault\(\);\s*document\.getElementById\('museumLoader'\)\?\.classList\.add\('is-hidden'\)/);
+  assert.match(styles, /\.museum-hub-home\{\s*position:relative;\s*z-index:3;\s*padding:6px;/);
+  assert.match(styles, /touch-action:manipulation/);
+});
+
 test('restored Story, Exhibitions, Contact, and Music retain English and Hebrew content', async () => {
   const files = await Promise.all([
     'StorySection.jsx',

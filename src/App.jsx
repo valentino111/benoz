@@ -90,6 +90,9 @@ export default function App() {
   useEffect(() => {
     document.body.classList.toggle('locked', view === VIEW_ENTRY);
     if (view === VIEW_ENTRY) return undefined;
+    if (view === VIEW_COLLECTIONS) {
+      document.getElementById('museumLoader')?.classList.add('is-hidden');
+    }
 
     const frame = window.requestAnimationFrame(() => {
       if (view === VIEW_COLLECTIONS) {
@@ -151,6 +154,7 @@ export default function App() {
 
   function enterGallery(event) {
     event?.preventDefault();
+    document.getElementById('museumLoader')?.classList.add('is-hidden');
     const url = collectionSelectionUrl(window.location, SITE_PATHS.gallery);
     window.history.replaceState(
       { benOzView: VIEW_COLLECTIONS },
