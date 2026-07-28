@@ -170,10 +170,10 @@ document.addEventListener('keydown',e=>{
 });
 
 document.addEventListener('contextmenu',e=>{
-  if(e.target.closest('img,.art-media'))e.preventDefault();
+  if(e.target instanceof Element && e.target.closest('img,.art-media'))e.preventDefault();
 });
 document.addEventListener('dragstart',e=>{
-  if(e.target.closest('img'))e.preventDefault();
+  if(e.target instanceof Element && e.target.closest('img'))e.preventDefault();
 });
 
 
@@ -198,7 +198,10 @@ allArtImages.forEach(img=>{
 
 ['contextmenu','dragstart','selectstart'].forEach(type=>{
   document.addEventListener(type,e=>{
-    if(e.target.closest('.art-media,.image-shield,.lb-stage,.lightbox img')) e.preventDefault();
+    if(
+      e.target instanceof Element
+      && e.target.closest('.art-media,.image-shield,.lb-stage,.lightbox img')
+    ) e.preventDefault();
   },{capture:true});
 });
 
@@ -220,53 +223,6 @@ artworkSections.forEach(section=>{
   prev?.addEventListener('click',()=>collectionSections[index-1]?.scrollIntoView({behavior:'smooth',block:'center'}));
   next?.addEventListener('click',()=>collectionSections[index+1]?.scrollIntoView({behavior:'smooth',block:'center'}));
 });
-
-// Collector details dialog.
-const detailsDialog=document.getElementById('detailsDialog');
-const dialogTitleHe=document.getElementById('dialogTitleHe');
-const dialogTitleEn=document.getElementById('dialogTitleEn');
-const dialogStatus=document.getElementById('dialogStatus');
-const dialogPrice=document.getElementById('dialogPrice');
-const dialogEdition=document.getElementById('dialogEdition');
-const dialogEditionFraction=document.getElementById('dialogEditionFraction');
-const dialogEditionUniqueHe=document.getElementById('dialogEditionUniqueHe');
-const dialogEditionUniqueEn=document.getElementById('dialogEditionUniqueEn');
-const dialogDescription=document.getElementById('dialogDescription');
-const dialogDescriptionHe=document.getElementById('dialogDescriptionHe');
-const dialogDescriptionEn=document.getElementById('dialogDescriptionEn');
-const dialogWhatsapp=document.getElementById('dialogWhatsapp');
-
-document.querySelectorAll('.details-btn').forEach(btn=>btn.addEventListener('click',()=>{
-  const isAvailable=btn.dataset.available==='true';
-  dialogTitleHe.textContent=btn.dataset.titleHe;
-  dialogTitleEn.textContent=btn.dataset.titleEn;
-
-  dialogStatus.innerHTML=isAvailable
-    ? '<span data-lang="he">יצירה מקורית • זמינה</span><span data-lang="en">Original Artwork • Available</span>'
-    : '<span data-lang="he">יצירה מתוך הסדרה • אינה מוצעת למכירה בתערוכה זו</span><span data-lang="en">Work from the Series • Not offered in this exhibition</span>';
-
-  dialogPrice.textContent=isAvailable ? btn.dataset.price : '';
-  dialogPrice.hidden=!isAvailable;
-
-  const editionFraction=btn.dataset.editionFraction || '';
-  const isUniqueEdition=btn.dataset.editionUnique==='true';
-  dialogEditionFraction.textContent=editionFraction;
-  dialogEdition.hidden=!editionFraction;
-  dialogEditionUniqueHe.hidden=!isUniqueEdition;
-  dialogEditionUniqueEn.hidden=!isUniqueEdition;
-  dialogDescriptionHe.textContent=btn.dataset.descriptionHe || '';
-  dialogDescriptionEn.textContent=btn.dataset.descriptionEn || '';
-  dialogDescription.hidden=!dialogDescriptionHe.textContent && !dialogDescriptionEn.textContent;
-
-  const message=isAvailable
-    ? `Hello, I am interested in "${btn.dataset.titleEn}" (${btn.dataset.price}).`
-    : `Hello, I would like more information about "${btn.dataset.titleEn}".`;
-  dialogWhatsapp.href=`https://wa.me/972544520987?text=${encodeURIComponent(message)}`;
-
-  detailsDialog.showModal();
-}));
-detailsDialog.querySelector('.dialog-close').addEventListener('click',()=>detailsDialog.close());
-detailsDialog.addEventListener('click',e=>{if(e.target===detailsDialog)detailsDialog.close()});
 
 // Enhanced lightbox zoom, live percentage, desktop controls and mobile pinch.
 const lbStage=lightbox.querySelector('.lb-stage');
@@ -522,7 +478,6 @@ cleanup=()=>{
   frames.forEach(frame=>window.cancelAnimationFrame(frame));
   observers.forEach(activeObserver=>activeObserver.disconnect());
   closeLightbox();
-  if(detailsDialog.open) detailsDialog.close();
   document.querySelectorAll('video').forEach(video=>video.pause());
   document.querySelectorAll('.image-shield').forEach(shield=>shield.remove());
   document.querySelectorAll('.fade.show').forEach(element=>element.classList.remove('show'));

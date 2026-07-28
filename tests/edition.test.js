@@ -96,22 +96,24 @@ test('Google Sheets Works normalize valid Edition values and null invalid or abs
   )));
 });
 
-test('Edition UI renders in cards and details with an LTR fraction in Hebrew', async () => {
-  const [gallery, overlays, legacy] = await Promise.all([
+test('Edition UI renders in React cards and details with an LTR fraction in Hebrew', async () => {
+  const [gallery, details, legacy] = await Promise.all([
     readFile(new URL('../src/components/ArtworkGallery.jsx', import.meta.url), 'utf8'),
-    readFile(new URL('../src/components/Overlays.jsx', import.meta.url), 'utf8'),
+    readFile(new URL('../src/components/ArtworkDetailsDialog.jsx', import.meta.url), 'utf8'),
     readFile(new URL('../public/legacy.js', import.meta.url), 'utf8'),
   ]);
 
   assert.match(gallery, /className="edition-info"/);
   assert.match(gallery, /<bdi dir="ltr">\{editionHe\.fraction\}<\/bdi>/);
-  assert.match(gallery, /data-edition-fraction=\{editionEn\?\.fraction \|\| ''\}/);
   assert.match(gallery, /available in two editions/i);
-  assert.match(gallery, /data-description-en=\{work\.descriptionEn\}/);
-  assert.match(overlays, /<bdi dir="ltr" id="dialogEditionFraction"><\/bdi>/);
-  assert.match(overlays, /class="dialog-description" hidden id="dialogDescription"/);
-  assert.match(overlays, /\$\{editionHe\.unique\}/);
-  assert.match(overlays, /\$\{editionEn\.unique\}/);
-  assert.match(legacy, /dialogEdition\.hidden=!editionFraction/);
-  assert.match(legacy, /dialogDescriptionEn\.textContent=btn\.dataset\.descriptionEn \|\| ''/);
+  assert.match(gallery, /onClick=\{\(\) => onViewDetails\?\.\(work\)\}/);
+  assert.doesNotMatch(gallery, /data-edition-fraction=/);
+  assert.match(details, /className="dialog-edition"/);
+  assert.match(details, /<bdi dir="ltr">\{editionEn\.fraction\}<\/bdi>/);
+  assert.match(details, /editionHe\.uniqueLabel/);
+  assert.match(details, /editionEn\.uniqueLabel/);
+  assert.match(details, /className="dialog-description"/);
+  assert.doesNotMatch(legacy, /detailsDialog/);
+  assert.doesNotMatch(legacy, /querySelectorAll\('\.details-btn'\)/);
+  assert.doesNotMatch(legacy, /dialogEdition/);
 });
