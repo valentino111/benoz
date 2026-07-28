@@ -36,10 +36,6 @@ document.querySelectorAll('img').forEach((img,i)=>{
   img.decoding='async';
 });
 
-const entry=document.getElementById('entry');
-const site=document.getElementById('site');
-const projectHub=document.getElementById('projectHub');
-
 const langBtn=document.getElementById('langBtn');
 const originalLangLabel=langBtn.textContent;
 const requestedLanguage=new URLSearchParams(location.search).get('lang')==='he'?'he':'en';
@@ -63,7 +59,6 @@ langBtn.addEventListener('click',()=>{
   document.querySelectorAll('[data-alt-en][data-alt-he]').forEach(img=>{
     img.alt=en?img.dataset.altEn:img.dataset.altHe;
   });
-  if(lightbox.classList.contains('open')) lbImg.alt=artImages[current]?.alt || '';
   window.dispatchEvent(new CustomEvent('benoz:languagechange',{detail:{language}}));
 });
 
@@ -72,235 +67,6 @@ const observer=new IntersectionObserver(entries=>{
 },{threshold:.1});
 observers.push(observer);
 document.querySelectorAll('.fade').forEach(el=>observer.observe(el));
-
-const allArtImages=[...document.querySelectorAll('.art-media img')];
-let artImages=allArtImages;
-const lightbox=document.getElementById('lightbox');
-const lbImg=lightbox.querySelector('img');
-let current=0;
-let lightboxOpener=null;
-let lightboxLoadId=0;
-let pendingDetailImage=null;
-const interactionRoots=[entry,site,projectHub].filter(Boolean);
-interactionRoots.forEach(element=>{element.inert=false});
-function cancelPendingDetailImage(){
-  if(!pendingDetailImage) return;
-  pendingDetailImage.onload=null;
-  pendingDetailImage.onerror=null;
-  pendingDetailImage.removeAttribute('src');
-  pendingDetailImage=null;
-}
-function closeLightbox(){
-  const wasOpen=lightbox.classList.contains('open');
-  lightboxLoadId+=1;
-  cancelPendingDetailImage();
-  lightbox.classList.remove('open');
-  lightbox.setAttribute('aria-hidden','true');
-  interactionRoots.forEach(element=>{element.inert=false});
-  document.body.classList.remove('lightbox-open');
-  document.body.classList.toggle('locked',entry?.classList.contains('active'));
-  lbImg.removeAttribute('src');
-  if(wasOpen && lightboxOpener?.isConnected) lightboxOpener.focus?.();
-  lightboxOpener=null;
-}
-function showImage(i){
-  if(!artImages.length) return;
-  cancelPendingDetailImage();
-  const opening=!lightbox.classList.contains('open');
-  if(opening) lightboxOpener=document.activeElement;
-  current=(i+artImages.length)%artImages.length;
-  const sourceImage=artImages[current];
-  const previewSrc=sourceImage.currentSrc || sourceImage.src;
-  const fullSrc=sourceImage.dataset.fullSrc || previewSrc;
-  const loadId=++lightboxLoadId;
-  lbImg.src=previewSrc;
-  lbImg.alt=sourceImage.alt;
-  lightbox.classList.add('open');
-  lightbox.setAttribute('aria-hidden','false');
-  document.body.classList.add('locked','lightbox-open');
-  if(opening) lightbox.querySelector('.close').focus();
-
-  if(fullSrc!==previewSrc){
-    const detailImage=new Image();
-    pendingDetailImage=detailImage;
-    detailImage.decoding='async';
-    let decoded;
-    if(typeof detailImage.decode==='function'){
-      detailImage.src=fullSrc;
-      decoded=detailImage.decode();
-    }else{
-      decoded=new Promise((resolve,reject)=>{
-        detailImage.onload=resolve;
-        detailImage.onerror=reject;
-      });
-      detailImage.src=fullSrc;
-    }
-    decoded.then(()=>{
-      if(loadId===lightboxLoadId && lightbox.classList.contains('open')) lbImg.src=fullSrc;
-      if(pendingDetailImage===detailImage) pendingDetailImage=null;
-    }).catch(()=>{
-      if(pendingDetailImage===detailImage) pendingDetailImage=null;
-    });
-  }
-}
-function openArtworkImage(img){
-  const collectionId=img.closest('.artwork')?.dataset.collectionId;
-  artImages=allArtImages.filter(candidate=>candidate.closest('.artwork')?.dataset.collectionId===collectionId);
-  showImage(artImages.indexOf(img));
-}
-allArtImages.forEach(img=>img.addEventListener('click',()=>openArtworkImage(img)));
-lightbox.querySelector('.close').addEventListener('click',closeLightbox);
-lightbox.querySelector('.prev').addEventListener('click',e=>{e.stopPropagation();showImage(current-1)});
-lightbox.querySelector('.next').addEventListener('click',e=>{e.stopPropagation();showImage(current+1)});
-lightbox.addEventListener('click',e=>{if(e.target===lightbox)closeLightbox()});
-window.addEventListener('pagehide',closeLightbox);
-window.addEventListener('popstate',closeLightbox);
-document.addEventListener('keydown',e=>{
-  if(!lightbox.classList.contains('open'))return;
-  if(e.key==='Escape') closeLightbox();
-  if(e.key==='ArrowLeft')showImage(current-1);
-  if(e.key==='ArrowRight')showImage(current+1);
-  if(e.key==='Tab'){
-    const focusable=[...lightbox.querySelectorAll('button:not([disabled]),[href],input:not([disabled]),[tabindex]:not([tabindex="-1"])')];
-    const first=focusable[0];
-    const last=focusable[focusable.length-1];
-    if(e.shiftKey && document.activeElement===first){e.preventDefault();last?.focus()}
-    else if(!e.shiftKey && document.activeElement===last){e.preventDefault();first?.focus()}
-  }
-});
-
-document.addEventListener('contextmenu',e=>{
-  if(e.target instanceof Element && e.target.closest('img,.art-media'))e.preventDefault();
-});
-document.addEventListener('dragstart',e=>{
-  if(e.target instanceof Element && e.target.closest('img'))e.preventDefault();
-});
-
-
-
-// RC12: discourage iOS Safari long-press saving while preserving normal taps.
-allArtImages.forEach(img=>{
-  const media=img.closest('.art-media');
-  if(!media || media.querySelector('.image-shield')) return;
-  img.setAttribute('draggable','false');
-  const shield=document.createElement('span');
-  shield.className='image-shield';
-  shield.setAttribute('aria-label',img.alt || 'View artwork');
-  shield.setAttribute('role','button');
-  shield.tabIndex=0;
-  shield.addEventListener('click',()=>openArtworkImage(img));
-  shield.addEventListener('keydown',e=>{
-    if(e.key==='Enter' || e.key===' '){e.preventDefault();openArtworkImage(img)}
-  });
-  shield.addEventListener('contextmenu',e=>e.preventDefault());
-  media.appendChild(shield);
-});
-
-['contextmenu','dragstart','selectstart'].forEach(type=>{
-  document.addEventListener(type,e=>{
-    if(
-      e.target instanceof Element
-      && e.target.closest('.art-media,.image-shield,.lb-stage,.lightbox img')
-    ) e.preventDefault();
-  },{capture:true});
-});
-
-// Enhanced lightbox zoom, live percentage, desktop controls and mobile pinch.
-const lbStage=lightbox.querySelector('.lb-stage');
-const lbCount=lightbox.querySelector('.lb-count');
-const zoomLabel=lightbox.querySelector('.zoom-reset');
-let zoom=1;
-let startX=0;
-let pinchStartDistance=0;
-let pinchStartZoom=1;
-let pinching=false;
-
-function touchDistance(touches){
-  const dx=touches[0].clientX-touches[1].clientX;
-  const dy=touches[0].clientY-touches[1].clientY;
-  return Math.hypot(dx,dy);
-}
-function applyZoom(){
-  zoom=Math.max(1,Math.min(4,zoom));
-  lbImg.style.transform=`scale(${zoom})`;
-  lbImg.style.cursor=zoom>1?'zoom-out':'zoom-in';
-  zoomLabel.textContent=`${Math.round(zoom*100)}%`;
-}
-function resetZoom(){
-  zoom=1;
-  applyZoom();
-}
-const originalShowImage=showImage;
-showImage=function(i){
-  originalShowImage(i);
-  resetZoom();
-  lbCount.textContent=`${current+1} / ${artImages.length}`;
-}
-lightbox.querySelector('.zoom-in').addEventListener('click',()=>{
-  zoom=Math.min(4,zoom+.25);
-  applyZoom();
-});
-lightbox.querySelector('.zoom-out').addEventListener('click',()=>{
-  zoom=Math.max(1,zoom-.25);
-  applyZoom();
-});
-zoomLabel.addEventListener('click',resetZoom);
-lbImg.addEventListener('dblclick',()=>{
-  zoom=zoom===1?2:1;
-  applyZoom();
-});
-lbStage.addEventListener('wheel',e=>{
-  e.preventDefault();
-  zoom=Math.max(1,Math.min(4,zoom+(e.deltaY<0?.15:-.15)));
-  applyZoom();
-},{passive:false});
-
-lbStage.addEventListener('touchstart',e=>{
-  if(e.touches.length===2){
-    pinching=true;
-    pinchStartDistance=touchDistance(e.touches);
-    pinchStartZoom=zoom;
-    e.preventDefault();
-    return;
-  }
-  if(e.touches.length===1){
-    pinching=false;
-    startX=e.touches[0].clientX;
-  }
-},{passive:false});
-
-lbStage.addEventListener('touchmove',e=>{
-  if(e.touches.length===2){
-    if(!pinching){
-      pinching=true;
-      pinchStartDistance=touchDistance(e.touches);
-      pinchStartZoom=zoom;
-    }
-    const distance=touchDistance(e.touches);
-    if(pinchStartDistance>0){
-      zoom=pinchStartZoom*(distance/pinchStartDistance);
-      applyZoom();
-    }
-    e.preventDefault();
-  }
-},{passive:false});
-
-lbStage.addEventListener('touchend',e=>{
-  if(pinching){
-    if(e.touches.length<2) pinching=false;
-    return;
-  }
-  if(e.changedTouches.length!==1 || zoom>1.01) return;
-  const dx=e.changedTouches[0].clientX-startX;
-  if(Math.abs(dx)>55){
-    dx<0?showImage(current+1):showImage(current-1);
-  }
-},{passive:true});
-lbStage.addEventListener('touchcancel',()=>{pinching=false});
-lbStage.addEventListener('click',e=>{
-  if(e.target===lbStage && zoom<=1.01) closeLightbox();
-});
-
 
 // Subtle pointer parallax for the gallery opening.
 const parallaxItems=[...document.querySelectorAll('.parallax-item')];
@@ -413,16 +179,10 @@ cleanup=()=>{
   timers.forEach(timer=>window.clearTimeout(timer));
   frames.forEach(frame=>window.cancelAnimationFrame(frame));
   observers.forEach(activeObserver=>activeObserver.disconnect());
-  closeLightbox();
   document.querySelectorAll('video').forEach(video=>video.pause());
-  document.querySelectorAll('.image-shield').forEach(shield=>shield.remove());
   document.querySelectorAll('.fade.show').forEach(element=>element.classList.remove('show'));
   closeMobileMenu();
   parallaxItems.forEach(element=>{element.style.transform=''});
-  lbImg.removeAttribute('src');
-  lbImg.removeAttribute('alt');
-  lbImg.style.transform='';
-  lbImg.style.cursor='';
   langBtn.textContent=originalLangLabel;
   soundBtn.textContent=originalSoundLabel;
   soundBtn.classList.remove('is-on');
@@ -443,7 +203,6 @@ cleanup=()=>{
   timers.forEach(timer=>window.clearTimeout(timer));
   frames.forEach(frame=>window.cancelAnimationFrame(frame));
   observers.forEach(activeObserver=>activeObserver.disconnect());
-  document.querySelectorAll('.image-shield').forEach(shield=>shield.remove());
   originalImages.forEach(({img,alt,loading,decoding,draggable})=>{
     if(alt===null) img.removeAttribute('alt'); else img.setAttribute('alt',alt);
     if(loading===null) img.removeAttribute('loading'); else img.setAttribute('loading',loading);

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import EntryScreen from './components/EntryScreen.jsx';
 import ProjectHub from './components/ProjectHub.jsx';
 import SiteHeader from './components/SiteHeader.jsx';
@@ -39,6 +39,7 @@ export default function App() {
   const [selectedCollectionId, setSelectedCollectionId] = useState('');
   const [activePage, setActivePage] = useState('');
   const [detailsWork, setDetailsWork] = useState(null);
+  const [lightboxSelection, setLightboxSelection] = useState(null);
   const [language, setLanguage] = useState(() => languageFromLocation(window.location));
 
   useEffect(() => {
@@ -118,6 +119,7 @@ export default function App() {
 
   useEffect(() => {
     setDetailsWork(null);
+    setLightboxSelection(null);
   }, [activePage, selectedCollectionId, view]);
 
   useEffect(() => {
@@ -200,6 +202,14 @@ export default function App() {
     setView(route.view);
   }
 
+  const closeDetails = useCallback(() => setDetailsWork(null), []);
+  const closeLightbox = useCallback(() => setLightboxSelection(null), []);
+  const selectLightbox = useCallback((index) => {
+    setLightboxSelection((current) => (
+      current ? { ...current, index } : current
+    ));
+  }, []);
+
   if (!content) {
     const initialRoute = resolveSiteRoute(INITIAL_SEO_CONTENT.collections, window.location);
     return (
@@ -234,6 +244,10 @@ export default function App() {
             active={view === VIEW_COLLECTION && collection.id === selectedCollectionId}
             collection={collection}
             key={collection.id}
+            language={language}
+            onOpenArtwork={(works, index, opener) => {
+              setLightboxSelection({ index, opener, works });
+            }}
             onViewDetails={setDetailsWork}
             songs={content.songs}
           />
@@ -252,7 +266,14 @@ export default function App() {
         </div>
         <SiteFooter />
       </main>
-      <Overlays detailsWork={detailsWork} onCloseDetails={() => setDetailsWork(null)} />
+      <Overlays
+        detailsWork={detailsWork}
+        language={language}
+        lightboxSelection={lightboxSelection}
+        onCloseDetails={closeDetails}
+        onCloseLightbox={closeLightbox}
+        onSelectLightbox={selectLightbox}
+      />
     </div>
   );
 }

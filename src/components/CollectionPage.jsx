@@ -4,6 +4,8 @@ import HeroSection from './HeroSection.jsx';
 export default function CollectionPage({
   active,
   collection,
+  language,
+  onOpenArtwork,
   onViewDetails,
   songs,
 }) {
@@ -17,6 +19,8 @@ export default function CollectionPage({
       <HeroSection active={active} collection={collection} />
       <ArtworkGallery
         active={active}
+        language={language}
+        onOpenArtwork={onOpenArtwork}
         onViewDetails={onViewDetails}
         songs={songs}
         works={collection.works}
