@@ -2,6 +2,7 @@ export const exhibitionWorks = [
   {
     id: 'human-creator',
     collectionId: 'exhibition',
+    order: 10,
     titleEn: 'The Human Creator',
     titleHe: 'האדם היוצר',
     image: 'assets/human-creator.jpg',
@@ -21,6 +22,7 @@ export const exhibitionWorks = [
   {
     id: 'gaze-of-compassion',
     collectionId: 'exhibition',
+    order: 20,
     titleEn: 'A Gaze of Compassion',
     titleHe: 'מבט של חמלה',
     image: 'assets/compassion.jpg',
@@ -40,6 +42,7 @@ export const exhibitionWorks = [
   {
     id: 'inner-light',
     collectionId: 'exhibition',
+    order: 30,
     titleEn: 'The Light Within',
     titleHe: 'האור שבפנים',
     image: 'assets/inner-light.jpg',
@@ -59,6 +62,7 @@ export const exhibitionWorks = [
   {
     id: 'hidden-harmony',
     collectionId: 'exhibition',
+    order: 40,
     titleEn: 'The Hidden Harmony',
     titleHe: 'ההרמוניה הנסתרת',
     image: 'assets/hidden-harmony.jpg',
@@ -78,6 +82,7 @@ export const exhibitionWorks = [
   {
     id: 'fragility-of-love',
     collectionId: 'exhibition',
+    order: 50,
     titleEn: 'The Fragility of Love',
     titleHe: 'שבריריות האהבה',
     image: 'assets/fragility-of-love.jpg',
@@ -97,6 +102,7 @@ export const exhibitionWorks = [
   {
     id: 'gate-to-infinity',
     collectionId: 'exhibition',
+    order: 60,
     titleEn: 'The Gate to Infinity',
     titleHe: 'השער אל האינסוף',
     image: 'assets/gate-to-infinity.jpg',

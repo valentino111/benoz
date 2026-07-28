@@ -92,6 +92,46 @@ function normalizeSongs(rows) {
   });
 }
 
+function normalizeWork(work, {
+  available = false,
+  order,
+  songIds = [],
+  sourceOrder = 0,
+} = {}) {
+  const image = optimizedImage(work.image);
+  const thumbnail = optimizedImage(work.thumbnail || work.image, 'thumbnail');
+  const edition = normalizeEdition(work.editionNumber, work.editionTotal);
+  return {
+    id: work.id,
+    collectionId: normalizeCollectionId(work.collectionId),
+    order,
+    sourceOrder,
+    titleEn: work.titleEn,
+    titleHe: work.titleHe,
+    image: image.src,
+    imageWidth: image.width,
+    imageHeight: image.height,
+    video: work.video || '',
+    thumbnail: thumbnail.src,
+    thumbnailWidth: thumbnail.width,
+    thumbnailHeight: thumbnail.height,
+    statusEn: work.statusEn || '',
+    statusHe: work.statusHe || '',
+    meta: work.meta || '',
+    descriptionEn: work.descriptionEn || '',
+    descriptionHe: work.descriptionHe || '',
+    collectorLabelEn: work.collectorLabelEn || '',
+    collectorLabelHe: work.collectorLabelHe || '',
+    availabilityEn: work.availabilityEn || '',
+    availabilityHe: work.availabilityHe || '',
+    available,
+    price: String(work.price || '').trim(),
+    editionNumber: edition?.editionNumber ?? null,
+    editionTotal: edition?.editionTotal ?? null,
+    songIds: [...songIds],
+  };
+}
+
 function normalizeWorks(rows, songs) {
   const songIdsByWork = new Map();
   songs.forEach((song) => {
@@ -102,76 +142,29 @@ function normalizeWorks(rows, songs) {
     });
   });
 
-  return rows.map((row, sourceOrder) => {
-    const image = optimizedImage(row.image);
-    const thumbnail = optimizedImage(row.thumbnail || row.image, 'thumbnail');
-    const edition = normalizeEdition(row.editionNumber, row.editionTotal);
-    return {
-      id: row.id,
-      collectionId: normalizeCollectionId(row.collectionId),
-      order: Number(row.sort),
-      sourceOrder,
-      titleEn: row.titleEn,
-      titleHe: row.titleHe,
-      image: image.src,
-      imageWidth: image.width,
-      imageHeight: image.height,
-      video: assetPath(row.video),
-      thumbnail: thumbnail.src,
-      thumbnailWidth: thumbnail.width,
-      thumbnailHeight: thumbnail.height,
-      statusEn: row.statusEn,
-      statusHe: row.statusHe,
-      meta: row.meta,
-      descriptionEn: row.descriptionEn,
-      descriptionHe: row.descriptionHe,
-      collectorLabelEn: row.collectorLabelEn,
-      collectorLabelHe: row.collectorLabelHe,
-      availabilityEn: row.availabilityEn,
-      availabilityHe: row.availabilityHe,
-      available: parseBoolean(row.available).value,
-      price: String(row.price || '').trim(),
-      editionNumber: edition?.editionNumber ?? null,
-      editionTotal: edition?.editionTotal ?? null,
-      songIds: songIdsByWork.get(row.id) || [],
-    };
-  });
+  return rows.map((row, sourceOrder) => (
+    normalizeWork(
+      { ...row, video: assetPath(row.video) },
+      {
+        available: parseBoolean(row.available).value,
+        order: Number(row.sort),
+        songIds: songIdsByWork.get(row.id) || [],
+        sourceOrder,
+      },
+    )
+  ));
 }
 
 function normalizeLocalWork(work, sourceOrder) {
-  const media = work.media ?? {};
-  const image = optimizedImage(work.image || media.image);
-  const thumbnail = optimizedImage(work.thumbnail || work.image || media.image, 'thumbnail');
-  const edition = normalizeEdition(work.editionNumber, work.editionTotal);
-  return {
-    id: work.id,
-    collectionId: normalizeCollectionId(work.collectionId),
-    order: Number.isFinite(Number(work.order)) ? Number(work.order) : (sourceOrder + 1) * 10,
-    sourceOrder,
-    titleEn: work.titleEn,
-    titleHe: work.titleHe,
-    image: image.src,
-    imageWidth: image.width,
-    imageHeight: image.height,
-    video: work.video || media.animation || '',
-    thumbnail: thumbnail.src,
-    thumbnailWidth: thumbnail.width,
-    thumbnailHeight: thumbnail.height,
-    statusEn: work.statusEn || '',
-    statusHe: work.statusHe || '',
-    meta: work.meta || '',
-    descriptionEn: work.descriptionEn || work.textEn || '',
-    descriptionHe: work.descriptionHe || work.textHe || '',
-    collectorLabelEn: work.collectorLabelEn || '',
-    collectorLabelHe: work.collectorLabelHe || '',
-    availabilityEn: work.availabilityEn || '',
-    availabilityHe: work.availabilityHe || '',
-    available: Boolean(work.available),
-    price: work.price || '',
-    editionNumber: edition?.editionNumber ?? null,
-    editionTotal: edition?.editionTotal ?? null,
-    songIds: [...(work.songIds || media.songIds || [])],
-  };
+  return normalizeWork(
+    work,
+    {
+      available: Boolean(work.available),
+      order: Number.isFinite(Number(work.order)) ? Number(work.order) : (sourceOrder + 1) * 10,
+      sourceOrder,
+      songIds: work.songIds || [],
+    },
+  );
 }
 
 export function fallbackContent() {

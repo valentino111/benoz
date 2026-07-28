@@ -79,6 +79,5 @@ Media is local; Google Sheets should normally store filenames rather than full l
 
 - Global styles are contained in one large stylesheet with historical override sections.
 - There is no router, state library, TypeScript configuration, or explicit Vite configuration; focused content and collection-page tests use Node's test runner.
-- Pearls of Truth local works use a different shape from normalized remote Works.
 
 These constraints should be addressed incrementally through [ROADMAP.md](ROADMAP.md), without redesigning the gallery.

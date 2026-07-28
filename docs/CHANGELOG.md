@@ -20,6 +20,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) conv
 - React now owns all runtime interaction behavior, including navigation, overlays, media controls, header controls, loader, reveal, and parallax.
 - Removed the legacy imperative browser runtime.
 - Replaced the remaining static HTML injection wrapper with direct JSX components.
+- Unified bundled and Google Sheets Works through one canonical runtime normalizer.
 
 ### Planned
 

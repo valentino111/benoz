@@ -31,6 +31,8 @@ Common fields include:
 - availability labels, boolean availability, and optional price;
 - related Song IDs derived from Song relationships.
 
+Bundled fallback Works use this same source shape directly. Both fallback and Google Sheets Works pass through the same runtime normalizer; compatibility-only `textEn`, `textHe`, and nested `media` fields are not supported.
+
 `id` identifies a Work and must remain globally unique. The Sheets `sort` value becomes normalized `order` and controls presentation only within the Work's own Collection. The runtime filters by `collectionId` before sorting numerically by `order`; equal values retain source-row order, with Work ID as the final deterministic tie-breaker. Reusing values such as `10`, `20`, and `30` in separate Collections is expected.
 
 The Exhibition series currently contains six Works. Four are exhibition sale works; `fragility-of-love` and `gate-to-infinity` belong to the complete cycle but were not among the four physical exhibition sale works.
