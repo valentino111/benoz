@@ -32,7 +32,13 @@ function ArtworkSoundtrack({ song }) {
   );
 }
 
-function ArtworkMedia({ active, isFirstVisibleArtwork, work }) {
+function ArtworkMedia({
+  active,
+  isFirstVisibleArtwork,
+  language,
+  onOpen,
+  work,
+}) {
   const videoRef = useRef(null);
   const longPressTimer = useRef(null);
   const longPressStart = useRef(null);
@@ -43,6 +49,7 @@ function ArtworkMedia({ active, isFirstVisibleArtwork, work }) {
   const previewWidth = work.thumbnailWidth || work.imageWidth;
   const previewHeight = work.thumbnailHeight || work.imageHeight;
   const hasAnimation = Boolean(work.video);
+  const imageAlt = language === 'he' ? work.titleHe : work.titleEn;
 
   function clearLongPress() {
     window.clearTimeout(longPressTimer.current);
@@ -140,7 +147,7 @@ function ArtworkMedia({ active, isFirstVisibleArtwork, work }) {
     >
       <span className="art-media-frame">
         <img
-          alt={work.titleEn || work.titleHe}
+          alt={imageAlt}
           data-alt-en={work.titleEn}
           data-alt-he={work.titleHe}
           data-full-src={work.image}
@@ -148,6 +155,7 @@ function ArtworkMedia({ active, isFirstVisibleArtwork, work }) {
           fetchPriority={isFirstVisibleArtwork ? 'high' : 'auto'}
           height={previewHeight}
           loading={isFirstVisibleArtwork ? 'eager' : 'lazy'}
+          onClick={(event) => onOpen(event.currentTarget)}
           src={previewImage}
           width={previewWidth}
         />
@@ -175,6 +183,19 @@ function ArtworkMedia({ active, isFirstVisibleArtwork, work }) {
             playing={previewPlaying}
           />
         )}
+        <span
+          aria-label={imageAlt || 'View artwork'}
+          className="image-shield"
+          onClick={(event) => onOpen(event.currentTarget)}
+          onContextMenu={(event) => event.preventDefault()}
+          onKeyDown={(event) => {
+            if (event.key !== 'Enter' && event.key !== ' ') return;
+            event.preventDefault();
+            onOpen(event.currentTarget);
+          }}
+          role="button"
+          tabIndex="0"
+        />
       </span>
     </div>
   );
@@ -184,7 +205,9 @@ function Artwork({
   active,
   artworkRef,
   index,
+  language,
   onNavigate,
+  onOpenArtwork,
   onViewDetails,
   songsById,
   total,
@@ -227,7 +250,13 @@ function Artwork({
       }}
       ref={artworkRef}
     >
-      <ArtworkMedia active={active} isFirstVisibleArtwork={isFirstVisibleArtwork} work={work} />
+      <ArtworkMedia
+        active={active}
+        isFirstVisibleArtwork={isFirstVisibleArtwork}
+        language={language}
+        onOpen={(opener) => onOpenArtwork(index, opener)}
+        work={work}
+      />
 
       <div className="art-copy">
         <span className="status"><LanguageText en={work.statusEn} he={work.statusHe} /></span>
@@ -292,6 +321,8 @@ function Artwork({
 
 export default function ArtworkGallery({
   active = false,
+  language = 'en',
+  onOpenArtwork,
   onViewDetails,
   songs = [],
   works = [],
@@ -386,10 +417,14 @@ export default function ArtworkGallery({
           if (element) artworkElements.current.set(work.id, element);
           else artworkElements.current.delete(work.id);
         }}
+        language={language}
         work={work}
         index={index}
         onNavigate={(targetIndex, options) => {
           navigateToArtwork(collectionWorks, targetIndex, options);
+        }}
+        onOpenArtwork={(targetIndex, opener) => {
+          onOpenArtwork?.(collectionWorks, targetIndex, opener);
         }}
         onViewDetails={onViewDetails}
         total={collectionWorks.length}
