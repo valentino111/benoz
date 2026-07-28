@@ -56,9 +56,3 @@ export function sitePageUrl(path, locationLike = {}) {
   url.hash = '';
   return `${url.pathname}${url.search}${url.hash}`;
 }
-
-export function revealRoutePage(documentLike, page) {
-  const element = page ? documentLike?.getElementById?.(page) : null;
-  element?.classList?.add('show');
-  return Boolean(element);
-}

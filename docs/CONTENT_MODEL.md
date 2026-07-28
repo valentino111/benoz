@@ -13,6 +13,8 @@ Current collection IDs:
 
 Core fields include `id`, English and Hebrew titles, optional English and Hebrew subtitles, introductory descriptions, poster media, slug, enabled state, and sort order. Published rows normalize `enabled` to `true` and Sheets `sort` to numeric `order`. The normalized model also carries presentation fields such as number, type, card cover, page anchor, and nested works.
 
+Bundled fallback Collections use these same source field names (`titleEn`, `descriptionEn`, `posterImage`, and `sort`) and pass through the same runtime normalizer as Google Sheets Collections.
+
 Every enabled Collection opens as an independent page: a reusable collection introduction is followed by only the Works whose trimmed `collectionId` matches that Collection. Collection cards use each Collection's `cover`; all collection introductions use the shared Ben Oz brand logo at `/assets/brand/ben-oz-logo-gold-transparent.png`. The Exhibition fallback retains its established “The Hidden Geometry of the Soul” subtitle, bilingual manifesto, and series note.
 
 Sheets `descriptionEn` and `descriptionHe` are the exact collection-introduction fields. Remote non-empty text overrides local fallback text; empty remote text preserves a valid localized fallback. English is never substituted into the Hebrew presentation. Pearls of Truth currently has an English fallback description but no approved Hebrew fallback, so its live `descriptionHe` cell must be filled before Hebrew introductory text can appear.
@@ -30,6 +32,8 @@ Common fields include:
 - format or metadata text;
 - availability labels, boolean availability, and optional price;
 - related Song IDs derived from Song relationships.
+
+Bundled fallback Works use this same source shape directly. Both fallback and Google Sheets Works pass through the same runtime normalizer; compatibility-only `textEn`, `textHe`, nested `media`, and source-level Work `songIds` fields are not supported.
 
 `id` identifies a Work and must remain globally unique. The Sheets `sort` value becomes normalized `order` and controls presentation only within the Work's own Collection. The runtime filters by `collectionId` before sorting numerically by `order`; equal values retain source-row order, with Work ID as the final deterministic tie-breaker. Reusing values such as `10`, `20`, and `30` in separate Collections is expected.
 
@@ -49,6 +53,8 @@ Common fields include:
 - comma-separated `relatedWorkIds` in Google Sheets.
 
 Current Song IDs are `lihyot` and `yofi`. Only one audio track should play at a time.
+
+Bundled fallback Songs use the same `relatedWorkIds` relationship source as Google Sheets. The loader derives runtime Work `songIds` from Songs for both sources, preventing duplicate relationship definitions from drifting apart.
 
 ## Relationships
 

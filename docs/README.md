@@ -9,7 +9,7 @@ Start with [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) for the authoritative projec
 - [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) — canonical project identity, content facts, media relationships, and current priorities.
 - [VISION.md](VISION.md) — creative philosophy and long-term direction.
 - [ROADMAP.md](ROADMAP.md) — current status and staged path toward Release 1.0 and beyond.
-- [ARCHITECTURE.md](ARCHITECTURE.md) — current React/Vite structure, data flow, legacy interaction layer, and assets.
+- [ARCHITECTURE.md](ARCHITECTURE.md) — current React/Vite structure, data flow, interaction ownership, and assets.
 - [CONTENT_MODEL.md](CONTENT_MODEL.md) — Collections, Works, Songs, IDs, relationships, and media conventions.
 - [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) — visual tokens, layout principles, interaction restraint, mobile, and accessibility.
 - [GOOGLE_SHEETS.md](GOOGLE_SHEETS.md) — spreadsheet schema, synchronization flow, validation expectations, and fallback behavior.

@@ -42,7 +42,7 @@ The current project is a React application built with Vite. React renders the pa
 - `SiteFooter`
 - `Overlays`
 
-Some components return JSX directly. Others use `RawMarkup` to inject constant local HTML. This is current behavior, not the preferred long-term architecture.
+All page sections render JSX directly. Spreadsheet text is normalized as plain text and is never injected as HTML.
 
 ## Data flow
 
@@ -79,6 +79,5 @@ Media is local; Google Sheets should normally store filenames rather than full l
 
 - Global styles are contained in one large stylesheet with historical override sections.
 - There is no router, state library, TypeScript configuration, or explicit Vite configuration; focused content and collection-page tests use Node's test runner.
-- Pearls of Truth local works use a different shape from normalized remote Works.
 
 These constraints should be addressed incrementally through [ROADMAP.md](ROADMAP.md), without redesigning the gallery.

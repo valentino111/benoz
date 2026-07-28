@@ -18,6 +18,7 @@ import {
   COLLECTION_HERO_LOGO,
   getCollectionHeroModel,
 } from '../src/data/collectionPresentation.js';
+import { collections as localCollections } from '../src/data/collections.js';
 
 const baseCollections = [
   { id: 'exhibition', slug: 'exhibition', title: 'Exhibition' },
@@ -109,7 +110,7 @@ test('remote intro fields preserve fallback values when empty and override when 
 });
 
 test('a collection posterVideo filename resolves from Google Sheets with a local fallback', () => {
-  const fallback = fallbackContent().collections.find(({ id }) => id === 'exhibition');
+  const fallback = localCollections.find(({ id }) => id === 'exhibition');
   const remote = normalizeCollection(collectionRow({
     posterVideo: 'ExhibitionCoverAnimation.MP4',
   }), fallback);
@@ -198,7 +199,7 @@ test('Pearls of Truth English intro renders its English text', () => {
 });
 
 test('Pearls of Truth Hebrew intro renders approved descriptionHe text', () => {
-  const fallback = fallbackContent().collections.find(({ id }) => id === 'pearls-of-truth');
+  const fallback = localCollections.find(({ id }) => id === 'pearls-of-truth');
   const pearls = normalizeCollection(collectionRow({
     id: 'pearls-of-truth',
     titleEn: 'Pearls of Truth',
@@ -211,7 +212,7 @@ test('Pearls of Truth Hebrew intro renders approved descriptionHe text', () => {
 
 test('empty remote Pearls Hebrew intro preserves a valid fallback descriptionHe', () => {
   const fallback = {
-    ...fallbackContent().collections.find(({ id }) => id === 'pearls-of-truth'),
+    ...localCollections.find(({ id }) => id === 'pearls-of-truth'),
     descriptionHe: 'תיאור עברי מאושר לבדיקה',
   };
   const pearls = normalizeCollection(collectionRow({
@@ -231,7 +232,7 @@ test('every collection intro uses the canonical Ben Oz logo', () => {
 });
 
 test('Pearls collection card keeps its remote poster while its intro uses the logo', () => {
-  const fallback = fallbackContent().collections.find(({ id }) => id === 'pearls-of-truth');
+  const fallback = localCollections.find(({ id }) => id === 'pearls-of-truth');
   const pearls = normalizeCollection(collectionRow({
     id: 'pearls-of-truth',
     titleEn: 'Pearls of Truth',

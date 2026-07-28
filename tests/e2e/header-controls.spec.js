@@ -123,6 +123,22 @@ test('ambient sound is controlled by React and starts after entering the gallery
   await expect(page.locator('#soundBtn')).toHaveAttribute('aria-pressed', 'true');
 });
 
+test('desktop menu reveals every standalone page declaratively', async ({ page }) => {
+  await preparePage(page, '/gallery?collection=exhibition#human-creator');
+
+  for (const [path, section] of [
+    ['/music', '#music'],
+    ['/story', '#story'],
+    ['/exhibitions', '#exhibitions'],
+    ['/contact', '#contact'],
+  ]) {
+    await page.locator(`#mainMenu a[href="${path}"]`).click();
+    await expect(page).toHaveURL(new RegExp(`${path}$`));
+    await expect(page.locator(section)).toBeVisible();
+    await expect(page.locator(section)).toHaveClass(/\bshow\b/);
+  }
+});
+
 test.describe('mobile menu', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 

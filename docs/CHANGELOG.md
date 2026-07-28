@@ -19,6 +19,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) conv
 - Work `sort` values now control order only within each Work's Collection.
 - React now owns all runtime interaction behavior, including navigation, overlays, media controls, header controls, loader, reveal, and parallax.
 - Removed the legacy imperative browser runtime.
+- Replaced the remaining static HTML injection wrapper with direct JSX components.
+- Unified bundled and Google Sheets Works through one canonical runtime normalizer.
+- Made Songs the single Work-to-Song relationship source for both bundled and Google Sheets content.
+- Unified bundled and Google Sheets Collections through one canonical runtime normalizer.
+- Made standalone page reveal and React readiness declarative instead of mutating route DOM state.
 
 ### Planned
 
