@@ -39,27 +39,26 @@ function nonEmpty(remoteValue, fallbackValue = '') {
 
 export function normalizeCollection(row, fallback = {}, index = 0) {
   const remoteCover = optimizedImage(row.posterImage, 'thumbnail').src;
-  const fallbackCover = optimizedImage(fallback.cover, 'thumbnail').src;
+  const fallbackCover = optimizedImage(fallback.posterImage || row.posterImage, 'thumbnail').src;
   return {
-    ...fallback,
     id: row.id,
     enabled: true,
-    order: Number(row.sort),
+    order: Number(row.sort ?? row.order ?? fallback.sort ?? fallback.order),
     number: String(index + 1).padStart(2, '0'),
-    title: nonEmpty(row.titleEn, fallback.title),
-    titleHe: nonEmpty(row.titleHe, fallback.titleHe),
-    subtitleEn: nonEmpty(row.subtitleEn, fallback.subtitleEn),
-    subtitleHe: nonEmpty(row.subtitleHe, fallback.subtitleHe),
-    type: fallback.type || 'Visual Collection',
-    description: nonEmpty(row.descriptionEn, fallback.description),
-    descriptionHe: nonEmpty(row.descriptionHe, fallback.descriptionHe),
-    noteEn: fallback.noteEn || '',
-    noteHe: fallback.noteHe || '',
+    title: nonEmpty(row.titleEn, fallback.titleEn || ''),
+    titleHe: nonEmpty(row.titleHe, fallback.titleHe || ''),
+    subtitleEn: nonEmpty(row.subtitleEn, fallback.subtitleEn || ''),
+    subtitleHe: nonEmpty(row.subtitleHe, fallback.subtitleHe || ''),
+    type: nonEmpty(row.type, fallback.type || 'Visual Collection'),
+    description: nonEmpty(row.descriptionEn, fallback.descriptionEn || ''),
+    descriptionHe: nonEmpty(row.descriptionHe, fallback.descriptionHe || ''),
+    noteEn: nonEmpty(row.noteEn, fallback.noteEn || ''),
+    noteHe: nonEmpty(row.noteHe, fallback.noteHe || ''),
     cover: remoteCover || fallbackCover,
     fallbackCover,
-    posterVideo: assetPath(row.posterVideo) || fallback.posterVideo || '',
+    posterVideo: assetPath(row.posterVideo) || assetPath(fallback.posterVideo),
     slug: nonEmpty(row.slug, fallback.slug || row.id),
-    pageId: fallback.pageId || `collection-${nonEmpty(row.slug, row.id)}`,
+    pageId: row.pageId || fallback.pageId || `collection-${nonEmpty(row.slug, row.id)}`,
     works: [],
   };
 }
@@ -185,13 +184,8 @@ export function fallbackContent() {
   const works = localCollections.flatMap((collection) => (
     collection.works.map((work, sourceOrder) => normalizeLocalWork(work, sourceOrder, songIdsByWork))
   ));
-  const collections = localCollections.map((collection) => ({
-    ...collection,
-    cover: optimizedImage(collection.cover, 'thumbnail').src,
-    descriptionHe: collection.descriptionHe || '',
-    posterVideo: collection.posterVideo || '',
-    fallbackCover: optimizedImage(collection.cover, 'thumbnail').src,
-    slug: collection.slug || collection.id,
+  const collections = sorted(localCollections).map((collection, index) => ({
+    ...normalizeCollection(collection, {}, index),
     works: getCollectionWorks(works, collection.id),
   }));
   const content = { source: 'local-fallback', collections, works, songs };

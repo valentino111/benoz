@@ -16,13 +16,13 @@ Current functionality includes:
 - responsive layouts, mobile navigation, swipe navigation, and pinch zoom;
 - local media assets and an existing production build.
 
-The legacy interaction runtime has been removed. React components and hooks own the application behavior, automated lint, unit, build, and browser regression checks are present, and bundled fallback Works share the canonical Google Sheets runtime shape.
+The legacy interaction runtime has been removed. React components and hooks own the application behavior, automated lint, unit, build, and browser regression checks are present, and bundled fallback Collections, Works, and Songs share the canonical Google Sheets runtime shape.
 
 ## Milestone 1 — Stabilize the content pipeline
 
 Planned engineering work:
 
-- define one canonical schema for Collections, Works, and Songs;
+- maintain the canonical schema for Collections, Works, and Songs;
 - validate required fields, IDs, references, booleans, sorting, and filenames;
 - add request timeout and clear loading/fallback states;
 - keep local fallback behavior aligned with remote behavior;

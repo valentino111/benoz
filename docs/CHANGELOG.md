@@ -22,6 +22,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) conv
 - Replaced the remaining static HTML injection wrapper with direct JSX components.
 - Unified bundled and Google Sheets Works through one canonical runtime normalizer.
 - Made Songs the single Work-to-Song relationship source for both bundled and Google Sheets content.
+- Unified bundled and Google Sheets Collections through one canonical runtime normalizer.
 
 ### Planned
 
