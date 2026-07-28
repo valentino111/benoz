@@ -42,7 +42,7 @@ The current project is a React application built with Vite. React renders the pa
 - `SiteFooter`
 - `Overlays`
 
-Some components return JSX directly. Others use `RawMarkup` to inject constant local HTML. This is current behavior, not the preferred long-term architecture.
+All page sections render JSX directly. Spreadsheet text is normalized as plain text and is never injected as HTML.
 
 ## Data flow
 

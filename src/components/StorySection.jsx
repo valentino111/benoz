@@ -1,10 +1,104 @@
-import RawMarkup from './RawMarkup.jsx';
+import { Fragment } from 'react';
 
-const markup = "<section class=\"story fade\" id=\"story\">\n<div class=\"story-grid\">\n<div>\n<div class=\"story-kicker\"><span data-lang=\"he\">למה הפרויקט הזה קיים</span><span data-lang=\"en\">Why this project exists</span></div>\n<h2><span data-lang=\"he\">הסיפור שמאחורי הסדרה</span><span data-lang=\"en\">The Story Behind the Series</span></h2>\n<div class=\"story-text\">\n<p><span data-lang=\"he\">הפרויקט נולד מתוך שאלה פשוטה: האם רעיון אחד יכול לחיות בו־זמנית כשירה, דימוי, מוזיקה וקולנוע?</span><span data-lang=\"en\">This project was born from a simple question: can one idea live simultaneously as poetry, image, music and film?</span></p>\n<p><span data-lang=\"he\">הסדרה חוקרת יופי, חמלה, יצירה, אהבה ואת אותו סדר נסתר המחבר בין האדם, הטבע והיקום. כל עבודה מתחילה במילים, מקבלת גוף בתמונה, ממשיכה אל הצליל ולבסוף אל התנועה.</span><span data-lang=\"en\">The series explores beauty, compassion, creation, love and the hidden order connecting the human being, nature and the universe. Each work begins in words, takes form as an image, continues into sound and finally into movement.</span></p>\n</div>\n<div class=\"process-list\">\n<div><span>01</span><strong><span data-lang=\"he\">כתיבה</span><span data-lang=\"en\">Writing</span></strong></div>\n<div><span>02</span><strong><span data-lang=\"he\">יצירת דימוי</span><span data-lang=\"en\">Visual Creation</span></strong></div>\n<div><span>03</span><strong><span data-lang=\"he\">מוזיקה</span><span data-lang=\"en\">Music</span></strong></div>\n<div><span>04</span><strong><span data-lang=\"he\">קולנוע</span><span data-lang=\"en\">Film</span></strong></div>\n</div>\n</div>\n<div class=\"flow\">\n<div><span data-lang=\"he\">רעיון</span><span data-lang=\"en\">Idea</span></div><div class=\"arrow\">↓</div>\n<div><span data-lang=\"he\">שירה</span><span data-lang=\"en\">Poetry</span></div><div class=\"arrow\">↓</div>\n<div><span data-lang=\"he\">אמנות</span><span data-lang=\"en\">Art</span></div><div class=\"arrow\">↓</div>\n<div><span data-lang=\"he\">מוזיקה</span><span data-lang=\"en\">Music</span></div><div class=\"arrow\">↓</div>\n<div><span data-lang=\"he\">קולנוע</span><span data-lang=\"en\">Cinema</span></div><div class=\"arrow\">↓</div>\n<div><span data-lang=\"he\">זיכרון</span><span data-lang=\"en\">Memory</span></div>\n</div>\n</div>\n<div aria-label=\"Creative journey\" class=\"timeline\">\n<article class=\"timeline-item fade\"><div class=\"timeline-year\">Before</div><h3><span data-lang=\"he\">חיפוש</span><span data-lang=\"en\">Searching</span></h3><p><span data-lang=\"he\">שנים של קולנוע, טכנולוגיה ומוזיקה חיפשו שפה משותפת.</span><span data-lang=\"en\">Years of cinema, technology and music searched for a common language.</span></p></article>\n<article class=\"timeline-item fade\"><div class=\"timeline-year\">2023</div><h3><span data-lang=\"he\">7 באוקטובר</span><span data-lang=\"en\">October 7</span></h3><p><span data-lang=\"he\">השבר שינה את היחס לזיכרון, לבית ולמשמעות של יצירה.</span><span data-lang=\"en\">The rupture changed the relationship to memory, home and the meaning of creation.</span></p></article>\n<article class=\"timeline-item fade\"><div class=\"timeline-year\">Return</div><h3><span data-lang=\"he\">חזרה</span><span data-lang=\"en\">Return</span></h3><p><span data-lang=\"he\">החזרה דרומה הפכה את היצירה לדרך לאסוף מחדש את החלקים.</span><span data-lang=\"en\">Returning south transformed creation into a way of gathering the fragments again.</span></p></article>\n<article class=\"timeline-item fade\"><div class=\"timeline-year\">2026</div><h3><span data-lang=\"he\">קול אחד, צורות רבות</span><span data-lang=\"en\">One Voice, Many Forms</span></h3><p><span data-lang=\"he\">שירה, דימוי, מוזיקה וקולנוע מתכנסים לתערוכה דיגיטלית אחת.</span><span data-lang=\"en\">Poetry, image, music and film converge into one digital exhibition.</span></p></article>\n</div>\n</section>";
+const processSteps = [
+  ['01', 'כתיבה', 'Writing'],
+  ['02', 'יצירת דימוי', 'Visual Creation'],
+  ['03', 'מוזיקה', 'Music'],
+  ['04', 'קולנוע', 'Film'],
+];
+
+const flowSteps = [
+  ['רעיון', 'Idea'],
+  ['שירה', 'Poetry'],
+  ['אמנות', 'Art'],
+  ['מוזיקה', 'Music'],
+  ['קולנוע', 'Cinema'],
+  ['זיכרון', 'Memory'],
+];
+
+const timelineItems = [
+  {
+    year: 'Before',
+    titleHe: 'חיפוש',
+    titleEn: 'Searching',
+    textHe: 'שנים של קולנוע, טכנולוגיה ומוזיקה חיפשו שפה משותפת.',
+    textEn: 'Years of cinema, technology and music searched for a common language.',
+  },
+  {
+    year: '2023',
+    titleHe: '7 באוקטובר',
+    titleEn: 'October 7',
+    textHe: 'השבר שינה את היחס לזיכרון, לבית ולמשמעות של יצירה.',
+    textEn: 'The rupture changed the relationship to memory, home and the meaning of creation.',
+  },
+  {
+    year: 'Return',
+    titleHe: 'חזרה',
+    titleEn: 'Return',
+    textHe: 'החזרה דרומה הפכה את היצירה לדרך לאסוף מחדש את החלקים.',
+    textEn: 'Returning south transformed creation into a way of gathering the fragments again.',
+  },
+  {
+    year: '2026',
+    titleHe: 'קול אחד, צורות רבות',
+    titleEn: 'One Voice, Many Forms',
+    textHe: 'שירה, דימוי, מוזיקה וקולנוע מתכנסים לתערוכה דיגיטלית אחת.',
+    textEn: 'Poetry, image, music and film converge into one digital exhibition.',
+  },
+];
 
 export default function StorySection({ standalone = false }) {
-  const semanticMarkup = standalone
-    ? markup.replace('<h2>', '<h1>').replace('</h2>', '</h1>')
-    : markup;
-  return <RawMarkup html={semanticMarkup} />;
+  const Heading = standalone ? 'h1' : 'h2';
+
+  return (
+    <section className="story fade" id="story">
+      <div className="story-grid">
+        <div>
+          <div className="story-kicker">
+            <span data-lang="he">למה הפרויקט הזה קיים</span>
+            <span data-lang="en">Why this project exists</span>
+          </div>
+          <Heading>
+            <span data-lang="he">הסיפור שמאחורי הסדרה</span>
+            <span data-lang="en">The Story Behind the Series</span>
+          </Heading>
+          <div className="story-text">
+            <p>
+              <span data-lang="he">הפרויקט נולד מתוך שאלה פשוטה: האם רעיון אחד יכול לחיות בו־זמנית כשירה, דימוי, מוזיקה וקולנוע?</span>
+              <span data-lang="en">This project was born from a simple question: can one idea live simultaneously as poetry, image, music and film?</span>
+            </p>
+            <p>
+              <span data-lang="he">הסדרה חוקרת יופי, חמלה, יצירה, אהבה ואת אותו סדר נסתר המחבר בין האדם, הטבע והיקום. כל עבודה מתחילה במילים, מקבלת גוף בתמונה, ממשיכה אל הצליל ולבסוף אל התנועה.</span>
+              <span data-lang="en">The series explores beauty, compassion, creation, love and the hidden order connecting the human being, nature and the universe. Each work begins in words, takes form as an image, continues into sound and finally into movement.</span>
+            </p>
+          </div>
+          <div className="process-list">
+            {processSteps.map(([number, he, en]) => (
+              <div key={number}>
+                <span>{number}</span>
+                <strong><span data-lang="he">{he}</span><span data-lang="en">{en}</span></strong>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="flow">
+          {flowSteps.map(([he, en], index) => (
+            <Fragment key={en}>
+              <div><span data-lang="he">{he}</span><span data-lang="en">{en}</span></div>
+              {index < flowSteps.length - 1 && <div className="arrow">↓</div>}
+            </Fragment>
+          ))}
+        </div>
+      </div>
+      <div aria-label="Creative journey" className="timeline">
+        {timelineItems.map((item) => (
+          <article className="timeline-item fade" key={item.year}>
+            <div className="timeline-year">{item.year}</div>
+            <h3><span data-lang="he">{item.titleHe}</span><span data-lang="en">{item.titleEn}</span></h3>
+            <p><span data-lang="he">{item.textHe}</span><span data-lang="en">{item.textEn}</span></p>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
 }

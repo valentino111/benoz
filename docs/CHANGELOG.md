@@ -19,6 +19,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) conv
 - Work `sort` values now control order only within each Work's Collection.
 - React now owns all runtime interaction behavior, including navigation, overlays, media controls, header controls, loader, reveal, and parallax.
 - Removed the legacy imperative browser runtime.
+- Replaced the remaining static HTML injection wrapper with direct JSX components.
 
 ### Planned
 
