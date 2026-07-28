@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import VideoPreviewButton from './VideoPreviewButton.jsx';
 
 function CollectionPoster({ active, collection, leavingId, onSelect }) {
   const videoRef = useRef(null);
@@ -49,14 +50,19 @@ function CollectionPoster({ active, collection, leavingId, onSelect }) {
   }
 
   function handlePointerDown(event) {
-    if (!hasAnimation || !isTouchPreview() || event.button !== 0) return;
+    if (
+      !hasAnimation
+      || !isTouchPreview()
+      || event.button !== 0
+      || event.target.closest('.video-preview-trigger')
+    ) return;
     clearLongPress();
     longPressStart.current = { x: event.clientX, y: event.clientY };
     longPressTimer.current = window.setTimeout(() => {
       suppressNextClick.current = true;
       startPreview();
       longPressTimer.current = null;
-    }, 550);
+    }, 150);
   }
 
   function handlePointerMove(event) {
@@ -87,59 +93,71 @@ function CollectionPoster({ active, collection, leavingId, onSelect }) {
   }
 
   return (
-    <a
-      className={`museum-poster museum-poster-${collection.id}${hasAnimation ? ' has-cover-animation' : ''}${leavingId === collection.id ? ' is-selected' : ''}`}
-      data-collection-id={collection.id}
-      href={`/gallery?collection=${encodeURIComponent(collection.slug || collection.id)}`}
-      onBlur={stopPreview}
-      onClick={handleClick}
-      onContextMenu={(event) => {
-        if (isTouchPreview()) event.preventDefault();
-      }}
-      onFocus={() => {
-        if (!isTouchPreview()) startPreview();
-      }}
-      onMouseEnter={() => {
-        if (!isTouchPreview()) startPreview();
-      }}
-      onMouseLeave={() => {
-        if (!isTouchPreview()) stopPreview();
-      }}
-      onPointerCancel={handlePointerCancel}
-      onPointerDown={handlePointerDown}
-      onPointerMove={handlePointerMove}
-      onPointerUp={handlePointerEnd}
-      style={{
-        '--museum-cover': `url(${collection.cover})`,
-        '--museum-fallback-cover': `url(${collection.fallbackCover || collection.cover})`,
-      }}
-      aria-label={`Enter ${collection.title}${collection.titleHe ? ` — ${collection.titleHe}` : ''}`}
-    >
-      <span className="museum-poster-image" aria-hidden="true">
-        {hasAnimation && (
-          <video
-            className={`museum-poster-video${previewPlaying ? ' is-playing' : ''}`}
-            draggable={false}
-            onEnded={stopPreview}
-            onError={stopPreview}
-            onPlay={() => setPreviewPlaying(true)}
-            playsInline
-            preload="metadata"
-            ref={videoRef}
-          >
-            <source src={animationSrc} type="video/mp4" />
-          </video>
-        )}
-        <span className="museum-poster-enter">Enter collection</span>
-      </span>
-      <span className="museum-poster-caption">
-        <span className="museum-poster-title">{collection.title}</span>
-        {collection.titleHe && (
-          <span className="museum-poster-title-he" lang="he" dir="rtl">{collection.titleHe}</span>
-        )}
-        <span className="museum-poster-type">{collection.type}</span>
-      </span>
-    </a>
+    <div className="museum-poster-shell">
+      <a
+        className={`museum-poster museum-poster-${collection.id}${hasAnimation ? ' has-cover-animation' : ''}${leavingId === collection.id ? ' is-selected' : ''}`}
+        data-collection-id={collection.id}
+        href={`/gallery?collection=${encodeURIComponent(collection.slug || collection.id)}`}
+        onBlur={stopPreview}
+        onClick={handleClick}
+        onContextMenu={(event) => {
+          if (isTouchPreview()) event.preventDefault();
+        }}
+        onFocus={() => {
+          if (!isTouchPreview()) startPreview();
+        }}
+        onMouseEnter={() => {
+          if (!isTouchPreview()) startPreview();
+        }}
+        onMouseLeave={() => {
+          if (!isTouchPreview()) stopPreview();
+        }}
+        onPointerCancel={handlePointerCancel}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerEnd}
+        style={{
+          '--museum-cover': `url(${collection.cover})`,
+          '--museum-fallback-cover': `url(${collection.fallbackCover || collection.cover})`,
+        }}
+        aria-label={`Enter ${collection.title}${collection.titleHe ? ` — ${collection.titleHe}` : ''}`}
+      >
+        <span className="museum-poster-image" aria-hidden="true">
+          {hasAnimation && (
+            <video
+              className={`museum-poster-video${previewPlaying ? ' is-playing' : ''}`}
+              controls={false}
+              disablePictureInPicture
+              draggable={false}
+              onEnded={stopPreview}
+              onError={stopPreview}
+              onPlay={() => setPreviewPlaying(true)}
+              playsInline
+              preload="metadata"
+              ref={videoRef}
+            >
+              <source src={animationSrc} type="video/mp4" />
+            </video>
+          )}
+          <span className="museum-poster-enter">Enter collection</span>
+        </span>
+        <span className="museum-poster-caption">
+          <span className="museum-poster-title">{collection.title}</span>
+          {collection.titleHe && (
+            <span className="museum-poster-title-he" lang="he" dir="rtl">{collection.titleHe}</span>
+          )}
+          <span className="museum-poster-type">{collection.type}</span>
+        </span>
+      </a>
+      {hasAnimation && (
+        <VideoPreviewButton
+          className="is-collection"
+          label={`${previewPlaying ? 'Pause' : 'Play'} ${collection.title} animation`}
+          onActivate={previewPlaying ? stopPreview : startPreview}
+          playing={previewPlaying}
+        />
+      )}
+    </div>
   );
 }
 
