@@ -11,6 +11,7 @@ import SiteFooter from './components/SiteFooter.jsx';
 import Overlays from './components/Overlays.jsx';
 import SeoHead from './components/SeoHead.jsx';
 import { fallbackContent, loadGalleryContent } from './data/contentService.js';
+import useAmbientSound from './hooks/useAmbientSound.js';
 import { languageFromLocation } from './seo/seo.js';
 import {
   collectionPageUrl,
@@ -41,12 +42,14 @@ export default function App() {
   const [detailsWork, setDetailsWork] = useState(null);
   const [lightboxSelection, setLightboxSelection] = useState(null);
   const [language, setLanguage] = useState(() => languageFromLocation(window.location));
+  const { ambientOn, scheduleAmbient, toggleAmbient } = useAmbientSound();
 
   useEffect(() => {
-    const handleLanguageChange = (event) => setLanguage(event.detail?.language || languageFromLocation(window.location));
-    window.addEventListener('benoz:languagechange', handleLanguageChange);
-    return () => window.removeEventListener('benoz:languagechange', handleLanguageChange);
-  }, []);
+    const english = language === 'en';
+    document.body.classList.toggle('en', english);
+    document.documentElement.lang = language;
+    document.documentElement.dir = english ? 'ltr' : 'rtl';
+  }, [language]);
 
   useEffect(() => {
     let active = true;
@@ -126,7 +129,7 @@ export default function App() {
     if (!content) return undefined;
 
     const previousBodyClass = document.body.className;
-    document.body.className = 'locked en';
+    document.body.className = `locked${language === 'en' ? ' en' : ''}`;
     document.documentElement.dataset.contentSource = content.source;
     const script = document.createElement('script');
     script.src = '/legacy.js';
@@ -171,6 +174,7 @@ export default function App() {
     setSelectedCollectionId('');
     setActivePage('');
     setView(VIEW_COLLECTIONS);
+    scheduleAmbient();
   }
 
   function openCollection(collectionId, hash = '') {
@@ -200,6 +204,19 @@ export default function App() {
     setSelectedCollectionId(route.collectionId);
     setActivePage(route.page);
     setView(route.view);
+  }
+
+  function toggleLanguage() {
+    const nextLanguage = language === 'en' ? 'he' : 'en';
+    const url = new URL(window.location.href);
+    if (nextLanguage === 'he') url.searchParams.set('lang', 'he');
+    else url.searchParams.delete('lang');
+    window.history.replaceState(
+      window.history.state,
+      '',
+      `${url.pathname}${url.search}${url.hash}`,
+    );
+    setLanguage(nextLanguage);
   }
 
   const closeDetails = useCallback(() => setDetailsWork(null), []);
@@ -238,7 +255,13 @@ export default function App() {
         onSelect={openCollection}
       />
       <main className={`site${siteActive ? ' active' : ''}`} hidden={!siteActive} id="site">
-        <SiteHeader onNavigate={navigateTo} />
+        <SiteHeader
+          ambientOn={ambientOn}
+          language={language}
+          onNavigate={navigateTo}
+          onToggleLanguage={toggleLanguage}
+          onToggleSound={toggleAmbient}
+        />
         {content.collections.map((collection) => (
           <CollectionPage
             active={view === VIEW_COLLECTION && collection.id === selectedCollectionId}
