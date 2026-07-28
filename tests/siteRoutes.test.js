@@ -143,6 +143,20 @@ test('portrait mobile hero uses the dedicated mobile crop while desktop keeps th
   assert.match(styles, /object-position:center top/);
 });
 
+test('hero controls use a blurred static backdrop and recede while video is playing', async () => {
+  const [entry, styles] = await Promise.all([
+    readFile(new URL('../src/components/EntryScreen.jsx', import.meta.url), 'utf8'),
+    readFile(new URL('../src/styles.css', import.meta.url), 'utf8'),
+  ]);
+
+  assert.match(entry, /className=\{`entry\$\{heroPlaying \? ' is-hero-playing' : ''\}`\}/);
+  assert.match(entry, /onPause=\{\(\) => setHeroPlaying\(false\)\}/);
+  assert.match(styles, /\.entry-inner:before\{[\s\S]*?backdrop-filter:blur\(17px\) saturate\(.82\)/);
+  assert.match(styles, /\.entry\.is-hero-playing \.entry-inner\{[\s\S]*?opacity:0/);
+  assert.match(styles, /transition:opacity \.65s ease,filter \.65s ease,transform \.65s ease/);
+  assert.match(styles, /pointer-events:none/);
+});
+
 test('animated mobile collection covers suppress browser copy and callout behavior', async () => {
   const [hub, styles] = await Promise.all([
     readFile(new URL('../src/components/ProjectHub.jsx', import.meta.url), 'utf8'),
