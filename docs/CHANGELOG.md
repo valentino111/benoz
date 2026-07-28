@@ -12,11 +12,13 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) conv
 - Reusable bilingual collection introductions backed by normalized Collection data.
 - History API navigation between the collection selector and Collection pages.
 - Regression coverage for collection isolation, local ordering, intro fallback, bilingual content, and URL state.
+- React hooks for fade reveal, collection hero parallax, and ambient sound.
 
 ### Changed
 
 - Work `sort` values now control order only within each Work's Collection.
-- React now owns collection selection and back navigation while preserving existing gallery interactions.
+- React now owns all runtime interaction behavior, including navigation, overlays, media controls, header controls, loader, reveal, and parallax.
+- Removed the legacy imperative browser runtime.
 
 ### Planned
 
@@ -39,7 +41,6 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) conv
 ### Notes
 
 - This release is a foundation version, not Release 1.0.
-- Much of the current interaction layer remains in `public/legacy.js`.
 - See [ROADMAP.md](ROADMAP.md) for planned stabilization work.
 
 [Unreleased]: https://github.com/valentino111/benoz/compare/v0.1.0...HEAD

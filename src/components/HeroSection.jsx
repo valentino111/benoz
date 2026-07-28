@@ -1,5 +1,6 @@
 import { Fragment } from 'react';
 import { getCollectionHeroModel } from '../data/collectionPresentation.js';
+import useHeroParallax from '../hooks/useHeroParallax.js';
 
 function TextLines({ text, title = false }) {
   return String(text || '').split('\n').filter(Boolean).map((line, index) => (
@@ -27,10 +28,11 @@ function HeroLogo({ active, alt, src }) {
 
 export default function HeroSection({ active = false, collection }) {
   const hero = getCollectionHeroModel(collection);
+  const heroRef = useHeroParallax();
 
   return (
     <>
-      <section className="hero fade" id={collection.pageId}>
+      <section className="hero fade" id={collection.pageId} ref={heroRef}>
         <div>
           <HeroLogo active={active} alt={hero.logoAlt} src={hero.logoSrc} />
           <h1 className="collection-hero-heading parallax-item" id={`collection-title-${collection.id}`} tabIndex="-1">

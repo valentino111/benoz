@@ -2,19 +2,19 @@
 
 ## Overview
 
-The current project is a React application built with Vite. React renders the page structure and data-driven gallery sections. A legacy browser script supplies much of the imperative interaction behavior.
+The current project is a React application built with Vite. React renders the page structure, data-driven gallery sections, and all interaction behavior.
 
 ## Project structure
 
 ```text
 .
 ├── public/                 Static files copied directly into the build
-│   ├── assets/             Artwork, audio, video, covers, and brand assets
-│   └── legacy.js           Current imperative interaction layer
+│   └── assets/             Artwork, audio, video, covers, and brand assets
 ├── src/
 │   ├── collections/        Local structured work data by collection
 │   ├── components/         React-rendered page sections and controls
 │   ├── data/               Collections, Songs, and content loading
+│   ├── hooks/              Shared React interaction lifecycles
 │   ├── App.jsx             Application composition and content bootstrap
 │   ├── main.jsx            React entry point
 │   └── styles.css          Global visual and responsive styles
@@ -23,7 +23,7 @@ The current project is a React application built with Vite. React renders the pa
 └── package.json            Commands and dependencies
 ```
 
-`dist/` contains generated production output currently checked into the repository. Treat it as a build artifact; do not edit it by hand.
+`dist/` is generated production output and is excluded from the repository. Treat it as a build artifact; do not edit or commit it.
 
 ## React composition
 
@@ -53,7 +53,7 @@ Some components return JSX directly. Others use `RawMarkup` to inject constant l
 5. Each Collection receives only matching Works, sorted by numeric collection-local order with deterministic ties.
 6. If remote loading fails or produces no enabled collections/works, local fallback data is returned.
 7. React renders the entry, selector, selected collection page, and global supporting sections.
-8. After content renders, `App` loads `/legacy.js`, which attaches language, lightbox, audio, dialog, mobile, and animation behavior to the DOM. React owns collection-level navigation.
+8. React components and hooks own language, lightbox, audio, dialog, mobile, loader, reveal, parallax, and navigation behavior with lifecycle cleanup.
 
 ## Collection navigation
 
@@ -77,7 +77,6 @@ Media is local; Google Sheets should normally store filenames rather than full l
 
 ## Current constraints
 
-- `legacy.js` and React still share responsibility for the rendered DOM, but collection-level navigation is React-owned.
 - Global styles are contained in one large stylesheet with historical override sections.
 - There is no router, state library, TypeScript configuration, or explicit Vite configuration; focused content and collection-page tests use Node's test runner.
 - Pearls of Truth local works use a different shape from normalized remote Works.
