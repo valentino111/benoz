@@ -211,6 +211,8 @@ test('music controls and artwork soundtrack links use the custom gold play icon'
   ]);
 
   assert.match(music, /className="play">\s*<span aria-hidden="true" className="gold-play-glyph" \/>/);
+  assert.match(music, /className="player" dir="ltr"/);
+  assert.match(music, /className="range" dir="ltr"/);
   assert.match(gallery, /className="soundtrack-icon">\s*<span className="gold-play-glyph" \/>/);
   assert.doesNotMatch(music, />▶</);
   assert.doesNotMatch(gallery, /className="soundtrack-icon">▶/);
@@ -220,5 +222,6 @@ test('music controls and artwork soundtrack links use the custom gold play icon'
   assert.match(legacy, /play\.classList\.remove\('is-playing'\)/);
   assert.match(styles, /\.gold-play-glyph\{/);
   assert.match(styles, /\.play\.is-playing \.gold-play-glyph/);
+  assert.match(styles, /\.player\{[^}]*direction:ltr/);
   assert.match(styles, /@media \(hover:none\)\{[\s\S]*?\.track-media::before/);
 });
