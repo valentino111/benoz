@@ -3,11 +3,10 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
 test('React owns language, mobile menu, and ambient sound controls', async () => {
-  const [app, header, ambient, legacy] = await Promise.all([
+  const [app, header, ambient] = await Promise.all([
     readFile(new URL('../src/App.jsx', import.meta.url), 'utf8'),
     readFile(new URL('../src/components/SiteHeader.jsx', import.meta.url), 'utf8'),
     readFile(new URL('../src/hooks/useAmbientSound.js', import.meta.url), 'utf8'),
-    readFile(new URL('../public/legacy.js', import.meta.url), 'utf8'),
   ]);
 
   assert.match(app, /document\.body\.classList\.toggle\('en', english\)/);
@@ -21,9 +20,4 @@ test('React owns language, mobile menu, and ambient sound controls', async () =>
   assert.match(ambient, /linearRampToValueAtTime/);
   assert.match(ambient, /scheduleAmbient/);
 
-  assert.doesNotMatch(legacy, /langBtn/);
-  assert.doesNotMatch(legacy, /soundBtn/);
-  assert.doesNotMatch(legacy, /mobileMenuBtn/);
-  assert.doesNotMatch(legacy, /AudioContext/);
-  assert.doesNotMatch(legacy, /benoz:languagechange/);
 });

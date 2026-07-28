@@ -97,10 +97,9 @@ test('Google Sheets Works normalize valid Edition values and null invalid or abs
 });
 
 test('Edition UI renders in React cards and details with an LTR fraction in Hebrew', async () => {
-  const [gallery, details, legacy] = await Promise.all([
+  const [gallery, details] = await Promise.all([
     readFile(new URL('../src/components/ArtworkGallery.jsx', import.meta.url), 'utf8'),
     readFile(new URL('../src/components/ArtworkDetailsDialog.jsx', import.meta.url), 'utf8'),
-    readFile(new URL('../public/legacy.js', import.meta.url), 'utf8'),
   ]);
 
   assert.match(gallery, /className="edition-info"/);
@@ -113,7 +112,4 @@ test('Edition UI renders in React cards and details with an LTR fraction in Hebr
   assert.match(details, /editionHe\.uniqueLabel/);
   assert.match(details, /editionEn\.uniqueLabel/);
   assert.match(details, /className="dialog-description"/);
-  assert.doesNotMatch(legacy, /detailsDialog/);
-  assert.doesNotMatch(legacy, /querySelectorAll\('\.details-btn'\)/);
-  assert.doesNotMatch(legacy, /dialogEdition/);
 });

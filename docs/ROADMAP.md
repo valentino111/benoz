@@ -16,7 +16,7 @@ Current functionality includes:
 - responsive layouts, mobile navigation, swipe navigation, and pinch zoom;
 - local media assets and an existing production build.
 
-The application still uses `public/legacy.js` for much of its interaction behavior. The local fallback and remote content shapes are not yet fully equivalent, and automated validation and testing are not present.
+The legacy interaction runtime has been removed. React components and hooks own the application behavior, and automated lint, unit, build, and browser regression checks are present. The local fallback and remote content shapes are not yet fully equivalent.
 
 ## Milestone 1 — Stabilize the content pipeline
 
@@ -32,8 +32,8 @@ Planned engineering work:
 
 Planned engineering work:
 
-- move legacy DOM behavior into maintainable React components and hooks incrementally;
-- add explicit lifecycle cleanup for any remaining global behavior;
+- keep interaction behavior in maintainable React components and hooks;
+- preserve explicit lifecycle cleanup for global browser behavior;
 - replace static HTML strings with JSX where practical;
 - organize styles by responsibility without changing the visual direction;
 - add error boundaries and useful diagnostics that remain invisible in the visitor experience.

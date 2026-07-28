@@ -3,6 +3,16 @@ import { useEffect, useRef, useState } from 'react';
 export default function EntryScreen({ loading = false, active = true, onEnter }) {
   const heroVideoRef = useRef(null);
   const [heroPlaying, setHeroPlaying] = useState(false);
+  const [loaderHidden, setLoaderHidden] = useState(false);
+
+  useEffect(() => {
+    if (loading) {
+      setLoaderHidden(false);
+      return undefined;
+    }
+    const timer = window.setTimeout(() => setLoaderHidden(true), 1200);
+    return () => window.clearTimeout(timer);
+  }, [loading]);
 
   useEffect(() => {
     if (active) return;
@@ -32,10 +42,15 @@ export default function EntryScreen({ loading = false, active = true, onEnter })
     playHeroAnimation();
   }
 
+  function handleEnter(event) {
+    setLoaderHidden(true);
+    onEnter?.(event);
+  }
+
   return (
     <>
-      <a className="skip-link" hidden={!active || loading} href="#projectHub" onClick={onEnter}>Skip to collections</a>
-      <div aria-hidden="true" className="museum-loader" id="museumLoader">
+      <a className="skip-link" hidden={!active || loading} href="#projectHub" onClick={handleEnter}>Skip to collections</a>
+      <div aria-hidden="true" className={`museum-loader${loaderHidden ? ' is-hidden' : ''}`} id="museumLoader">
         <div className="loader-inner">
           <div className="loader-name">BEN OZ</div>
           <div className="loader-sub">Digital Gallery</div>
@@ -93,7 +108,7 @@ export default function EntryScreen({ loading = false, active = true, onEnter })
               className="enter"
               disabled={loading}
               id="enterBtn"
-              onClick={onEnter}
+              onClick={handleEnter}
             >
               Enter Gallery
             </button>

@@ -101,13 +101,13 @@ test('navigation exposes every restored route and Netlify serves them through th
 });
 
 test('the mobile Collections logo is not blocked by the loader and has a stable tap target', async () => {
-  const [app, styles] = await Promise.all([
-    readFile(new URL('../src/App.jsx', import.meta.url), 'utf8'),
+  const [entry, styles] = await Promise.all([
+    readFile(new URL('../src/components/EntryScreen.jsx', import.meta.url), 'utf8'),
     readFile(new URL('../src/styles.css', import.meta.url), 'utf8'),
   ]);
 
-  assert.match(app, /if \(view === VIEW_COLLECTIONS\) \{\s*document\.getElementById\('museumLoader'\)\?\.classList\.add\('is-hidden'\)/);
-  assert.match(app, /function enterGallery\(event\) \{\s*event\?\.preventDefault\(\);\s*document\.getElementById\('museumLoader'\)\?\.classList\.add\('is-hidden'\)/);
+  assert.match(entry, /function handleEnter\(event\) \{\s*setLoaderHidden\(true\);\s*onEnter\?\.\(event\)/);
+  assert.match(entry, /className=\{`museum-loader\$\{loaderHidden \? ' is-hidden' : ''\}`\}/);
   assert.match(styles, /\.museum-hub-home\{\s*position:relative;\s*z-index:3;\s*padding:6px;/);
   assert.match(styles, /touch-action:manipulation/);
 });
@@ -203,10 +203,9 @@ test('mobile video previews use custom controls and start during a 150ms hold', 
 });
 
 test('music controls and artwork soundtrack links use the custom gold play icon', async () => {
-  const [music, gallery, legacy, styles] = await Promise.all([
+  const [music, gallery, styles] = await Promise.all([
     readFile(new URL('../src/components/MusicSection.jsx', import.meta.url), 'utf8'),
     readFile(new URL('../src/components/ArtworkGallery.jsx', import.meta.url), 'utf8'),
-    readFile(new URL('../public/legacy.js', import.meta.url), 'utf8'),
     readFile(new URL('../src/styles.css', import.meta.url), 'utf8'),
   ]);
 
@@ -218,10 +217,6 @@ test('music controls and artwork soundtrack links use the custom gold play icon'
   assert.match(gallery, /className="soundtrack-icon">\s*<span className="gold-play-glyph" \/>/);
   assert.doesNotMatch(music, />▶</);
   assert.doesNotMatch(gallery, /className="soundtrack-icon">▶/);
-  assert.doesNotMatch(legacy, /textContent='▶'/);
-  assert.doesNotMatch(legacy, /textContent='❚❚'/);
-  assert.doesNotMatch(legacy, /document\.querySelectorAll\('\.track'\)/);
-  assert.doesNotMatch(legacy, /document\.querySelectorAll\('\.track-media'\)/);
   assert.match(styles, /\.gold-play-glyph\{/);
   assert.match(styles, /\.play\.is-playing \.gold-play-glyph/);
   assert.match(styles, /\.player\{[^}]*direction:ltr/);

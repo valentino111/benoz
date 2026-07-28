@@ -12,6 +12,7 @@ import Overlays from './components/Overlays.jsx';
 import SeoHead from './components/SeoHead.jsx';
 import { fallbackContent, loadGalleryContent } from './data/contentService.js';
 import useAmbientSound from './hooks/useAmbientSound.js';
+import useFadeReveal from './hooks/useFadeReveal.js';
 import { languageFromLocation } from './seo/seo.js';
 import {
   collectionPageUrl,
@@ -43,6 +44,7 @@ export default function App() {
   const [lightboxSelection, setLightboxSelection] = useState(null);
   const [language, setLanguage] = useState(() => languageFromLocation(window.location));
   const { ambientOn, scheduleAmbient, toggleAmbient } = useAmbientSound();
+  useFadeReveal(Boolean(content));
 
   useEffect(() => {
     const english = language === 'en';
@@ -95,10 +97,6 @@ export default function App() {
   useEffect(() => {
     document.body.classList.toggle('locked', view === VIEW_ENTRY);
     if (view === VIEW_ENTRY) return undefined;
-    if (view === VIEW_COLLECTIONS) {
-      document.getElementById('museumLoader')?.classList.add('is-hidden');
-    }
-
     const frame = window.requestAnimationFrame(() => {
       if (view === VIEW_COLLECTIONS) {
         window.scrollTo(0, 0);
@@ -128,43 +126,15 @@ export default function App() {
   useEffect(() => {
     if (!content) return undefined;
 
-    const previousBodyClass = document.body.className;
-    document.body.className = `locked${language === 'en' ? ' en' : ''}`;
     document.documentElement.dataset.contentSource = content.source;
-    const script = document.createElement('script');
-    script.src = '/legacy.js';
-    script.async = false;
-    script.dataset.benOzLegacy = 'true';
-    let loaderTimer;
-    const enableRuntimeFallback = (error) => {
-      if (import.meta.env.DEV) console.error('[Ben Oz Gallery] Interaction runtime could not start.', error);
-      document.getElementById('reactMigrationRoot')?.setAttribute('data-react-migration', 'script-error');
-      document.getElementById('museumLoader')?.classList.add('is-hidden');
-    };
-    script.onload = () => {
-      try {
-        if (!window.BenOzLegacyRuntime?.init) throw new Error('Legacy runtime API is unavailable.');
-        window.BenOzLegacyRuntime.init();
-        document.getElementById('reactMigrationRoot')?.setAttribute('data-react-migration', 'ready');
-        loaderTimer = window.setTimeout(() => document.getElementById('museumLoader')?.classList.add('is-hidden'), 1200);
-      } catch (error) {
-        enableRuntimeFallback(error);
-      }
-    };
-    script.onerror = enableRuntimeFallback;
-    document.body.appendChild(script);
+    document.getElementById('reactMigrationRoot')?.setAttribute('data-react-migration', 'ready');
     return () => {
-      window.clearTimeout(loaderTimer);
-      window.BenOzLegacyRuntime?.destroy();
-      script.remove();
-      document.body.className = previousBodyClass;
       delete document.documentElement.dataset.contentSource;
     };
   }, [content]);
 
   function enterGallery(event) {
     event?.preventDefault();
-    document.getElementById('museumLoader')?.classList.add('is-hidden');
     const url = collectionSelectionUrl(window.location, SITE_PATHS.gallery);
     window.history.replaceState(
       { benOzView: VIEW_COLLECTIONS },
