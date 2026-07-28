@@ -185,3 +185,24 @@ test('mobile video previews use custom controls and start during a 150ms hold', 
   assert.match(styles, /::-webkit-media-controls-start-playback-button/);
   assert.ok(asset.byteLength > 0);
 });
+
+test('music controls and artwork soundtrack links use the custom gold play icon', async () => {
+  const [music, gallery, legacy, styles] = await Promise.all([
+    readFile(new URL('../src/components/MusicSection.jsx', import.meta.url), 'utf8'),
+    readFile(new URL('../src/components/ArtworkGallery.jsx', import.meta.url), 'utf8'),
+    readFile(new URL('../public/legacy.js', import.meta.url), 'utf8'),
+    readFile(new URL('../src/styles.css', import.meta.url), 'utf8'),
+  ]);
+
+  assert.match(music, /className="play">\s*<span aria-hidden="true" className="gold-play-glyph" \/>/);
+  assert.match(gallery, /className="soundtrack-icon">\s*<span className="gold-play-glyph" \/>/);
+  assert.doesNotMatch(music, />▶</);
+  assert.doesNotMatch(gallery, /className="soundtrack-icon">▶/);
+  assert.doesNotMatch(legacy, /textContent='▶'/);
+  assert.doesNotMatch(legacy, /textContent='❚❚'/);
+  assert.match(legacy, /play\.classList\.add\('is-playing'\)/);
+  assert.match(legacy, /play\.classList\.remove\('is-playing'\)/);
+  assert.match(styles, /\.gold-play-glyph\{/);
+  assert.match(styles, /\.play\.is-playing \.gold-play-glyph/);
+  assert.match(styles, /@media \(hover:none\)\{[\s\S]*?\.track-media::before/);
+});
