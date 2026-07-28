@@ -151,7 +151,9 @@ test('hero controls use a blurred static backdrop and recede while video is play
 
   assert.match(entry, /className=\{`entry\$\{heroPlaying \? ' is-hero-playing' : ''\}`\}/);
   assert.match(entry, /onPause=\{\(\) => setHeroPlaying\(false\)\}/);
-  assert.match(styles, /\.entry-inner:before\{[\s\S]*?backdrop-filter:blur\(17px\) saturate\(.82\)/);
+  assert.match(entry, /className="entry-callout"/);
+  assert.match(styles, /\.entry-callout:before\{[\s\S]*?backdrop-filter:blur\(9px\) saturate\(.9\)/);
+  assert.doesNotMatch(styles, /\.entry-inner:before/);
   assert.match(styles, /\.entry\.is-hero-playing \.entry-inner\{[\s\S]*?opacity:0/);
   assert.match(styles, /transition:opacity \.65s ease,filter \.65s ease,transform \.65s ease/);
   assert.match(styles, /pointer-events:none/);
