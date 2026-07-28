@@ -13,7 +13,6 @@ export const pearlsOfTruthWorks = [
     descriptionHe: 'הרהור על יופי ככוח שמרכך את הנשמה ומשנה את האופן שבו אנו רואים.',
     available: false,
     price: '',
-    songIds: ['yofi'],
   },
   {
     id: 'the-light-within-pearl',
@@ -27,7 +26,6 @@ export const pearlsOfTruthWorks = [
     descriptionHe: 'ייתכן שהאור שאנו מחפשים בחוץ כבר חי בתוכנו.',
     available: false,
     price: '',
-    songIds: ['yofi'],
   },
   {
     id: 'to-live',
@@ -41,6 +39,5 @@ export const pearlsOfTruthWorks = [
     descriptionHe: 'בחירה להמשיך לחיות, ליצור ולחפש אור גם כשהמציאות נשברת.',
     available: false,
     price: '',
-    songIds: ['lihyot'],
   },
 ];

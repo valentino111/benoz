@@ -17,7 +17,6 @@ export const exhibitionWorks = [
     availabilityHe: 'זמינה',
     available: true,
     price: '₪3,400',
-    songIds: [],
   },
   {
     id: 'gaze-of-compassion',
@@ -37,7 +36,6 @@ export const exhibitionWorks = [
     availabilityHe: 'זמינה',
     available: true,
     price: '₪3,400',
-    songIds: [],
   },
   {
     id: 'inner-light',
@@ -57,7 +55,6 @@ export const exhibitionWorks = [
     availabilityHe: 'זמינה',
     available: true,
     price: '₪3,600',
-    songIds: ['yofi'],
   },
   {
     id: 'hidden-harmony',
@@ -77,7 +74,6 @@ export const exhibitionWorks = [
     availabilityHe: 'זמינה',
     available: true,
     price: '₪3,900',
-    songIds: ['lihyot'],
   },
   {
     id: 'fragility-of-love',
@@ -97,7 +93,6 @@ export const exhibitionWorks = [
     availabilityHe: 'לא מוצעת למכירה בתערוכה זו',
     available: false,
     price: '',
-    songIds: [],
   },
   {
     id: 'gate-to-infinity',
@@ -117,6 +112,5 @@ export const exhibitionWorks = [
     availabilityHe: 'לא מוצעת למכירה בתערוכה זו',
     available: false,
     price: '',
-    songIds: [],
   },
 ];

@@ -28,7 +28,7 @@ function assetPath(fileName) {
 }
 
 function sorted(rows) {
-  return [...rows].sort((a, b) => Number(a.sort) - Number(b.sort));
+  return [...rows].sort((a, b) => Number(a.sort ?? a.order) - Number(b.sort ?? b.order));
 }
 
 function nonEmpty(remoteValue, fallbackValue = '') {
@@ -70,26 +70,45 @@ export function normalizeCollections(rows) {
   ));
 }
 
+function relatedWorkIds(value) {
+  const ids = Array.isArray(value) ? value : String(value || '').split(',');
+  return ids.map((id) => String(id).trim()).filter(Boolean);
+}
+
+function normalizeSong(song) {
+  const cover = optimizedImage(song.cover, 'thumbnail');
+  return {
+    id: song.id,
+    domId: `track-${song.id}`,
+    title: song.titleHe || song.titleEn,
+    titleEn: song.titleEn,
+    titleHe: song.titleHe,
+    artist: song.artist || 'Ben Oz',
+    audio: assetPath(song.audio),
+    cover: cover.src,
+    coverWidth: cover.width,
+    coverHeight: cover.height,
+    animation: assetPath(song.video),
+    noteEn: song.noteEn || '',
+    noteHe: song.noteHe || '',
+    relatedWorkIds: relatedWorkIds(song.relatedWorkIds),
+  };
+}
+
 function normalizeSongs(rows) {
-  return sorted(rows).map((row) => {
-    const cover = optimizedImage(row.cover, 'thumbnail');
-    return {
-      id: row.id,
-      domId: `track-${row.id}`,
-      title: row.titleHe || row.titleEn,
-      titleEn: row.titleEn,
-      titleHe: row.titleHe,
-      artist: row.artist || 'Ben Oz',
-      audio: assetPath(row.audio),
-      cover: cover.src,
-      coverWidth: cover.width,
-      coverHeight: cover.height,
-      animation: assetPath(row.video),
-      noteEn: row.noteEn || '',
-      noteHe: row.noteHe || '',
-      relatedWorkIds: String(row.relatedWorkIds || '').split(',').map((id) => id.trim()).filter(Boolean),
-    };
+  return sorted(rows).map(normalizeSong);
+}
+
+function indexSongIdsByWork(songs) {
+  const songIdsByWork = new Map();
+  songs.forEach((song) => {
+    song.relatedWorkIds.forEach((workId) => {
+      const current = songIdsByWork.get(workId) || [];
+      current.push(song.id);
+      songIdsByWork.set(workId, current);
+    });
   });
+  return songIdsByWork;
 }
 
 function normalizeWork(work, {
@@ -133,14 +152,7 @@ function normalizeWork(work, {
 }
 
 function normalizeWorks(rows, songs) {
-  const songIdsByWork = new Map();
-  songs.forEach((song) => {
-    song.relatedWorkIds.forEach((workId) => {
-      const current = songIdsByWork.get(workId) || [];
-      current.push(song.id);
-      songIdsByWork.set(workId, current);
-    });
-  });
+  const songIdsByWork = indexSongIdsByWork(songs);
 
   return rows.map((row, sourceOrder) => (
     normalizeWork(
@@ -155,35 +167,24 @@ function normalizeWorks(rows, songs) {
   ));
 }
 
-function normalizeLocalWork(work, sourceOrder) {
+function normalizeLocalWork(work, sourceOrder, songIdsByWork) {
   return normalizeWork(
     work,
     {
       available: Boolean(work.available),
       order: Number.isFinite(Number(work.order)) ? Number(work.order) : (sourceOrder + 1) * 10,
       sourceOrder,
-      songIds: work.songIds || [],
+      songIds: songIdsByWork.get(work.id) || [],
     },
   );
 }
 
 export function fallbackContent() {
+  const songs = normalizeSongs(localSongs);
+  const songIdsByWork = indexSongIdsByWork(songs);
   const works = localCollections.flatMap((collection) => (
-    collection.works.map((work, sourceOrder) => normalizeLocalWork(work, sourceOrder))
+    collection.works.map((work, sourceOrder) => normalizeLocalWork(work, sourceOrder, songIdsByWork))
   ));
-  const songs = localSongs.map((song) => {
-    const cover = optimizedImage(song.cover, 'thumbnail');
-    return {
-      ...song,
-      cover: cover.src,
-      coverWidth: cover.width,
-      coverHeight: cover.height,
-      titleEn: song.titleEn || song.title,
-      titleHe: song.titleHe || song.title,
-      artist: song.artist || 'Ben Oz',
-      relatedWorkIds: works.filter((work) => work.songIds.includes(song.id)).map((work) => work.id),
-    };
-  });
   const collections = localCollections.map((collection) => ({
     ...collection,
     cover: optimizedImage(collection.cover, 'thumbnail').src,

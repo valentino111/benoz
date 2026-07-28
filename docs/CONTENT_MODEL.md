@@ -31,7 +31,7 @@ Common fields include:
 - availability labels, boolean availability, and optional price;
 - related Song IDs derived from Song relationships.
 
-Bundled fallback Works use this same source shape directly. Both fallback and Google Sheets Works pass through the same runtime normalizer; compatibility-only `textEn`, `textHe`, and nested `media` fields are not supported.
+Bundled fallback Works use this same source shape directly. Both fallback and Google Sheets Works pass through the same runtime normalizer; compatibility-only `textEn`, `textHe`, nested `media`, and source-level Work `songIds` fields are not supported.
 
 `id` identifies a Work and must remain globally unique. The Sheets `sort` value becomes normalized `order` and controls presentation only within the Work's own Collection. The runtime filters by `collectionId` before sorting numerically by `order`; equal values retain source-row order, with Work ID as the final deterministic tie-breaker. Reusing values such as `10`, `20`, and `30` in separate Collections is expected.
 
@@ -51,6 +51,8 @@ Common fields include:
 - comma-separated `relatedWorkIds` in Google Sheets.
 
 Current Song IDs are `lihyot` and `yofi`. Only one audio track should play at a time.
+
+Bundled fallback Songs use the same `relatedWorkIds` relationship source as Google Sheets. The loader derives runtime Work `songIds` from Songs for both sources, preventing duplicate relationship definitions from drifting apart.
 
 ## Relationships
 
