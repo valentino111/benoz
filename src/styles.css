@@ -724,6 +724,12 @@ footer{
 .collector-summary .collector-label{
   margin-top:0;
 }
+.edition-info{
+  margin-top:7px;
+  color:var(--muted);
+  font-size:calc(var(--small) - 1px);
+  line-height:1.4;
+}
 .details-btn{
   display:inline-flex;
   align-items:center;
@@ -749,6 +755,31 @@ footer{
   font-size:var(--small);
   margin-bottom:18px;
 }
+.dialog-edition{
+  display:grid;
+  grid-template-columns:auto 1fr;
+  gap:8px 16px;
+  align-items:baseline;
+  margin:0 0 18px;
+  padding:13px 0;
+  border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+}
+.dialog-edition[hidden]{display:none}
+.dialog-edition-label{
+  color:var(--gold-deep);
+  font-size:var(--small);
+  letter-spacing:.08em;
+}
+.dialog-edition-value{color:var(--gold);font-size:16px}
+.dialog-description{
+  margin:0 0 18px;
+  color:var(--muted);
+  font-size:var(--small);
+  line-height:1.6;
+  white-space:pre-line;
+}
+.dialog-description[hidden]{display:none}
 .dialog-price{
   font-size:var(--heading);
   margin:22px 0 6px;
@@ -1211,6 +1242,7 @@ body.en .art-copy .en-title{display:none}
   .collector-summary{margin-top:25px}
   .collector-label{font-size:12px;letter-spacing:.15em}
   .availability{font-size:14px;margin-top:8px}
+  .edition-info{font-size:13px;margin-top:7px}
   .details-btn{min-height:48px;padding:12px 22px;margin-top:18px;font-size:12px}
   .art-nav{
     order:3;position:static!important;display:grid;grid-template-columns:1fr auto 1fr;

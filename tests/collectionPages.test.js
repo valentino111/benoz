@@ -174,8 +174,8 @@ test('the first collection retains its established hero structure and content da
     {
       pageId: 'gallery',
       heroImage: '/assets/brand/ben-oz-logo-gold-transparent.png',
-      noteEn: 'The complete series consists of six works.\nFour are presented in the current exhibition.\nEach artwork is available in its original artistic version with integrated text, where typography is an essential part of the composition, or as a clean image without text, according to the collector’s preference.',
-      noteHe: 'הסדרה המלאה כוללת שש עבודות.\nארבע מתוכן משתתפות בתערוכה הנוכחית.\nכל יצירה זמינה בגרסתה האמנותית המקורית, שבה הטקסט מהווה חלק בלתי נפרד מהקומפוזיציה, או בגרסה נקייה ללא טקסט – בהתאם להעדפת האספן.',
+      noteEn: 'The complete series consists of six works.\nFour are presented in the current exhibition.',
+      noteHe: 'הסדרה המלאה כוללת שש עבודות.\nארבע מתוכן משתתפות בתערוכה הנוכחית.',
       workIds: [
         'human-creator',
         'gaze-of-compassion',
@@ -193,8 +193,8 @@ test('Pearls of Truth English intro renders its English text', () => {
   const hero = getCollectionHeroModel(pearls);
   assert.equal(hero.en.intro, 'A collection where words, images, music and motion meet.');
   assert.equal(hero.he.intro, '');
-  assert.equal(pearls.noteEn, 'Each artwork is available in its original artistic version with integrated text, where typography is an essential part of the composition, or as a clean image without text, according to the collector’s preference.');
-  assert.equal(pearls.noteHe, 'כל יצירה זמינה בגרסתה האמנותית המקורית, שבה הטקסט מהווה חלק בלתי נפרד מהקומפוזיציה, או בגרסה נקייה ללא טקסט – בהתאם להעדפת האספן.');
+  assert.equal(pearls.noteEn, '');
+  assert.equal(pearls.noteHe, '');
 });
 
 test('Pearls of Truth Hebrew intro renders approved descriptionHe text', () => {
