@@ -169,45 +169,6 @@ document.addEventListener('keydown',e=>{
   }
 });
 
-const audios=[...document.querySelectorAll('audio')];
-document.querySelectorAll('.track').forEach(track=>{
-  const audio=track.querySelector('audio');
-  const play=track.querySelector('.play');
-  const range=track.querySelector('.range');
-  const time=track.querySelector('.time');
-
-  play.addEventListener('click',()=>{
-    if(audio.paused){
-      audios.forEach(a=>{if(a!==audio)a.pause()});
-      const playback=audio.play();
-      if(playback) playback.catch(()=>{
-        play.classList.remove('is-playing');
-        play.setAttribute('aria-pressed','false');
-      });
-    }else audio.pause();
-  });
-  audio.addEventListener('play',()=>{
-    play.classList.add('is-playing');
-    play.setAttribute('aria-pressed','true');
-    play.setAttribute('aria-label',play.getAttribute('aria-label').replace(/^Play /,'Pause '));
-  });
-  audio.addEventListener('pause',()=>{
-    play.classList.remove('is-playing');
-    play.setAttribute('aria-pressed','false');
-    play.setAttribute('aria-label',play.getAttribute('aria-label').replace(/^Pause /,'Play '));
-  });
-  audio.addEventListener('timeupdate',()=>{
-    range.value=audio.duration?audio.currentTime/audio.duration*100:0;
-    const m=Math.floor(audio.currentTime/60);
-    const s=Math.floor(audio.currentTime%60).toString().padStart(2,'0');
-    time.textContent=`${m}:${s}`;
-    range.setAttribute('aria-valuetext',`${m} minutes ${s} seconds`);
-  });
-  range.addEventListener('input',()=>{
-    if(audio.duration) audio.currentTime=range.value/100*audio.duration;
-  });
-});
-
 document.addEventListener('contextmenu',e=>{
   if(e.target.closest('img,.art-media'))e.preventDefault();
 });
@@ -404,49 +365,6 @@ lbStage.addEventListener('click',e=>{
 });
 
 
-// Animate music covers on hover. On touch devices, tap to play.
-document.querySelectorAll('.track-media').forEach(media=>{
-  const video=media.querySelector('.track-hover-video');
-  if(!video) return;
-
-  const startPreview=()=>{
-    video.currentTime=0;
-    media.classList.add('is-playing');
-    const promise=video.play();
-    if(promise) promise.catch(()=>{
-      media.classList.remove('is-playing');
-    });
-  };
-
-  const stopPreview=()=>{
-    video.pause();
-    video.currentTime=0;
-    media.classList.remove('is-playing');
-  };
-
-  media.addEventListener('mouseenter',startPreview);
-  media.addEventListener('mouseleave',stopPreview);
-
-  media.addEventListener('click',()=>{
-    if(window.matchMedia('(hover:none)').matches){
-      if(video.paused) startPreview();
-      else stopPreview();
-    }
-  });
-  media.addEventListener('keydown',e=>{
-    if(e.key!=='Enter' && e.key!==' ') return;
-    e.preventDefault();
-    if(video.paused) startPreview();
-    else stopPreview();
-  });
-
-  video.addEventListener('ended',()=>{
-    video.currentTime=0;
-    media.classList.remove('is-playing');
-  });
-});
-
-
 // Subtle pointer parallax for the gallery opening.
 const parallaxItems=[...document.querySelectorAll('.parallax-item')];
 const heroSections=[...document.querySelectorAll('.hero')];
@@ -605,11 +523,9 @@ cleanup=()=>{
   observers.forEach(activeObserver=>activeObserver.disconnect());
   closeLightbox();
   if(detailsDialog.open) detailsDialog.close();
-  audios.forEach(audio=>audio.pause());
   document.querySelectorAll('video').forEach(video=>video.pause());
   document.querySelectorAll('.image-shield').forEach(shield=>shield.remove());
   document.querySelectorAll('.fade.show').forEach(element=>element.classList.remove('show'));
-  document.querySelectorAll('.track-media.is-playing').forEach(element=>element.classList.remove('is-playing'));
   closeMobileMenu();
   parallaxItems.forEach(element=>{element.style.transform=''});
   lbImg.removeAttribute('src');
@@ -621,18 +537,6 @@ cleanup=()=>{
     const next=section.querySelector('.art-next');
     if(prev) prev.disabled=false;
     if(next) next.disabled=false;
-  });
-  document.querySelectorAll('.track').forEach(track=>{
-    const play=track.querySelector('.play');
-    const range=track.querySelector('.range');
-    const time=track.querySelector('.time');
-    if(play){
-      play.classList.remove('is-playing');
-      play.setAttribute('aria-pressed','false');
-      play.setAttribute('aria-label',play.getAttribute('aria-label').replace(/^Pause /,'Play '));
-    }
-    if(range){range.value=0;range.removeAttribute('aria-valuetext')}
-    if(time) time.textContent='0:00';
   });
   langBtn.textContent=originalLangLabel;
   soundBtn.textContent=originalSoundLabel;

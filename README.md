@@ -15,3 +15,11 @@ Animation and music belong to individual works rather than separate site section
 npm install
 npm run dev -- --host
 ```
+
+## Test
+
+```bash
+npm test
+npx playwright install chromium
+npm run test:e2e
+```

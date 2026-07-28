@@ -261,7 +261,7 @@ button{font:inherit}
 .track img{width:100%;display:block;aspect-ratio:1;object-fit:cover;user-select:none;-webkit-user-drag:none}
 .track-body{padding:22px}
 .track-title{font-size:var(--heading);margin:0 0 18px}
-.player{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center}
+.player{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;direction:ltr}
 .play{
   width:46px;height:46px;border-radius:50%;border:1px solid var(--gold);
   display:grid;place-items:center;padding:0;
