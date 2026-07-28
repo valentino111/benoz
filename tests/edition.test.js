@@ -10,8 +10,8 @@ import { buildRemoteContent, fallbackContent } from '../src/data/contentService.
 import { validateSheetRows } from '../src/data/contentValidation.js';
 
 test('Edition formatter handles unique, numbered, string, and whitespace values', () => {
-  assert.equal(formatEdition(1, 1, 'en').value, '1/1 (Unique Edition)');
-  assert.equal(formatEdition('1', '1', 'en').value, '1/1 (Unique Edition)');
+  assert.equal(formatEdition(1, 1, 'en').value, '1/1 (Unique Gallery Edition)');
+  assert.equal(formatEdition('1', '1', 'en').value, '1/1 (Unique Gallery Edition)');
   assert.equal(formatEdition(1, 3, 'en').value, '1/3');
   assert.equal(formatEdition(2, 4, 'en').value, '2/4');
   assert.equal(formatEdition(' 1 ', ' 3 ', 'en').value, '1/3');
@@ -38,7 +38,7 @@ test('Edition formatter localizes English and Hebrew from one normalized model',
   const hebrew = formatEdition(normalized.editionNumber, normalized.editionTotal, 'he');
 
   assert.deepEqual(normalized, { editionNumber: 1, editionTotal: 1 });
-  assert.equal(english.text, 'Edition: 1/1 (Unique Edition)');
+  assert.equal(english.text, 'Edition: 1/1 (Unique Gallery Edition)');
   assert.equal(hebrew.text, 'מהדורה: 1/1 (מהדורה יחידה)');
   assert.deepEqual(getEditionTranslations('he'), {
     label: 'מהדורה',

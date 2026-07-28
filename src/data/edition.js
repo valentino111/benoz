@@ -1,7 +1,7 @@
 const EDITION_TRANSLATIONS = {
   en: {
     label: 'Edition',
-    unique: 'Unique Edition',
+    unique: 'Unique Gallery Edition',
   },
   he: {
     label: 'מהדורה',
