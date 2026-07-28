@@ -34,9 +34,9 @@ Planned engineering work:
 
 - keep interaction behavior in maintainable React components and hooks;
 - preserve explicit lifecycle cleanup for global browser behavior;
-- replace static HTML strings with JSX where practical;
+- render page sections as direct JSX;
 - organize styles by responsibility without changing the visual direction;
-- add error boundaries and useful diagnostics that remain invisible in the visitor experience.
+- maintain the recoverable production error boundary and development-only diagnostics.
 
 ## Milestone 3 — Release 1.0 readiness
 

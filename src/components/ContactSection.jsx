@@ -2,7 +2,7 @@ export default function ContactSection({ standalone = false }) {
   const Heading = standalone ? 'h1' : 'h2';
 
   return (
-    <section className="contact fade" id="contact">
+    <section className={`contact fade${standalone ? ' show' : ''}`} id="contact">
       <div className="contact-card">
         <div className="contact-role"><span data-lang="he">אמן</span><span data-lang="en">Artist</span></div>
         <div className="contact-name">Ben Oz</div>

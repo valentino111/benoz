@@ -191,7 +191,7 @@ export default function MusicSection({ songs = [], standalone = false }) {
   const [activeSongId, setActiveSongId] = useState('');
   const Heading = standalone ? 'h1' : 'h2';
   return (
-    <section className="music fade" id="music">
+    <section className={`music fade${standalone ? ' show' : ''}`} id="music">
       <div className="music-wrap">
         <Heading><LanguageText en="Beyond the Canvas" he="מעבר לקנבס" /></Heading>
         <div className="tracks">

@@ -7,7 +7,6 @@ import {
   PAGE_EXHIBITIONS,
   PAGE_MUSIC,
   PAGE_STORY,
-  revealRoutePage,
   resolveSiteRoute,
   sitePageUrl,
   VIEW_COLLECTION,
@@ -66,14 +65,24 @@ test('legacy root collection links remain valid while page navigation removes co
   );
 });
 
-test('client-side page navigation reveals content that was hidden when the observer started', () => {
-  const addedClasses = [];
-  const pageElement = { classList: { add: (className) => addedClasses.push(className) } };
-  const documentLike = { getElementById: (id) => (id === PAGE_STORY ? pageElement : null) };
+test('standalone pages reveal declaratively without route-level DOM mutation', async () => {
+  const [app, routes, ...sections] = await Promise.all([
+    readFile(new URL('../src/App.jsx', import.meta.url), 'utf8'),
+    readFile(new URL('../src/data/siteRoutes.js', import.meta.url), 'utf8'),
+    ...[
+      'MusicSection.jsx',
+      'StorySection.jsx',
+      'ExhibitionsSection.jsx',
+      'ContactSection.jsx',
+    ].map((file) => readFile(new URL(`../src/components/${file}`, import.meta.url), 'utf8')),
+  ]);
 
-  assert.equal(revealRoutePage(documentLike, PAGE_STORY), true);
-  assert.deepEqual(addedClasses, ['show']);
-  assert.equal(revealRoutePage(documentLike, 'missing'), false);
+  sections.forEach((section) => {
+    assert.match(section, /standalone \? ' show' : ''/);
+  });
+  assert.match(app, /data-react-migration="ready"/);
+  assert.doesNotMatch(app, /revealRoutePage|data-react-migration', 'ready'/);
+  assert.doesNotMatch(routes, /documentLike|classList/);
 });
 
 test('navigation exposes every restored route and Netlify serves them through the SPA entry', async () => {

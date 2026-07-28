@@ -51,7 +51,7 @@ export default function StorySection({ standalone = false }) {
   const Heading = standalone ? 'h1' : 'h2';
 
   return (
-    <section className="story fade" id="story">
+    <section className={`story fade${standalone ? ' show' : ''}`} id="story">
       <div className="story-grid">
         <div>
           <div className="story-kicker">

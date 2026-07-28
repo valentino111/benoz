@@ -11,11 +11,12 @@ test('React owns loader, fade reveal, and collection hero parallax without a leg
   ]);
 
   assert.match(app, /useFadeReveal\(Boolean\(content\)\)/);
-  assert.match(app, /data-react-migration', 'ready'/);
+  assert.match(app, /data-react-migration="ready"/);
+  assert.doesNotMatch(app, /data-react-migration', 'ready'/);
   assert.doesNotMatch(app, /legacy\.js|BenOzLegacyRuntime|createElement\('script'\)/);
   assert.match(entry, /loaderHidden \? ' is-hidden' : ''/);
   assert.match(reveal, /new IntersectionObserver/);
-  assert.match(reveal, /observer\.unobserve\(entry\.target\)/);
+  assert.doesNotMatch(reveal, /observer\.unobserve/);
   assert.match(parallax, /requestAnimationFrame/);
   assert.match(parallax, /prefers-reduced-motion: reduce/);
 

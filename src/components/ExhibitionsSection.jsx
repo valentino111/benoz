@@ -2,7 +2,7 @@ export default function ExhibitionsSection({ standalone = false }) {
   const Heading = standalone ? 'h1' : 'h2';
 
   return (
-    <section className="exhibitions fade" id="exhibitions">
+    <section className={`exhibitions fade${standalone ? ' show' : ''}`} id="exhibitions">
       <div className="exhibitions-wrap">
         <div className="story-kicker">
           <span data-lang="he">תערוכה נוכחית</span>

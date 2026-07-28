@@ -23,7 +23,6 @@ import {
   PAGE_EXHIBITIONS,
   PAGE_MUSIC,
   PAGE_STORY,
-  revealRoutePage,
   resolveSiteRoute,
   SITE_PATHS,
   sitePageUrl,
@@ -104,8 +103,6 @@ export default function App() {
         return;
       }
 
-      if (view === VIEW_PAGE) revealRoutePage(document, activePage);
-
       const hashTarget = view === VIEW_COLLECTION && window.location.hash
         ? document.getElementById(decodeURIComponent(window.location.hash.slice(1)))
         : null;
@@ -127,7 +124,6 @@ export default function App() {
     if (!content) return undefined;
 
     document.documentElement.dataset.contentSource = content.source;
-    document.getElementById('reactMigrationRoot')?.setAttribute('data-react-migration', 'ready');
     return () => {
       delete document.documentElement.dataset.contentSource;
     };
@@ -211,7 +207,7 @@ export default function App() {
   const showSharedSection = (page) => view === VIEW_COLLECTION || activePage === page;
 
   return (
-    <div id="reactMigrationRoot" data-react-migration="loading">
+    <div id="reactMigrationRoot" data-react-migration="ready">
       <SeoHead
         content={content}
         language={language}
