@@ -205,25 +205,6 @@ allArtImages.forEach(img=>{
   },{capture:true});
 });
 
-// Artwork section navigation.
-const artworkSections=[...document.querySelectorAll('.artwork')];
-const artworkSectionsByCollection=new Map();
-artworkSections.forEach(section=>{
-  const collectionSections=artworkSectionsByCollection.get(section.dataset.collectionId) || [];
-  collectionSections.push(section);
-  artworkSectionsByCollection.set(section.dataset.collectionId,collectionSections);
-});
-artworkSections.forEach(section=>{
-  const collectionSections=artworkSectionsByCollection.get(section.dataset.collectionId);
-  const index=collectionSections.indexOf(section);
-  const prev=section.querySelector('.art-prev');
-  const next=section.querySelector('.art-next');
-  if(prev) prev.disabled=index===0;
-  if(next) next.disabled=index===collectionSections.length-1;
-  prev?.addEventListener('click',()=>collectionSections[index-1]?.scrollIntoView({behavior:'smooth',block:'center'}));
-  next?.addEventListener('click',()=>collectionSections[index+1]?.scrollIntoView({behavior:'smooth',block:'center'}));
-});
-
 // Enhanced lightbox zoom, live percentage, desktop controls and mobile pinch.
 const lbStage=lightbox.querySelector('.lb-stage');
 const lbCount=lightbox.querySelector('.lb-count');
@@ -427,51 +408,6 @@ document.addEventListener('click',e=>{
   if(topbar?.classList.contains('menu-open') && !topbar.contains(e.target)) closeMobileMenu();
 });
 
-const artworkBySlug=new Map(artworkSections.map(section=>[section.dataset.artworkSlug,section]));
-function openGalleryAt(section, smooth=false){
-  scheduleFrame(()=>section?.scrollIntoView({behavior:smooth?'smooth':'auto',block:'start'}));
-}
-function handleArtworkHash(){
-  const slug=decodeURIComponent(location.hash.slice(1));
-  const section=artworkBySlug.get(slug);
-  if(section) openGalleryAt(section,false);
-}
-window.addEventListener('hashchange',handleArtworkHash);
-if(location.hash && artworkBySlug.has(decodeURIComponent(location.hash.slice(1)))){
-  handleArtworkHash();
-}
-
-artworkSections.forEach(section=>{
-  const collectionSections=artworkSectionsByCollection.get(section.dataset.collectionId);
-  const index=collectionSections.indexOf(section);
-  let sx=0,sy=0;
-  section.addEventListener('touchstart',e=>{
-    if(e.touches.length!==1)return;
-    sx=e.touches[0].clientX;sy=e.touches[0].clientY;
-  },{passive:true});
-  section.addEventListener('touchend',e=>{
-    if(e.changedTouches.length!==1 || lightbox.classList.contains('open'))return;
-    const dx=e.changedTouches[0].clientX-sx;
-    const dy=e.changedTouches[0].clientY-sy;
-    if(Math.abs(dx)<70 || Math.abs(dx)<Math.abs(dy)*1.35)return;
-    const target=dx<0?collectionSections[index+1]:collectionSections[index-1];
-    if(target){
-      history.replaceState(history.state,'','#'+target.dataset.artworkSlug);
-      target.scrollIntoView({behavior:'smooth',block:'start'});
-    }
-  },{passive:true});
-});
-
-// Keep a shareable artwork URL while browsing the exhibition.
-const hashObserver=new IntersectionObserver(entries=>{
-  const visible=entries.filter(e=>e.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];
-  if(visible?.target?.dataset.artworkSlug && site.classList.contains('active')){
-    history.replaceState(history.state,'','#'+visible.target.dataset.artworkSlug);
-  }
-},{threshold:[.45,.65]});
-observers.push(hashObserver);
-artworkSections.forEach(section=>hashObserver.observe(section));
-
 cleanup=()=>{
   listeners.reverse().forEach(([target,type,handler,options])=>target.removeEventListener(type,handler,options));
   timers.forEach(timer=>window.clearTimeout(timer));
@@ -487,12 +423,6 @@ cleanup=()=>{
   lbImg.removeAttribute('alt');
   lbImg.style.transform='';
   lbImg.style.cursor='';
-  artworkSections.forEach(section=>{
-    const prev=section.querySelector('.art-prev');
-    const next=section.querySelector('.art-next');
-    if(prev) prev.disabled=false;
-    if(next) next.disabled=false;
-  });
   langBtn.textContent=originalLangLabel;
   soundBtn.textContent=originalSoundLabel;
   soundBtn.classList.remove('is-on');

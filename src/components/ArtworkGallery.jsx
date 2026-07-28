@@ -180,13 +180,53 @@ function ArtworkMedia({ active, isFirstVisibleArtwork, work }) {
   );
 }
 
-function Artwork({ active, work, index, onViewDetails, total, songsById }) {
+function Artwork({
+  active,
+  artworkRef,
+  index,
+  onNavigate,
+  onViewDetails,
+  songsById,
+  total,
+  work,
+}) {
+  const swipeStart = useRef(null);
   const isFirstVisibleArtwork = active && index === 0;
   const editionEn = formatEdition(work.editionNumber, work.editionTotal, 'en');
   const editionHe = formatEdition(work.editionNumber, work.editionTotal, 'he');
   const isEditionDescription = /available in two editions/i.test(work.descriptionEn || '');
   return (
-    <article className="artwork fade" data-artwork-slug={work.id} data-collection-id={work.collectionId} data-img={work.image} id={work.id}>
+    <article
+      className="artwork fade"
+      data-artwork-slug={work.id}
+      data-collection-id={work.collectionId}
+      data-img={work.image}
+      id={work.id}
+      onTouchEnd={(event) => {
+        const start = swipeStart.current;
+        swipeStart.current = null;
+        if (
+          !start
+          || event.changedTouches.length !== 1
+          || document.body.classList.contains('lightbox-open')
+        ) return;
+        const dx = event.changedTouches[0].clientX - start.x;
+        const dy = event.changedTouches[0].clientY - start.y;
+        if (Math.abs(dx) < 70 || Math.abs(dx) < Math.abs(dy) * 1.35) return;
+        onNavigate(index + (dx < 0 ? 1 : -1), { block: 'start' });
+      }}
+      onTouchStart={(event) => {
+        if (event.touches.length !== 1) {
+          swipeStart.current = null;
+          return;
+        }
+        swipeStart.current = {
+          x: event.touches[0].clientX,
+          y: event.touches[0].clientY,
+        };
+      }}
+      ref={artworkRef}
+    >
       <ArtworkMedia active={active} isFirstVisibleArtwork={isFirstVisibleArtwork} work={work} />
 
       <div className="art-copy">
@@ -228,9 +268,23 @@ function Artwork({ active, work, index, onViewDetails, total, songsById }) {
       </div>
 
       <nav aria-label="Artwork navigation" className="art-nav">
-        <button className="art-prev">← <LanguageText en="Previous" he="הקודמת" /></button>
+        <button
+          className="art-prev"
+          disabled={index === 0}
+          onClick={() => onNavigate(index - 1, { block: 'center' })}
+          type="button"
+        >
+          ← <LanguageText en="Previous" he="הקודמת" />
+        </button>
         <span className="art-count">{index + 1} / {total}</span>
-        <button className="art-next"><LanguageText en="Next" he="הבאה" /> →</button>
+        <button
+          className="art-next"
+          disabled={index === total - 1}
+          onClick={() => onNavigate(index + 1, { block: 'center' })}
+          type="button"
+        >
+          <LanguageText en="Next" he="הבאה" /> →
+        </button>
       </nav>
     </article>
   );
@@ -242,6 +296,7 @@ export default function ArtworkGallery({
   songs = [],
   works = [],
 }) {
+  const artworkElements = useRef(new Map());
   const songsById = Object.fromEntries(songs.map((song) => [song.id, song]));
   const worksByCollection = works.reduce((groups, work) => {
     const collectionWorks = groups.get(work.collectionId) || [];
@@ -250,14 +305,92 @@ export default function ArtworkGallery({
     return groups;
   }, new Map());
 
+  function navigateToArtwork(collectionWorks, index, { block = 'start' } = {}) {
+    const work = collectionWorks[index];
+    const target = work ? artworkElements.current.get(work.id) : null;
+    if (!target) return;
+    const url = new URL(window.location.href);
+    url.hash = work.id;
+    window.history.replaceState(
+      window.history.state,
+      '',
+      `${url.pathname}${url.search}${url.hash}`,
+    );
+    target.scrollIntoView({ behavior: 'smooth', block });
+  }
+
+  useEffect(() => {
+    if (!active) return undefined;
+    let scrollFrame;
+    const scrollToHash = () => {
+      let slug;
+      try {
+        slug = decodeURIComponent(window.location.hash.slice(1));
+      } catch {
+        return;
+      }
+      const target = artworkElements.current.get(slug);
+      if (!target) return;
+      window.cancelAnimationFrame(scrollFrame);
+      scrollFrame = window.requestAnimationFrame(() => {
+        target.scrollIntoView({ behavior: 'auto', block: 'start' });
+      });
+    };
+
+    window.addEventListener('hashchange', scrollToHash);
+    scrollToHash();
+
+    if (typeof IntersectionObserver === 'undefined') {
+      return () => {
+        window.cancelAnimationFrame(scrollFrame);
+        window.removeEventListener('hashchange', scrollToHash);
+      };
+    }
+
+    const hashObserver = new IntersectionObserver((entries) => {
+      const visible = entries
+        .filter((entry) => entry.isIntersecting)
+        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+      const slug = visible?.target?.dataset.artworkSlug;
+      if (!slug) return;
+      const url = new URL(window.location.href);
+      if (url.hash === `#${slug}`) return;
+      url.hash = slug;
+      window.history.replaceState(
+        window.history.state,
+        '',
+        `${url.pathname}${url.search}${url.hash}`,
+      );
+    }, { threshold: [0.45, 0.65] });
+
+    works.forEach((work) => {
+      const element = artworkElements.current.get(work.id);
+      if (element) hashObserver.observe(element);
+    });
+
+    return () => {
+      window.cancelAnimationFrame(scrollFrame);
+      window.removeEventListener('hashchange', scrollToHash);
+      hashObserver.disconnect();
+    };
+  }, [active, works]);
+
   return works.map((work) => {
     const collectionWorks = worksByCollection.get(work.collectionId);
+    const index = collectionWorks.indexOf(work);
     return (
       <Artwork
         key={work.id}
         active={active}
+        artworkRef={(element) => {
+          if (element) artworkElements.current.set(work.id, element);
+          else artworkElements.current.delete(work.id);
+        }}
         work={work}
-        index={collectionWorks.indexOf(work)}
+        index={index}
+        onNavigate={(targetIndex, options) => {
+          navigateToArtwork(collectionWorks, targetIndex, options);
+        }}
         onViewDetails={onViewDetails}
         total={collectionWorks.length}
         songsById={songsById}
