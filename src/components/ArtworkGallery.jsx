@@ -180,7 +180,7 @@ function ArtworkMedia({ active, isFirstVisibleArtwork, work }) {
   );
 }
 
-function Artwork({ active, work, index, total, songsById }) {
+function Artwork({ active, work, index, onViewDetails, total, songsById }) {
   const isFirstVisibleArtwork = active && index === 0;
   const editionEn = formatEdition(work.editionNumber, work.editionTotal, 'en');
   const editionHe = formatEdition(work.editionNumber, work.editionTotal, 'he');
@@ -219,14 +219,8 @@ function Artwork({ active, work, index, total, songsById }) {
           )}
           <button
             className="details-btn"
-            data-available={String(work.available)}
-            data-edition-fraction={editionEn?.fraction || ''}
-            data-edition-unique={String(Boolean(editionEn?.isUnique))}
-            data-description-en={work.descriptionEn}
-            data-description-he={work.descriptionHe}
-            data-price={work.price}
-            data-title-en={work.titleEn}
-            data-title-he={work.titleHe}
+            onClick={() => onViewDetails?.(work)}
+            type="button"
           >
             <LanguageText en="View Details" he="פרטים" />
           </button>
@@ -242,7 +236,12 @@ function Artwork({ active, work, index, total, songsById }) {
   );
 }
 
-export default function ArtworkGallery({ active = false, works = [], songs = [] }) {
+export default function ArtworkGallery({
+  active = false,
+  onViewDetails,
+  songs = [],
+  works = [],
+}) {
   const songsById = Object.fromEntries(songs.map((song) => [song.id, song]));
   const worksByCollection = works.reduce((groups, work) => {
     const collectionWorks = groups.get(work.collectionId) || [];
@@ -259,6 +258,7 @@ export default function ArtworkGallery({ active = false, works = [], songs = [] 
         active={active}
         work={work}
         index={collectionWorks.indexOf(work)}
+        onViewDetails={onViewDetails}
         total={collectionWorks.length}
         songsById={songsById}
       />

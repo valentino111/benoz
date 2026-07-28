@@ -1,7 +1,12 @@
 import ArtworkGallery from './ArtworkGallery.jsx';
 import HeroSection from './HeroSection.jsx';
 
-export default function CollectionPage({ active, collection, songs }) {
+export default function CollectionPage({
+  active,
+  collection,
+  onViewDetails,
+  songs,
+}) {
   return (
     <section
       aria-labelledby={`collection-title-${collection.id}`}
@@ -10,7 +15,12 @@ export default function CollectionPage({ active, collection, songs }) {
       hidden={!active}
     >
       <HeroSection active={active} collection={collection} />
-      <ArtworkGallery active={active} works={collection.works} songs={songs} />
+      <ArtworkGallery
+        active={active}
+        onViewDetails={onViewDetails}
+        songs={songs}
+        works={collection.works}
+      />
     </section>
   );
 }

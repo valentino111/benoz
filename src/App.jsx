@@ -38,6 +38,7 @@ export default function App() {
   const [view, setView] = useState(VIEW_ENTRY);
   const [selectedCollectionId, setSelectedCollectionId] = useState('');
   const [activePage, setActivePage] = useState('');
+  const [detailsWork, setDetailsWork] = useState(null);
   const [language, setLanguage] = useState(() => languageFromLocation(window.location));
 
   useEffect(() => {
@@ -113,6 +114,10 @@ export default function App() {
       }
     });
     return () => window.cancelAnimationFrame(frame);
+  }, [activePage, selectedCollectionId, view]);
+
+  useEffect(() => {
+    setDetailsWork(null);
   }, [activePage, selectedCollectionId, view]);
 
   useEffect(() => {
@@ -229,6 +234,7 @@ export default function App() {
             active={view === VIEW_COLLECTION && collection.id === selectedCollectionId}
             collection={collection}
             key={collection.id}
+            onViewDetails={setDetailsWork}
             songs={content.songs}
           />
         ))}
@@ -246,7 +252,7 @@ export default function App() {
         </div>
         <SiteFooter />
       </main>
-      <Overlays />
+      <Overlays detailsWork={detailsWork} onCloseDetails={() => setDetailsWork(null)} />
     </div>
   );
 }
