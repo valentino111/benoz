@@ -18,6 +18,10 @@ const markup = `<dialog class="details-dialog" id="detailsDialog">
 <div class="dialog-edition-label"><span data-lang="he">${editionHe.label}</span><span data-lang="en">${editionEn.label}</span></div>
 <div class="dialog-edition-value"><bdi dir="ltr" id="dialogEditionFraction"></bdi><span data-lang="he" id="dialogEditionUniqueHe"> (${editionHe.unique})</span><span data-lang="en" id="dialogEditionUniqueEn"> (${editionEn.unique})</span></div>
 </div>
+<p class="dialog-description" hidden id="dialogDescription">
+<span data-lang="he" id="dialogDescriptionHe" lang="he" dir="rtl"></span>
+<span data-lang="en" id="dialogDescriptionEn" lang="en" dir="ltr"></span>
+</p>
 <p>
 <span data-lang="he">Fine Art Canvas בגודל 40×60 ס״מ, מתוח על מסגרת עץ ומוכן לתלייה.</span>
 <span data-lang="en">Fine Art Canvas, 40×60 cm, stretched on a wooden frame and ready to hang.</span>

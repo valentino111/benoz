@@ -772,6 +772,14 @@ footer{
   letter-spacing:.08em;
 }
 .dialog-edition-value{color:var(--gold);font-size:16px}
+.dialog-description{
+  margin:0 0 18px;
+  color:var(--muted);
+  font-size:var(--small);
+  line-height:1.6;
+  white-space:pre-line;
+}
+.dialog-description[hidden]{display:none}
 .dialog-price{
   font-size:var(--heading);
   margin:22px 0 6px;

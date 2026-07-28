@@ -106,8 +106,12 @@ test('Edition UI renders in cards and details with an LTR fraction in Hebrew', a
   assert.match(gallery, /className="edition-info"/);
   assert.match(gallery, /<bdi dir="ltr">\{editionHe\.fraction\}<\/bdi>/);
   assert.match(gallery, /data-edition-fraction=\{editionEn\?\.fraction \|\| ''\}/);
+  assert.match(gallery, /available in two editions/i);
+  assert.match(gallery, /data-description-en=\{work\.descriptionEn\}/);
   assert.match(overlays, /<bdi dir="ltr" id="dialogEditionFraction"><\/bdi>/);
+  assert.match(overlays, /class="dialog-description" hidden id="dialogDescription"/);
   assert.match(overlays, /\$\{editionHe\.unique\}/);
   assert.match(overlays, /\$\{editionEn\.unique\}/);
   assert.match(legacy, /dialogEdition\.hidden=!editionFraction/);
+  assert.match(legacy, /dialogDescriptionEn\.textContent=btn\.dataset\.descriptionEn \|\| ''/);
 });

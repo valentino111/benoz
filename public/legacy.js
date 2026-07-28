@@ -270,6 +270,9 @@ const dialogEdition=document.getElementById('dialogEdition');
 const dialogEditionFraction=document.getElementById('dialogEditionFraction');
 const dialogEditionUniqueHe=document.getElementById('dialogEditionUniqueHe');
 const dialogEditionUniqueEn=document.getElementById('dialogEditionUniqueEn');
+const dialogDescription=document.getElementById('dialogDescription');
+const dialogDescriptionHe=document.getElementById('dialogDescriptionHe');
+const dialogDescriptionEn=document.getElementById('dialogDescriptionEn');
 const dialogWhatsapp=document.getElementById('dialogWhatsapp');
 
 document.querySelectorAll('.details-btn').forEach(btn=>btn.addEventListener('click',()=>{
@@ -290,6 +293,9 @@ document.querySelectorAll('.details-btn').forEach(btn=>btn.addEventListener('cli
   dialogEdition.hidden=!editionFraction;
   dialogEditionUniqueHe.hidden=!isUniqueEdition;
   dialogEditionUniqueEn.hidden=!isUniqueEdition;
+  dialogDescriptionHe.textContent=btn.dataset.descriptionHe || '';
+  dialogDescriptionEn.textContent=btn.dataset.descriptionEn || '';
+  dialogDescription.hidden=!dialogDescriptionHe.textContent && !dialogDescriptionEn.textContent;
 
   const message=isAvailable
     ? `Hello, I am interested in "${btn.dataset.titleEn}" (${btn.dataset.price}).`

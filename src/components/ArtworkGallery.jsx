@@ -184,6 +184,7 @@ function Artwork({ active, work, index, total, songsById }) {
   const isFirstVisibleArtwork = active && index === 0;
   const editionEn = formatEdition(work.editionNumber, work.editionTotal, 'en');
   const editionHe = formatEdition(work.editionNumber, work.editionTotal, 'he');
+  const isEditionDescription = /available in two editions/i.test(work.descriptionEn || '');
   return (
     <article className="artwork fade" data-artwork-slug={work.id} data-collection-id={work.collectionId} data-img={work.image} id={work.id}>
       <ArtworkMedia active={active} isFirstVisibleArtwork={isFirstVisibleArtwork} work={work} />
@@ -193,7 +194,9 @@ function Artwork({ active, work, index, total, songsById }) {
         <h2><LanguageText en={work.titleEn} he={work.titleHe} /></h2>
         <div className="en-title">{work.titleEn}</div>
         {work.meta && <div className="meta">{work.meta}</div>}
-        <p className="desc"><LanguageText en={work.descriptionEn} he={work.descriptionHe} /></p>
+        {!isEditionDescription && (
+          <p className="desc"><LanguageText en={work.descriptionEn} he={work.descriptionHe} /></p>
+        )}
 
         {work.songIds?.map((songId) => <ArtworkSoundtrack key={songId} song={songsById[songId]} />)}
 
@@ -219,6 +222,8 @@ function Artwork({ active, work, index, total, songsById }) {
             data-available={String(work.available)}
             data-edition-fraction={editionEn?.fraction || ''}
             data-edition-unique={String(Boolean(editionEn?.isUnique))}
+            data-description-en={work.descriptionEn}
+            data-description-he={work.descriptionHe}
             data-price={work.price}
             data-title-en={work.titleEn}
             data-title-he={work.titleHe}
