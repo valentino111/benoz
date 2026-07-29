@@ -3,6 +3,7 @@
 - Removed the standalone Music page and its navigation item.
 - Changed artwork song links into direct Play/Pause controls on each artwork card.
 - Added one coordinated audio player per active collection so only one artwork song plays at a time.
+- Automatically mute artwork hover videos while a song is playing.
 - Kept English and Hebrew song titles and redirected the retired `/music` route to Gallery.
 - Removed `/music` from the generated sitemap and kept song structured data with its related collection.
 

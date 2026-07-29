@@ -190,7 +190,8 @@ test('mobile video previews use custom controls and start during a 150ms hold', 
   assert.match(gallery, /Boolean\(work\.video\)/);
   assert.match(gallery, /<source src=\{work\.video\} type="video\/mp4" \/>/);
   assert.match(gallery, /className=\{`artwork-preview-video/);
-  assert.doesNotMatch(gallery, /\smuted\s/);
+  assert.match(gallery, /muted=\{musicPlaying\}/);
+  assert.match(gallery, /musicPlaying=\{Boolean\(playingSongId\)\}/);
   assert.match(gallery, /startPreview\(\);\s*longPressTimer\.current = null;/);
   assert.match(gallery, /\}, 150\)/);
   assert.doesNotMatch(gallery, /longPressReady/);

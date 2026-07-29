@@ -45,6 +45,7 @@ function ArtworkMedia({
   active,
   isFirstVisibleArtwork,
   language,
+  musicPlaying,
   onOpen,
   work,
 }) {
@@ -175,6 +176,7 @@ function ArtworkMedia({
             controls={false}
             disablePictureInPicture
             draggable={false}
+            muted={musicPlaying}
             onEnded={stopPreview}
             onError={stopPreview}
             onPlay={() => setPreviewPlaying(true)}
@@ -265,6 +267,7 @@ function Artwork({
         active={active}
         isFirstVisibleArtwork={isFirstVisibleArtwork}
         language={language}
+        musicPlaying={Boolean(playingSongId)}
         onOpen={(opener) => onOpenArtwork(index, opener)}
         work={work}
       />

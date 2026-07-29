@@ -1,6 +1,11 @@
 import { expect, test } from '@playwright/test';
 
-async function prepareGallery(page, language = 'en') {
+async function prepareGallery(
+  page,
+  language = 'en',
+  collection = 'exhibition',
+  artwork = 'hidden-harmony',
+) {
   await page.route('https://docs.google.com/spreadsheets/**', (route) => route.abort());
   await page.addInitScript(() => {
     const mediaState = new WeakMap();
@@ -29,7 +34,7 @@ async function prepareGallery(page, language = 'en') {
     };
   });
 
-  await page.goto(`/gallery?collection=exhibition&lang=${language}#hidden-harmony`);
+  await page.goto(`/gallery?collection=${collection}&lang=${language}#${artwork}`);
   await expect(page.locator('#reactMigrationRoot')).toHaveAttribute('data-react-migration', 'ready');
 }
 
@@ -61,6 +66,22 @@ test('Hebrew artwork controls use the localized song title', async ({ page }) =>
   await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
   await expect(page.locator('#hidden-harmony .artwork-soundtrack button'))
     .toHaveAccessibleName('Play לחיות');
+});
+
+test('artwork hover videos are muted only while music is playing', async ({ page }) => {
+  await prepareGallery(page, 'en', 'pearls-of-truth', 'beauty-as-power');
+
+  const video = page.locator('#beauty-as-power .artwork-preview-video');
+  const play = page.locator('#beauty-as-power .artwork-soundtrack button');
+  await expect(video).toHaveJSProperty('muted', false);
+
+  await play.click();
+  await expect(play).toHaveAttribute('aria-pressed', 'true');
+  await expect(video).toHaveJSProperty('muted', true);
+
+  await play.click();
+  await expect(play).toHaveAttribute('aria-pressed', 'false');
+  await expect(video).toHaveJSProperty('muted', false);
 });
 
 test('the retired music URL redirects to the gallery selection', async ({ page }) => {
