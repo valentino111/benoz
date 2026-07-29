@@ -3,7 +3,6 @@ import EntryScreen from './components/EntryScreen.jsx';
 import ProjectHub from './components/ProjectHub.jsx';
 import SiteHeader from './components/SiteHeader.jsx';
 import CollectionPage from './components/CollectionPage.jsx';
-import MusicSection from './components/MusicSection.jsx';
 import StorySection from './components/StorySection.jsx';
 import ExhibitionsSection from './components/ExhibitionsSection.jsx';
 import ContactSection from './components/ContactSection.jsx';
@@ -21,7 +20,6 @@ import {
 import {
   PAGE_CONTACT,
   PAGE_EXHIBITIONS,
-  PAGE_MUSIC,
   PAGE_STORY,
   resolveSiteRoute,
   SITE_PATHS,
@@ -75,6 +73,14 @@ export default function App() {
     }
 
     function applyLocation({ initial = false } = {}) {
+      const legacyMusicPath = window.location.pathname.replace(/\/+$/, '').toLowerCase() === '/music';
+      if (legacyMusicPath) {
+        window.history.replaceState(
+          window.history.state,
+          '',
+          sitePageUrl(SITE_PATHS.gallery, window.location),
+        );
+      }
       const route = resolveSiteRoute(content.collections, window.location);
       applyRoute(route);
       setLanguage(languageFromLocation(window.location));
@@ -241,9 +247,6 @@ export default function App() {
             songs={content.songs}
           />
         ))}
-        <div hidden={!showSharedSection(PAGE_MUSIC)}>
-          <MusicSection songs={content.songs} standalone={view === VIEW_PAGE && activePage === PAGE_MUSIC} />
-        </div>
         <div hidden={!showSharedSection(PAGE_STORY)}>
           <StorySection standalone={view === VIEW_PAGE && activePage === PAGE_STORY} />
         </div>

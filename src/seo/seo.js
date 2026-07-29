@@ -1,7 +1,6 @@
 import {
   PAGE_CONTACT,
   PAGE_EXHIBITIONS,
-  PAGE_MUSIC,
   PAGE_STORY,
   SITE_PATHS,
   VIEW_COLLECTION,
@@ -33,16 +32,6 @@ const PAGE_COPY = {
     he: {
       title: 'גלריית אמנות — בן עוז',
       description: 'גלו יצירות אמנות דיגיטליות ואוספים חזותיים מאת בן עוז, ובהם הגאומטריה הנסתרת של הנפש ופניני אמת.',
-    },
-  },
-  music: {
-    en: {
-      title: 'Original Music — Ben Oz',
-      description: 'Listen to original music by Ben Oz, created as part of a multidisciplinary dialogue between image, poetry, sound and movement.',
-    },
-    he: {
-      title: 'מוזיקה מקורית — בן עוז',
-      description: 'האזינו למוזיקה מקורית מאת בן עוז, שנוצרה כחלק מדיאלוג רב־תחומי בין דימוי, שירה, צליל ותנועה.',
     },
   },
   story: {
@@ -104,7 +93,6 @@ function absoluteUrl(path, siteUrl) {
 function canonicalPath(route) {
   if (route.view === VIEW_COLLECTION || route.view === VIEW_COLLECTIONS) return SITE_PATHS.gallery;
   if (route.view === VIEW_ENTRY) return SITE_PATHS.home;
-  if (route.page === PAGE_MUSIC) return SITE_PATHS.music;
   if (route.page === PAGE_STORY) return SITE_PATHS.story;
   if (route.page === PAGE_EXHIBITIONS) return SITE_PATHS.exhibitions;
   if (route.page === PAGE_CONTACT) return SITE_PATHS.contact;
@@ -136,7 +124,6 @@ function localizedCollectionCopy(collection, language) {
 
 function pageKey(route) {
   if (route.view === VIEW_COLLECTIONS) return 'gallery';
-  if (route.page === PAGE_MUSIC) return 'music';
   if (route.page === PAGE_STORY) return 'story';
   if (route.page === PAGE_EXHIBITIONS) return 'exhibitions';
   if (route.page === PAGE_CONTACT) return 'contact';
@@ -243,10 +230,14 @@ export function buildSeoModel({
       creator: { '@id': `${cleanSiteUrl}/#artist` },
       hasPart: (collection.works || []).map((work) => artworkSchema(work, collection, cleanSiteUrl, canonical, lang)),
     });
-  }
-
-  if (route?.page === PAGE_MUSIC) {
-    graph.push(...(content?.songs || []).map((song) => songSchema(song, cleanSiteUrl, canonical, lang)));
+    const collectionSongIds = new Set(
+      (collection.works || []).flatMap((work) => work.songIds || []),
+    );
+    graph.push(
+      ...(content?.songs || [])
+        .filter((song) => collectionSongIds.has(song.id))
+        .map((song) => songSchema(song, cleanSiteUrl, canonical, lang)),
+    );
   }
 
   return {

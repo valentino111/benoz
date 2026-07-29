@@ -11,12 +11,22 @@ function LanguageText({ en, he }) {
   );
 }
 
-function ArtworkSoundtrack({ song }) {
+function ArtworkSoundtrack({ language, onToggle, playing, song }) {
   if (!song) return null;
+  const title = language === 'he'
+    ? (song.titleHe || song.titleEn || song.title)
+    : (song.titleEn || song.titleHe || song.title);
+  const action = playing ? 'Pause' : 'Play';
 
   return (
     <div className="artwork-soundtrack">
-      <a aria-label={`Listen to ${song.title}`} href={`#${song.domId}`}>
+      <button
+        aria-label={`${action} ${title}`}
+        aria-pressed={playing}
+        className={playing ? 'is-playing' : ''}
+        onClick={() => onToggle(song)}
+        type="button"
+      >
         <span aria-hidden="true" className="soundtrack-icon">
           <span className="gold-play-glyph" />
         </span>
@@ -24,10 +34,9 @@ function ArtworkSoundtrack({ song }) {
           <span className="soundtrack-kicker">
             <LanguageText en="Music of the Artwork" he="המוזיקה של היצירה" />
           </span>
-          <span className="soundtrack-title">{song.title}</span>
+          <span className="soundtrack-title">{title}</span>
         </span>
-        <span aria-hidden="true" className="soundtrack-arrow">↓</span>
-      </a>
+      </button>
     </div>
   );
 }
@@ -36,6 +45,7 @@ function ArtworkMedia({
   active,
   isFirstVisibleArtwork,
   language,
+  musicPlaying,
   onOpen,
   work,
 }) {
@@ -166,6 +176,7 @@ function ArtworkMedia({
             controls={false}
             disablePictureInPicture
             draggable={false}
+            muted={musicPlaying}
             onEnded={stopPreview}
             onError={stopPreview}
             onPlay={() => setPreviewPlaying(true)}
@@ -208,7 +219,9 @@ function Artwork({
   language,
   onNavigate,
   onOpenArtwork,
+  onToggleSong,
   onViewDetails,
+  playingSongId,
   songsById,
   total,
   work,
@@ -254,6 +267,7 @@ function Artwork({
         active={active}
         isFirstVisibleArtwork={isFirstVisibleArtwork}
         language={language}
+        musicPlaying={Boolean(playingSongId)}
         onOpen={(opener) => onOpenArtwork(index, opener)}
         work={work}
       />
@@ -267,7 +281,15 @@ function Artwork({
           <p className="desc"><LanguageText en={work.descriptionEn} he={work.descriptionHe} /></p>
         )}
 
-        {work.songIds?.map((songId) => <ArtworkSoundtrack key={songId} song={songsById[songId]} />)}
+        {work.songIds?.map((songId) => (
+          <ArtworkSoundtrack
+            key={songId}
+            language={language}
+            onToggle={onToggleSong}
+            playing={playingSongId === songId}
+            song={songsById[songId]}
+          />
+        ))}
 
         <div className="collector-summary">
           <div className="collector-label"><LanguageText en={work.collectorLabelEn} he={work.collectorLabelHe} /></div>
@@ -328,6 +350,8 @@ export default function ArtworkGallery({
   works = [],
 }) {
   const artworkElements = useRef(new Map());
+  const audioRef = useRef(null);
+  const [playingSongId, setPlayingSongId] = useState('');
   const songsById = Object.fromEntries(songs.map((song) => [song.id, song]));
   const worksByCollection = works.reduce((groups, work) => {
     const collectionWorks = groups.get(work.collectionId) || [];
@@ -349,6 +373,31 @@ export default function ArtworkGallery({
     );
     target.scrollIntoView({ behavior: 'smooth', block });
   }
+
+  function toggleSong(song) {
+    const audio = audioRef.current;
+    if (!audio || !song?.audio) return;
+
+    if (playingSongId === song.id && !audio.paused) {
+      audio.pause();
+      return;
+    }
+
+    if (audio.dataset.songId !== song.id) {
+      audio.src = song.audio;
+      audio.dataset.songId = song.id;
+    }
+    audio.play()?.catch(() => setPlayingSongId(''));
+  }
+
+  useEffect(() => {
+    if (active) return undefined;
+    audioRef.current?.pause();
+    setPlayingSongId('');
+    return undefined;
+  }, [active]);
+
+  useEffect(() => () => audioRef.current?.pause(), []);
 
   useEffect(() => {
     if (!active) return undefined;
@@ -406,30 +455,44 @@ export default function ArtworkGallery({
     };
   }, [active, works]);
 
-  return works.map((work) => {
-    const collectionWorks = worksByCollection.get(work.collectionId);
-    const index = collectionWorks.indexOf(work);
-    return (
-      <Artwork
-        key={work.id}
-        active={active}
-        artworkRef={(element) => {
-          if (element) artworkElements.current.set(work.id, element);
-          else artworkElements.current.delete(work.id);
-        }}
-        language={language}
-        work={work}
-        index={index}
-        onNavigate={(targetIndex, options) => {
-          navigateToArtwork(collectionWorks, targetIndex, options);
-        }}
-        onOpenArtwork={(targetIndex, opener) => {
-          onOpenArtwork?.(collectionWorks, targetIndex, opener);
-        }}
-        onViewDetails={onViewDetails}
-        total={collectionWorks.length}
-        songsById={songsById}
+  return (
+    <>
+      <audio
+        onEnded={() => setPlayingSongId('')}
+        onError={() => setPlayingSongId('')}
+        onPause={() => setPlayingSongId('')}
+        onPlay={() => setPlayingSongId(audioRef.current?.dataset.songId || '')}
+        preload="none"
+        ref={audioRef}
       />
-    );
-  });
+      {works.map((work) => {
+        const collectionWorks = worksByCollection.get(work.collectionId);
+        const index = collectionWorks.indexOf(work);
+        return (
+          <Artwork
+            key={work.id}
+            active={active}
+            artworkRef={(element) => {
+              if (element) artworkElements.current.set(work.id, element);
+              else artworkElements.current.delete(work.id);
+            }}
+            language={language}
+            work={work}
+            index={index}
+            onNavigate={(targetIndex, options) => {
+              navigateToArtwork(collectionWorks, targetIndex, options);
+            }}
+            onOpenArtwork={(targetIndex, opener) => {
+              onOpenArtwork?.(collectionWorks, targetIndex, opener);
+            }}
+            onToggleSong={toggleSong}
+            onViewDetails={onViewDetails}
+            playingSongId={playingSongId}
+            total={collectionWorks.length}
+            songsById={songsById}
+          />
+        );
+      })}
+    </>
+  );
 }

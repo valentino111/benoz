@@ -127,7 +127,6 @@ test('desktop menu reveals every standalone page declaratively', async ({ page }
   await preparePage(page, '/gallery?collection=exhibition#human-creator');
 
   for (const [path, section] of [
-    ['/music', '#music'],
     ['/story', '#story'],
     ['/exhibitions', '#exhibitions'],
     ['/contact', '#contact'],

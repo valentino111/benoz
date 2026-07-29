@@ -75,7 +75,6 @@ export default function SiteHeader({
           <LanguageLabel en="Home" he="בית" />
         </NavigationLink>
         <NavigationLink className="menu-link" href="/gallery" onActivate={closeMenu} onNavigate={onNavigate}><LanguageLabel en="Gallery" he="גלריה" /></NavigationLink>
-        <NavigationLink className="menu-link" href="/music" onActivate={closeMenu} onNavigate={onNavigate}><LanguageLabel en="Music" he="מוזיקה" /></NavigationLink>
         <NavigationLink className="menu-link" href="/story" onActivate={closeMenu} onNavigate={onNavigate}><LanguageLabel en="Story" he="הסיפור" /></NavigationLink>
         <NavigationLink className="menu-link" href="/exhibitions" onActivate={closeMenu} onNavigate={onNavigate}><LanguageLabel en="Exhibitions" he="תערוכות" /></NavigationLink>
         <NavigationLink className="menu-link" href="/contact" onActivate={closeMenu} onNavigate={onNavigate}><LanguageLabel en="Contact" he="יצירת קשר" /></NavigationLink>

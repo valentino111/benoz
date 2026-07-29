@@ -4,7 +4,7 @@ import { collections } from '../src/data/collections.js';
 import { DEFAULT_SITE_URL } from '../src/seo/seo.js';
 
 const siteUrl = String(process.env.VITE_SITE_URL || DEFAULT_SITE_URL).replace(/\/+$/, '');
-const staticPaths = ['/', '/gallery', '/music', '/story', '/exhibitions', '/contact'];
+const staticPaths = ['/', '/gallery', '/story', '/exhibitions', '/contact'];
 const collectionPaths = collections
   .filter((collection) => collection.enabled !== false)
   .map((collection) => `/gallery?collection=${encodeURIComponent(collection.slug || collection.id)}`);

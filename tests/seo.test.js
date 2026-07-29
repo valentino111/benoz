@@ -5,7 +5,6 @@ import { fallbackContent } from '../src/data/contentService.js';
 import {
   PAGE_CONTACT,
   PAGE_EXHIBITIONS,
-  PAGE_MUSIC,
   PAGE_STORY,
   VIEW_COLLECTION,
   VIEW_COLLECTIONS,
@@ -23,7 +22,6 @@ const content = fallbackContent();
 const routes = [
   { key: 'home', view: VIEW_ENTRY, collectionId: '', page: '' },
   { key: 'gallery', view: VIEW_COLLECTIONS, collectionId: '', page: '' },
-  { key: 'music', view: VIEW_PAGE, collectionId: '', page: PAGE_MUSIC },
   { key: 'story', view: VIEW_PAGE, collectionId: '', page: PAGE_STORY },
   { key: 'exhibitions', view: VIEW_PAGE, collectionId: '', page: PAGE_EXHIBITIONS },
   { key: 'contact', view: VIEW_PAGE, collectionId: '', page: PAGE_CONTACT },
@@ -71,7 +69,7 @@ test('hreflang URLs are real variants of the existing route architecture', () =>
   assert.equal(languageFromLocation({ search: '?lang=en' }), 'en');
 });
 
-test('structured data matches actual collections, artworks, and songs', () => {
+test('structured data matches actual collections, artworks, and their songs', () => {
   const collectionModel = buildSeoModel({
     route: { view: VIEW_COLLECTION, collectionId: 'exhibition', page: '' },
     content,
@@ -83,16 +81,12 @@ test('structured data matches actual collections, artworks, and songs', () => {
   assert.equal(collectionSchema.hasPart.length, content.collections[0].works.length);
   assert.ok(collectionSchema.hasPart.every(({ '@type': type }) => type === 'VisualArtwork'));
 
-  const musicModel = buildSeoModel({
-    route: routes.find(({ key }) => key === 'music'),
-    content,
-    language: 'en',
-  });
+  const referencedSongIds = new Set(content.collections[0].works.flatMap((work) => work.songIds || []));
   assert.equal(
-    musicModel.structuredData['@graph'].filter(({ '@type': type }) => type === 'MusicRecording').length,
-    content.songs.length,
+    collectionModel.structuredData['@graph'].filter(({ '@type': type }) => type === 'MusicRecording').length,
+    referencedSongIds.size,
   );
-  assert.doesNotThrow(() => JSON.parse(JSON.stringify(musicModel.structuredData)));
+  assert.doesNotThrow(() => JSON.parse(JSON.stringify(collectionModel.structuredData)));
 });
 
 test('spreadsheet text is reduced to plain text for metadata', () => {

@@ -5,7 +5,6 @@ import { collectionPageUrl } from '../src/data/collectionPages.js';
 import {
   PAGE_CONTACT,
   PAGE_EXHIBITIONS,
-  PAGE_MUSIC,
   PAGE_STORY,
   resolveSiteRoute,
   sitePageUrl,
@@ -27,7 +26,7 @@ function route(url) {
 test('direct site routes resolve to complete page views', () => {
   assert.deepEqual(route('/'), { view: VIEW_ENTRY, collectionId: '', page: '' });
   assert.deepEqual(route('/gallery'), { view: VIEW_COLLECTIONS, collectionId: '', page: '' });
-  assert.deepEqual(route('/music'), { view: VIEW_PAGE, collectionId: '', page: PAGE_MUSIC });
+  assert.deepEqual(route('/music'), { view: VIEW_COLLECTIONS, collectionId: '', page: '' });
   assert.deepEqual(route('/exhibitions'), { view: VIEW_PAGE, collectionId: '', page: PAGE_EXHIBITIONS });
   assert.deepEqual(route('/contact'), { view: VIEW_PAGE, collectionId: '', page: PAGE_CONTACT });
 });
@@ -70,7 +69,6 @@ test('standalone pages reveal declaratively without route-level DOM mutation', a
     readFile(new URL('../src/App.jsx', import.meta.url), 'utf8'),
     readFile(new URL('../src/data/siteRoutes.js', import.meta.url), 'utf8'),
     ...[
-      'MusicSection.jsx',
       'StorySection.jsx',
       'ExhibitionsSection.jsx',
       'ContactSection.jsx',
@@ -91,9 +89,10 @@ test('navigation exposes every restored route and Netlify serves them through th
     readFile(new URL('../src/components/ProjectHub.jsx', import.meta.url), 'utf8'),
     readFile(new URL('../public/_redirects', import.meta.url), 'utf8'),
   ]);
-  ['/gallery', '/music', '/story', '/exhibitions', '/contact'].forEach((href) => {
+  ['/gallery', '/story', '/exhibitions', '/contact'].forEach((href) => {
     assert.match(header, new RegExp(`href="${href}"`));
   });
+  assert.doesNotMatch(header, /href="\/music"/);
   assert.match(hub, /href="\/about"/);
   assert.match(hub, /aria-label="Return to Ben Oz hero"/);
   assert.match(hub, /href="\/"/);
@@ -121,12 +120,11 @@ test('the mobile Collections logo is not blocked by the loader and has a stable 
   assert.match(styles, /touch-action:manipulation/);
 });
 
-test('restored Story, Exhibitions, Contact, and Music retain English and Hebrew content', async () => {
+test('restored Story, Exhibitions, and Contact retain English and Hebrew content', async () => {
   const files = await Promise.all([
     'StorySection.jsx',
     'ExhibitionsSection.jsx',
     'ContactSection.jsx',
-    'MusicSection.jsx',
   ].map((file) => readFile(new URL(`../src/components/${file}`, import.meta.url), 'utf8')));
 
   files.forEach((source) => {
@@ -136,7 +134,6 @@ test('restored Story, Exhibitions, Contact, and Music retain English and Hebrew 
   assert.match(files[0], /The Story Behind the Series/);
   assert.match(files[1], /Artists of the South/);
   assert.match(files[2], /https:\/\/wa\.me\/972544520987/);
-  assert.match(files[3], /Beyond the Canvas/);
 });
 
 test('portrait mobile hero uses the dedicated mobile crop while desktop keeps the original video', async () => {
@@ -193,7 +190,8 @@ test('mobile video previews use custom controls and start during a 150ms hold', 
   assert.match(gallery, /Boolean\(work\.video\)/);
   assert.match(gallery, /<source src=\{work\.video\} type="video\/mp4" \/>/);
   assert.match(gallery, /className=\{`artwork-preview-video/);
-  assert.doesNotMatch(gallery, /\smuted\s/);
+  assert.match(gallery, /muted=\{musicPlaying\}/);
+  assert.match(gallery, /musicPlaying=\{Boolean\(playingSongId\)\}/);
   assert.match(gallery, /startPreview\(\);\s*longPressTimer\.current = null;/);
   assert.match(gallery, /\}, 150\)/);
   assert.doesNotMatch(gallery, /longPressReady/);
@@ -211,23 +209,21 @@ test('mobile video previews use custom controls and start during a 150ms hold', 
   assert.ok(asset.byteLength > 0);
 });
 
-test('music controls and artwork soundtrack links use the custom gold play icon', async () => {
-  const [music, gallery, styles] = await Promise.all([
-    readFile(new URL('../src/components/MusicSection.jsx', import.meta.url), 'utf8'),
+test('artwork soundtrack controls play directly with the custom gold icon', async () => {
+  const [app, gallery, header, styles] = await Promise.all([
+    readFile(new URL('../src/App.jsx', import.meta.url), 'utf8'),
     readFile(new URL('../src/components/ArtworkGallery.jsx', import.meta.url), 'utf8'),
+    readFile(new URL('../src/components/SiteHeader.jsx', import.meta.url), 'utf8'),
     readFile(new URL('../src/styles.css', import.meta.url), 'utf8'),
   ]);
 
-  assert.match(music, /className=\{`play\$\{playing \? ' is-playing' : ''\}`\}/);
-  assert.match(music, /className="player" dir="ltr"/);
-  assert.match(music, /className="range"\s+dir="ltr"/);
-  assert.match(music, /onClick=\{togglePlayback\}/);
-  assert.match(music, /activeSongId=\{activeSongId\}/);
+  assert.doesNotMatch(app, /MusicSection/);
+  assert.doesNotMatch(header, /href="\/music"/);
+  assert.match(gallery, /<audio/);
+  assert.match(gallery, /onClick=\{\(\) => onToggle\(song\)\}/);
+  assert.match(gallery, /aria-pressed=\{playing\}/);
   assert.match(gallery, /className="soundtrack-icon">\s*<span className="gold-play-glyph" \/>/);
-  assert.doesNotMatch(music, />▶</);
-  assert.doesNotMatch(gallery, /className="soundtrack-icon">▶/);
+  assert.doesNotMatch(gallery, /href=\{`#\$\{song\.domId\}`\}/);
   assert.match(styles, /\.gold-play-glyph\{/);
-  assert.match(styles, /\.play\.is-playing \.gold-play-glyph/);
-  assert.match(styles, /\.player\{[^}]*direction:ltr/);
-  assert.match(styles, /@media \(hover:none\)\{[\s\S]*?\.track-media::before/);
+  assert.match(styles, /\.artwork-soundtrack button\.is-playing \.gold-play-glyph/);
 });
