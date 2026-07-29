@@ -1,3 +1,11 @@
+# Artwork-First Music Playback
+
+- Removed the standalone Music page and its navigation item.
+- Changed artwork song links into direct Play/Pause controls on each artwork card.
+- Added one coordinated audio player per active collection so only one artwork song plays at a time.
+- Kept English and Hebrew song titles and redirected the retired `/music` route to Gallery.
+- Removed `/music` from the generated sitemap and kept song structured data with its related collection.
+
 # RC16 — Restored Artwork Music Links
 
 - Restored the direct music links for **The Light Within** and **The Hidden Harmony**.

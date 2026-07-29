@@ -5,7 +5,6 @@ export const VIEW_COLLECTIONS = 'collections';
 export const VIEW_COLLECTION = 'collection';
 export const VIEW_PAGE = 'page';
 
-export const PAGE_MUSIC = 'music';
 export const PAGE_STORY = 'story';
 export const PAGE_EXHIBITIONS = 'exhibitions';
 export const PAGE_CONTACT = 'contact';
@@ -13,7 +12,6 @@ export const PAGE_CONTACT = 'contact';
 export const SITE_PATHS = {
   home: '/',
   gallery: '/gallery',
-  music: '/music',
   about: '/about',
   story: '/story',
   exhibitions: '/exhibitions',
@@ -32,8 +30,8 @@ export function resolveSiteRoute(collections, locationLike = {}) {
   switch (normalizedPath(locationLike.pathname)) {
     case SITE_PATHS.gallery:
       return { view: VIEW_COLLECTIONS, collectionId: '', page: '' };
-    case SITE_PATHS.music:
-      return { view: VIEW_PAGE, collectionId: '', page: PAGE_MUSIC };
+    case '/music':
+      return { view: VIEW_COLLECTIONS, collectionId: '', page: '' };
     case SITE_PATHS.about:
     case '/about-ben-oz':
     case SITE_PATHS.story:
