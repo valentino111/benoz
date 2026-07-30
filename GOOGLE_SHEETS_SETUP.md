@@ -11,7 +11,7 @@ For the deployed site to read the table without login:
 
 1. Open the spreadsheet.
 2. Choose **File → Share → Publish to web**.
-3. Select **Entire document** and **Comma-separated values (.csv)**, or publish the two tabs Collections and Works.
+3. Select **Entire document** and **Comma-separated values (.csv)**, or publish the three tabs Collections, Works and Songs.
 4. Click **Publish**.
 
 No URL needs to be pasted into the code. The spreadsheet ID and tab names are already configured.

@@ -12,7 +12,7 @@ import {
 } from './contentValidation.js';
 
 const SHEET_ID = '1qS2N_-BPKIP3zXuTYGSFe0zh18u7ECGdZxDspjJG0Ts';
-const SHEET_NAMES = ['Collections', 'Works'];
+const SHEET_NAMES = ['Collections', 'Works', 'Songs'];
 const DEFAULT_TIMEOUT_MS = 8000;
 const localCollectionsById = new Map(localCollections.map((collection) => [collection.id, collection]));
 
@@ -70,21 +70,12 @@ export function normalizeCollections(rows) {
 }
 
 function normalizeSong(song) {
-  const cover = optimizedImage(song.cover, 'thumbnail');
   return {
     id: song.id,
-    domId: `track-${song.id}`,
     title: song.titleHe || song.titleEn,
     titleEn: song.titleEn,
     titleHe: song.titleHe,
-    artist: song.artist || 'Ben Oz',
     audio: assetPath(song.audio),
-    cover: cover.src,
-    coverWidth: cover.width,
-    coverHeight: cover.height,
-    animation: assetPath(song.video),
-    noteEn: song.noteEn || '',
-    noteHe: song.noteHe || '',
   };
 }
 
@@ -176,7 +167,7 @@ export function fallbackContent() {
 }
 
 export function buildRemoteContent(rows) {
-  const songs = normalizeSongs(localSongs);
+  const songs = normalizeSongs(rows.Songs);
   const works = normalizeWorks(rows.Works);
   const collections = normalizeCollections(rows.Collections).map((collection) => ({
     ...collection,
@@ -222,9 +213,7 @@ export async function loadGalleryContent({ timeoutMs = DEFAULT_TIMEOUT_MS, fetch
     const parsed = Object.fromEntries(
       SHEET_NAMES.map((name, index) => [name, parseCsv(results[index].value, name)]),
     );
-    const { rows, diagnostics, drafts } = validateSheetRows(parsed, {
-      knownSongIds: localSongs.map((song) => song.id),
-    });
+    const { rows, diagnostics, drafts } = validateSheetRows(parsed);
     if (diagnostics.length && import.meta.env?.DEV) {
       console.warn('[Ben Oz Gallery] Spreadsheet validation diagnostics:', diagnostics);
     }

@@ -1,6 +1,7 @@
 const ENTITY_RULES = {
   Collections: { assets: ['posterImage', 'posterVideo'], requiredAssets: [] },
   Works: { assets: ['image', 'video', 'thumbnail'], requiredAssets: ['image'] },
+  Songs: { assets: ['audio'], requiredAssets: ['audio'] },
 };
 
 const sourceRowNumbers = new WeakMap();
@@ -215,13 +216,14 @@ function validateEntityRows(sheet, sourceRows, diagnostics, drafts) {
   });
 }
 
-export function validateSheetRows(sheetRows, { knownSongIds = [] } = {}) {
+export function validateSheetRows(sheetRows) {
   const diagnostics = [];
   const drafts = [];
   const collections = validateEntityRows('Collections', sheetRows.Collections ?? [], diagnostics, drafts);
   const worksWithFields = validateEntityRows('Works', sheetRows.Works ?? [], diagnostics, drafts);
+  const songs = validateEntityRows('Songs', sheetRows.Songs ?? [], diagnostics, drafts);
   const collectionIds = new Set(collections.map((row) => row.id));
-  const validSongIds = new Set(knownSongIds);
+  const validSongIds = new Set(songs.map((row) => row.id));
 
   const works = worksWithFields
     .filter((row, index) => {
@@ -236,7 +238,7 @@ export function validateSheetRows(sheetRows, { knownSongIds = [] } = {}) {
       return { ...row, songId: '' };
     });
 
-  return { rows: { Collections: collections, Works: works }, diagnostics, drafts };
+  return { rows: { Collections: collections, Works: works, Songs: songs }, diagnostics, drafts };
 }
 
 export function validateCanonicalContent({ collections = [], works = [], songs = [] }) {

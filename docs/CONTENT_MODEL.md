@@ -47,18 +47,16 @@ Common fields include:
 
 - stable `id`;
 - English and Hebrew titles;
-- artist;
-- audio, cover, and optional video filenames;
-- English and Hebrew notes.
+- audio filename or approved path.
 
-Current Song IDs are `lihyot` and `yofi`. Only one audio track should play at a time.
+Bundled fallback Song IDs are `lihyot` and `yofi`; the published Songs sheet may define additional IDs. Only one audio track should play at a time.
 
-Songs are defined locally in `src/data/songs.js`. The `Songs` sheet is not loaded. Google Sheets controls placement through each Work's optional `songId`.
+The Songs sheet supplies `id`, `titleEn`, `titleHe`, and `audio`. Its other columns are currently ignored. Bundled Songs provide the same minimal fields as fallback content. Google Sheets controls placement through each Work's optional `songId`.
 
 ## Relationships
 
 - Collection → Works: `Work.collectionId` equals `Collection.id`.
-- Work → Song: optional `Work.songId` equals one local Song ID.
+- Work → Song: optional `Work.songId` equals an enabled `Songs.id`.
 
 Approved relationships include:
 

@@ -302,13 +302,15 @@ Expected sheets:
 - Instructions
 - Collections
 - Works
+- Songs
 
 The React application should load:
 
 - Collections
 - Works
+- Songs
 
-Song metadata is loaded from the local catalog in `src/data/songs.js`. Google Sheets assigns one optional song to a Work through `Works.songId`.
+The Songs sheet currently supplies only `id`, `titleEn`, `titleHe`, and `audio`. Google Sheets assigns one optional song to a Work through `Works.songId`.
 
 Only rows with:
 
@@ -363,7 +365,20 @@ Typical fields:
 - price
 - songId
 
-`songId` is singular and optional. It must match a Song ID in the local catalog.
+`songId` is singular and optional. It must match an enabled ID in the Songs sheet.
+
+### Songs
+
+Currently used fields:
+
+- enabled
+- sort
+- id
+- titleEn
+- titleHe
+- audio
+
+Other Songs columns remain available in the sheet but are not currently read by the application.
 
 ## 12. Media handling
 
@@ -534,6 +549,6 @@ For every task:
 
 ## 22. Current priority
 
-The current architecture is being prepared so that future works, collections and artwork-to-song placement can be managed through Google Sheets without manually editing React components. Song metadata remains local.
+The current architecture is being prepared so that future works, collections, songs and artwork-to-song placement can be managed through Google Sheets without manually editing React components.
 
 The next technical work should focus on making this system reliable, clear and maintainable without changing the existing gallery design.

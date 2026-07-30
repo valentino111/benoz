@@ -22,7 +22,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) conv
 - Replaced the remaining static HTML injection wrapper with direct JSX components.
 - Unified bundled and Google Sheets Works through one canonical runtime normalizer.
 - Made each Work's singular `songId` the Work-to-Song relationship source.
-- Stopped loading the Google Sheets `Songs` tab; Song metadata now comes from the local catalog.
+- Limited Songs sheet usage to `id`, `titleEn`, `titleHe`, and `audio`; other Song columns are currently ignored.
 - Unified bundled and Google Sheets Collections through one canonical runtime normalizer.
 - Made standalone page reveal and React readiness declarative instead of mutating route DOM state.
 

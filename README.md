@@ -7,7 +7,7 @@ Collection-first React + Vite architecture.
 - Exhibition
 - Pearls of Truth / פניני אמת
 
-Animation and music belong to individual works rather than separate site sections. Each Work may reference one locally defined song through its `songId` field.
+Animation and music belong to individual works rather than separate site sections. Each Work may reference one song from the Songs sheet through its `songId` field.
 
 ## Run
 

@@ -46,9 +46,9 @@ All page sections render JSX directly. Spreadsheet text is normalized as plain t
 ## Data flow
 
 1. `App` calls `loadGalleryContent()` after mounting.
-2. `contentService.js` requests the Collections and Works sheets as CSV and loads Song metadata locally.
+2. `contentService.js` requests the Collections, Works, and Songs sheets as CSV.
 3. Rows are parsed, filtered to `enabled = TRUE`, sorted, and normalized.
-4. Each Work's optional `songId` is resolved against the local Song catalog.
+4. Each Work's optional `songId` is resolved against enabled Songs sheet rows.
 5. Each Collection receives only matching Works, sorted by numeric collection-local order with deterministic ties.
 6. If remote loading fails or produces no enabled collections/works, local fallback data is returned.
 7. React renders the entry, selector, selected collection page, and global supporting sections.
