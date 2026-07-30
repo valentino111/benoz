@@ -35,7 +35,6 @@ The current project is a React application built with Vite. React renders the pa
 - one reusable `CollectionPage` per enabled Collection
   - data-driven `HeroSection`
   - collection-filtered `ArtworkGallery`
-- `MusicSection`
 - `StorySection`
 - `ExhibitionsSection`
 - `ContactSection`
@@ -49,7 +48,7 @@ All page sections render JSX directly. Spreadsheet text is normalized as plain t
 1. `App` calls `loadGalleryContent()` after mounting.
 2. `contentService.js` requests the Collections, Works, and Songs sheets as CSV.
 3. Rows are parsed, filtered to `enabled = TRUE`, sorted, and normalized.
-4. Song-to-work relationships are derived from `relatedWorkIds`.
+4. Each Work's optional `songId` is resolved against enabled Songs sheet rows.
 5. Each Collection receives only matching Works, sorted by numeric collection-local order with deterministic ties.
 6. If remote loading fails or produces no enabled collections/works, local fallback data is returned.
 7. React renders the entry, selector, selected collection page, and global supporting sections.

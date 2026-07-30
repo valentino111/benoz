@@ -71,7 +71,6 @@ test('Google Sheets Works normalize valid Edition values and null invalid or abs
     const validated = validateSheetRows({
       Collections: [collection],
       Works: [work(editionFields)],
-      Songs: [],
     });
     return buildRemoteContent(validated.rows).works[0];
   };

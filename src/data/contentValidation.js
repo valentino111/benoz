@@ -1,7 +1,7 @@
 const ENTITY_RULES = {
   Collections: { assets: ['posterImage', 'posterVideo'], requiredAssets: [] },
   Works: { assets: ['image', 'video', 'thumbnail'], requiredAssets: ['image'] },
-  Songs: { assets: ['audio', 'cover', 'video'], requiredAssets: ['audio', 'cover'] },
+  Songs: { assets: ['audio'], requiredAssets: ['audio'] },
 };
 
 const sourceRowNumbers = new WeakMap();
@@ -221,24 +221,22 @@ export function validateSheetRows(sheetRows) {
   const drafts = [];
   const collections = validateEntityRows('Collections', sheetRows.Collections ?? [], diagnostics, drafts);
   const worksWithFields = validateEntityRows('Works', sheetRows.Works ?? [], diagnostics, drafts);
-  const songsWithFields = validateEntityRows('Songs', sheetRows.Songs ?? [], diagnostics, drafts);
+  const songs = validateEntityRows('Songs', sheetRows.Songs ?? [], diagnostics, drafts);
   const collectionIds = new Set(collections.map((row) => row.id));
+  const validSongIds = new Set(songs.map((row) => row.id));
 
-  const works = worksWithFields.filter((row, index) => {
-    if (collectionIds.has(row.collectionId)) return true;
-    diagnostics.push(issue('Works', row, index + 2, 'collectionId', 'missing-reference', `Unknown collection "${row.collectionId}".`));
-    return false;
-  });
-  const workIds = new Set(works.map((row) => row.id));
-  const songs = songsWithFields.map((row, index) => {
-    const relatedWorkIds = String(row.relatedWorkIds ?? '').split(',').map((id) => id.trim()).filter(Boolean);
-    const validIds = relatedWorkIds.filter((id) => {
-      if (workIds.has(id)) return true;
-      diagnostics.push(issue('Songs', row, index + 2, 'relatedWorkIds', 'missing-reference', `Unknown work "${id}" was ignored.`));
+  const works = worksWithFields
+    .filter((row, index) => {
+      if (collectionIds.has(row.collectionId)) return true;
+      diagnostics.push(issue('Works', row, index + 2, 'collectionId', 'missing-reference', `Unknown collection "${row.collectionId}".`));
       return false;
+    })
+    .map((row, index) => {
+      const songId = String(row.songId ?? '').trim();
+      if (!songId || validSongIds.has(songId)) return { ...row, songId };
+      diagnostics.push(issue('Works', row, index + 2, 'songId', 'missing-reference', `Unknown song "${songId}" was ignored.`));
+      return { ...row, songId: '' };
     });
-    return { ...row, relatedWorkIds: validIds.join(',') };
-  });
 
   return { rows: { Collections: collections, Works: works, Songs: songs }, diagnostics, drafts };
 }
@@ -257,27 +255,13 @@ export function validateCanonicalContent({ collections = [], works = [], songs =
   duplicateIds(works, 'works');
   duplicateIds(songs, 'songs');
   const collectionIds = new Set(collections.map((item) => item.id));
-  const workIds = new Set(works.map((item) => item.id));
-  const songIds = new Set(songs.map((item) => item.id));
-  const worksById = new Map(works.map((item) => [item.id, item]));
-  const songsById = new Map(songs.map((item) => [item.id, item]));
+  const availableSongIds = new Set(songs.map((item) => item.id));
 
   works.forEach((work) => {
     if (!collectionIds.has(work.collectionId)) diagnostics.push({ entity: 'works', id: work.id, code: 'missing-collection' });
-    work.songIds?.forEach((songId) => {
-      if (!songIds.has(songId)) diagnostics.push({ entity: 'works', id: work.id, code: 'missing-song', reference: songId });
-      else if (!songsById.get(songId).relatedWorkIds?.includes(work.id)) {
-        diagnostics.push({ entity: 'works', id: work.id, code: 'one-way-song-link', reference: songId });
-      }
-    });
-  });
-  songs.forEach((song) => {
-    song.relatedWorkIds?.forEach((workId) => {
-      if (!workIds.has(workId)) diagnostics.push({ entity: 'songs', id: song.id, code: 'missing-work', reference: workId });
-      else if (!worksById.get(workId).songIds?.includes(song.id)) {
-        diagnostics.push({ entity: 'songs', id: song.id, code: 'one-way-work-link', reference: workId });
-      }
-    });
+    if (work.songId && !availableSongIds.has(work.songId)) {
+      diagnostics.push({ entity: 'works', id: work.id, code: 'missing-song', reference: work.songId });
+    }
   });
 
   return diagnostics;

@@ -100,7 +100,6 @@ The intended main sections include:
 
 - Home
 - Gallery
-- Music
 - Artist Note or Artist Story
 - Contact
 
@@ -311,6 +310,8 @@ The React application should load:
 - Works
 - Songs
 
+The Songs sheet currently supplies only `id`, `titleEn`, `titleHe`, and `audio`. Google Sheets assigns one optional song to a Work through `Works.songId`.
+
 Only rows with:
 
 `enabled = TRUE`
@@ -362,25 +363,22 @@ Typical fields:
 - availabilityHe
 - available
 - price
+- songId
+
+`songId` is singular and optional. It must match an enabled ID in the Songs sheet.
 
 ### Songs
 
-Typical fields:
+Currently used fields:
 
 - enabled
 - sort
 - id
 - titleEn
 - titleHe
-- artist
 - audio
-- cover
-- video
-- relatedWorkIds
-- noteEn
-- noteHe
 
-Multiple IDs may be comma-separated when appropriate.
+Other Songs columns remain available in the sheet but are not currently read by the application.
 
 ## 12. Media handling
 
@@ -551,6 +549,6 @@ For every task:
 
 ## 22. Current priority
 
-The current architecture is being prepared so that future works, collections and songs can be managed through Google Sheets without manually editing React code.
+The current architecture is being prepared so that future works, collections, songs and artwork-to-song placement can be managed through Google Sheets without manually editing React components.
 
 The next technical work should focus on making this system reliable, clear and maintainable without changing the existing gallery design.

@@ -281,15 +281,14 @@ function Artwork({
           <p className="desc"><LanguageText en={work.descriptionEn} he={work.descriptionHe} /></p>
         )}
 
-        {work.songIds?.map((songId) => (
+        {work.songId && (
           <ArtworkSoundtrack
-            key={songId}
             language={language}
             onToggle={onToggleSong}
-            playing={playingSongId === songId}
-            song={songsById[songId]}
+            playing={playingSongId === work.songId}
+            song={songsById[work.songId]}
           />
-        ))}
+        )}
 
         <div className="collector-summary">
           <div className="collector-label"><LanguageText en={work.collectorLabelEn} he={work.collectorLabelHe} /></div>

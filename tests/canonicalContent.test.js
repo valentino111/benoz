@@ -26,6 +26,7 @@ test('all bundled Works use the canonical source shape', () => {
     assert.equal(typeof work.order, 'number');
     assert.equal(typeof work.descriptionEn, 'string');
     assert.equal(typeof work.descriptionHe, 'string');
+    assert.equal(typeof (work.songId || ''), 'string');
     assert.equal('songIds' in work, false);
     assert.equal('media' in work, false);
     assert.equal('textEn' in work, false);
@@ -33,13 +34,16 @@ test('all bundled Works use the canonical source shape', () => {
   });
 });
 
-test('bundled Songs are the canonical source for Work relationships', () => {
+test('bundled Songs contain media while Works own the relationship', () => {
   songs.forEach((song) => {
     assert.equal(typeof song.order, 'number');
-    assert.ok(Array.isArray(song.relatedWorkIds));
-    assert.equal(typeof song.video, 'string');
-    assert.equal('animation' in song, false);
+    assert.equal('relatedWorkIds' in song, false);
+    assert.equal(typeof song.audio, 'string');
+    assert.equal('cover' in song, false);
+    assert.equal('video' in song, false);
   });
+  assert.equal(exhibitionWorks.find(({ id }) => id === 'inner-light').songId, 'yofi');
+  assert.equal(exhibitionWorks.find(({ id }) => id === 'hidden-harmony').songId, 'lihyot');
 });
 
 test('Google Sheets and fallback content normalize to the same runtime fields', () => {
@@ -59,23 +63,35 @@ test('Google Sheets and fallback content normalize to the same runtime fields', 
       titleEn: 'Remote Work',
       titleHe: 'יצירה מרוחקת',
       image: 'human-creator.jpg',
+      songId: 'yofi',
       available: 'FALSE',
       price: '',
     }],
     Songs: [{
-      id: 'remote-song',
+      enabled: 'TRUE',
       sort: '10',
-      titleEn: 'Remote Song',
-      titleHe: 'שיר מרוחק',
-      audio: 'song.mp3',
-      cover: 'cover.jpg',
-      video: 'song.mp4',
-      relatedWorkIds: 'remote-work',
+      id: 'yofi',
+      titleEn: 'Remote Yofi',
+      titleHe: 'יופי מרוחק',
+      audio: 'remote-yofi.mp3',
+      artist: 'Ignored artist',
+      cover: 'ignored-cover.jpg',
+      video: 'ignored-video.mp4',
+      relatedWorkIds: 'work-1',
+      noteEn: 'Ignored note',
+      noteHe: 'הערה שלא בשימוש',
     }],
   });
 
   assert.deepEqual(Object.keys(fallback.works[0]).sort(), Object.keys(remote.works[0]).sort());
   assert.deepEqual(Object.keys(fallback.songs[0]).sort(), Object.keys(remote.songs[0]).sort());
   assert.deepEqual(Object.keys(fallback.collections[0]).sort(), Object.keys(remote.collections[0]).sort());
-  assert.deepEqual(remote.works[0].songIds, ['remote-song']);
+  assert.equal(remote.works[0].songId, 'yofi');
+  assert.equal(remote.songs[0].audio, '/assets/remote-yofi.mp3');
+  assert.equal(remote.songs[0].titleEn, 'Remote Yofi');
+  assert.equal('artist' in remote.songs[0], false);
+  assert.equal('cover' in remote.songs[0], false);
+  assert.equal('video' in remote.songs[0], false);
+  assert.equal('relatedWorkIds' in remote.songs[0], false);
+  assert.equal('noteEn' in remote.songs[0], false);
 });

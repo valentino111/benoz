@@ -21,7 +21,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) conv
 - Removed the legacy imperative browser runtime.
 - Replaced the remaining static HTML injection wrapper with direct JSX components.
 - Unified bundled and Google Sheets Works through one canonical runtime normalizer.
-- Made Songs the single Work-to-Song relationship source for both bundled and Google Sheets content.
+- Made each Work's singular `songId` the Work-to-Song relationship source.
+- Limited Songs sheet usage to `id`, `titleEn`, `titleHe`, and `audio`; other Song columns are currently ignored.
 - Unified bundled and Google Sheets Collections through one canonical runtime normalizer.
 - Made standalone page reveal and React readiness declarative instead of mutating route DOM state.
 

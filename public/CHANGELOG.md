@@ -1,5 +1,6 @@
 # Artwork-First Music Playback
 
+- Read each artwork's optional song from the singular `Works.songId` column and resolve its title and audio through the `Songs` sheet.
 - Removed the standalone Music page and its navigation item.
 - Changed artwork song links into direct Play/Pause controls on each artwork card.
 - Added one coordinated audio player per active collection so only one artwork song plays at a time.

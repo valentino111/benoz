@@ -231,7 +231,7 @@ export function buildSeoModel({
       hasPart: (collection.works || []).map((work) => artworkSchema(work, collection, cleanSiteUrl, canonical, lang)),
     });
     const collectionSongIds = new Set(
-      (collection.works || []).flatMap((work) => work.songIds || []),
+      (collection.works || []).map((work) => work.songId).filter(Boolean),
     );
     graph.push(
       ...(content?.songs || [])

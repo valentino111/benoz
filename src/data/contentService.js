@@ -69,28 +69,13 @@ export function normalizeCollections(rows) {
   ));
 }
 
-function relatedWorkIds(value) {
-  const ids = Array.isArray(value) ? value : String(value || '').split(',');
-  return ids.map((id) => String(id).trim()).filter(Boolean);
-}
-
 function normalizeSong(song) {
-  const cover = optimizedImage(song.cover, 'thumbnail');
   return {
     id: song.id,
-    domId: `track-${song.id}`,
     title: song.titleHe || song.titleEn,
     titleEn: song.titleEn,
     titleHe: song.titleHe,
-    artist: song.artist || 'Ben Oz',
     audio: assetPath(song.audio),
-    cover: cover.src,
-    coverWidth: cover.width,
-    coverHeight: cover.height,
-    animation: assetPath(song.video),
-    noteEn: song.noteEn || '',
-    noteHe: song.noteHe || '',
-    relatedWorkIds: relatedWorkIds(song.relatedWorkIds),
   };
 }
 
@@ -98,22 +83,10 @@ function normalizeSongs(rows) {
   return sorted(rows).map(normalizeSong);
 }
 
-function indexSongIdsByWork(songs) {
-  const songIdsByWork = new Map();
-  songs.forEach((song) => {
-    song.relatedWorkIds.forEach((workId) => {
-      const current = songIdsByWork.get(workId) || [];
-      current.push(song.id);
-      songIdsByWork.set(workId, current);
-    });
-  });
-  return songIdsByWork;
-}
-
 function normalizeWork(work, {
   available = false,
   order,
-  songIds = [],
+  songId = '',
   sourceOrder = 0,
 } = {}) {
   const image = optimizedImage(work.image);
@@ -146,43 +119,40 @@ function normalizeWork(work, {
     price: String(work.price || '').trim(),
     editionNumber: edition?.editionNumber ?? null,
     editionTotal: edition?.editionTotal ?? null,
-    songIds: [...songIds],
+    songId: String(songId || '').trim(),
   };
 }
 
-function normalizeWorks(rows, songs) {
-  const songIdsByWork = indexSongIdsByWork(songs);
-
+function normalizeWorks(rows) {
   return rows.map((row, sourceOrder) => (
     normalizeWork(
       { ...row, video: assetPath(row.video) },
       {
         available: parseBoolean(row.available).value,
         order: Number(row.sort),
-        songIds: songIdsByWork.get(row.id) || [],
+        songId: row.songId,
         sourceOrder,
       },
     )
   ));
 }
 
-function normalizeLocalWork(work, sourceOrder, songIdsByWork) {
+function normalizeLocalWork(work, sourceOrder) {
   return normalizeWork(
     work,
     {
       available: Boolean(work.available),
       order: Number.isFinite(Number(work.order)) ? Number(work.order) : (sourceOrder + 1) * 10,
       sourceOrder,
-      songIds: songIdsByWork.get(work.id) || [],
+      songId: work.songId,
     },
   );
 }
 
 export function fallbackContent() {
   const songs = normalizeSongs(localSongs);
-  const songIdsByWork = indexSongIdsByWork(songs);
   const works = localCollections.flatMap((collection) => (
-    collection.works.map((work, sourceOrder) => normalizeLocalWork(work, sourceOrder, songIdsByWork))
+    collection.works.map((work, sourceOrder) => normalizeLocalWork(work, sourceOrder))
   ));
   const collections = sorted(localCollections).map((collection, index) => ({
     ...normalizeCollection(collection, {}, index),
@@ -198,7 +168,7 @@ export function fallbackContent() {
 
 export function buildRemoteContent(rows) {
   const songs = normalizeSongs(rows.Songs);
-  const works = normalizeWorks(rows.Works, songs);
+  const works = normalizeWorks(rows.Works);
   const collections = normalizeCollections(rows.Collections).map((collection) => ({
     ...collection,
     works: getCollectionWorks(works, collection.id),
