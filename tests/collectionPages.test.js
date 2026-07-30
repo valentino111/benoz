@@ -135,7 +135,6 @@ test('disabled collections and works remain absent from collection pages', () =>
   const validated = validateSheetRows({
     Collections: [collectionRow(), collectionRow({ enabled: 'FALSE', id: 'hidden', slug: 'hidden' })],
     Works: [workRow(), workRow({ enabled: 'FALSE', id: 'hidden-work' })],
-    Songs: [],
   });
   const content = buildRemoteContent(validated.rows);
   assert.deepEqual(content.collections.map(({ id }) => id), ['exhibition']);
@@ -146,7 +145,6 @@ test('a Work video filename from Google Sheets resolves to a local preview asset
   const validated = validateSheetRows({
     Collections: [collectionRow()],
     Works: [workRow({ video: 'AJugOfWineAnimate.MP4' })],
-    Songs: [],
   });
   const content = buildRemoteContent(validated.rows);
   assert.equal(content.collections[0].works[0].video, '/assets/AJugOfWineAnimate.MP4');

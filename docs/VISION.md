@@ -34,7 +34,7 @@ The gallery supports English and Hebrew. English is the default language; Hebrew
 
 ## Long-term direction
 
-The long-term goal is a maintainable, data-driven gallery in which approved Collections, Works, and Songs can be managed through Google Sheets while media remains stored with the project. New content should not require rewriting presentation components.
+The long-term goal is a maintainable, data-driven gallery in which approved Collections, Works, and artwork-to-song placement can be managed through Google Sheets while Song metadata and media remain stored with the project. New Works should not require rewriting presentation components.
 
 This direction does not authorize redesigning the current gallery or inventing content. Technical evolution must preserve the visual restraint and relationships defined in [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md).
 

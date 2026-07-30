@@ -31,9 +31,9 @@ Common fields include:
 - English and Hebrew status and description;
 - format or metadata text;
 - availability labels, boolean availability, and optional price;
-- related Song IDs derived from Song relationships.
+- an optional single `songId`.
 
-Bundled fallback Works use this same source shape directly. Both fallback and Google Sheets Works pass through the same runtime normalizer; compatibility-only `textEn`, `textHe`, nested `media`, and source-level Work `songIds` fields are not supported.
+Bundled fallback Works use this same source shape directly. Both fallback and Google Sheets Works pass through the same runtime normalizer; compatibility-only `textEn`, `textHe`, nested `media`, and plural `songIds` fields are not supported.
 
 `id` identifies a Work and must remain globally unique. The Sheets `sort` value becomes normalized `order` and controls presentation only within the Work's own Collection. The runtime filters by `collectionId` before sorting numerically by `order`; equal values retain source-row order, with Work ID as the final deterministic tie-breaker. Reusing values such as `10`, `20`, and `30` in separate Collections is expected.
 
@@ -49,18 +49,16 @@ Common fields include:
 - English and Hebrew titles;
 - artist;
 - audio, cover, and optional video filenames;
-- English and Hebrew notes;
-- comma-separated `relatedWorkIds` in Google Sheets.
+- English and Hebrew notes.
 
 Current Song IDs are `lihyot` and `yofi`. Only one audio track should play at a time.
 
-Bundled fallback Songs use the same `relatedWorkIds` relationship source as Google Sheets. The loader derives runtime Work `songIds` from Songs for both sources, preventing duplicate relationship definitions from drifting apart.
+Songs are defined locally in `src/data/songs.js`. The `Songs` sheet is not loaded. Google Sheets controls placement through each Work's optional `songId`.
 
 ## Relationships
 
 - Collection → Works: `Work.collectionId` equals `Collection.id`.
-- Song → Works: each value in `Song.relatedWorkIds` equals a Work ID.
-- Runtime Work → Songs: the loader derives `songIds` for each Work.
+- Work → Song: optional `Work.songId` equals one local Song ID.
 
 Approved relationships include:
 
@@ -73,7 +71,7 @@ Do not change IDs or relationships without explicit approval.
 
 - Use lowercase kebab-case IDs: `pearls-of-truth`.
 - IDs must be unique within each entity type and stable after publication.
-- Use camelCase field names: `titleEn`, `relatedWorkIds`.
+- Use camelCase field names: `titleEn`, `songId`.
 - Use `En` and `He` suffixes for localized fields.
 - Collection `sort` controls collection-selection order; Work `sort` controls order only within its parent Collection.
 - Sort values should be numeric. Duplicate Work sort values are allowed and remain stable by source row, then Work ID.

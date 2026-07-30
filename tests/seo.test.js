@@ -81,7 +81,7 @@ test('structured data matches actual collections, artworks, and their songs', ()
   assert.equal(collectionSchema.hasPart.length, content.collections[0].works.length);
   assert.ok(collectionSchema.hasPart.every(({ '@type': type }) => type === 'VisualArtwork'));
 
-  const referencedSongIds = new Set(content.collections[0].works.flatMap((work) => work.songIds || []));
+  const referencedSongIds = new Set(content.collections[0].works.map((work) => work.songId).filter(Boolean));
   assert.equal(
     collectionModel.structuredData['@graph'].filter(({ '@type': type }) => type === 'MusicRecording').length,
     referencedSongIds.size,

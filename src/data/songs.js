@@ -10,7 +10,6 @@ export const songs = [
     video: '/assets/lachayot-hover.mp4',
     noteEn: 'A song about choosing to keep living, creating and searching for light even when reality fractures.',
     noteHe: 'שיר על הבחירה להמשיך לחיות, ליצור ולחפש אור גם כאשר המציאות נשברת.',
-    relatedWorkIds: ['hidden-harmony', 'to-live'],
   },
   {
     id: 'yofi',
@@ -23,7 +22,6 @@ export const songs = [
     video: '/assets/yofi-hover.mp4',
     noteEn: 'A musical reflection on beauty as a force that softens the soul and changes the way we see.',
     noteHe: 'הרהור מוזיקלי על יופי ככוח שמרכך את הנשמה ומשנה את האופן שבו אנו רואים.',
-    relatedWorkIds: ['inner-light', 'beauty-as-power', 'the-light-within-pearl'],
   },
 ];
 

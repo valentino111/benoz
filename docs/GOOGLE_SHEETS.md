@@ -14,8 +14,9 @@ Expected sheets:
 
 - `Instructions` — human editing guidance; not loaded by the application.
 - `Collections` — collection identity and poster information.
-- `Works` — artwork content, availability, and collection membership.
-- `Songs` — audio content and artwork relationships.
+- `Works` — artwork content, availability, collection membership, and an optional Song reference.
+
+Song metadata and media filenames are defined locally in `src/data/songs.js`; the application does not request the `Songs` sheet.
 
 The current application reads CSV through the Google Visualization endpoint. The spreadsheet must be publicly readable for anonymous production visitors.
 
@@ -56,28 +57,18 @@ For localized intro text, a non-empty remote `descriptionEn` or `descriptionHe` 
 | `availabilityEn`, `availabilityHe` | Localized availability text |
 | `available` | Boolean sale availability |
 | `price` | Editable display price |
+| `songId` | Optional single Song ID from `src/data/songs.js` |
 
-The current `Works` sheet also contains a `songIds` header. It is not the relationship source used by the application; current Work-to-Song links are derived from `Songs.relatedWorkIds`.
-
-## Songs columns
-
-| Column | Purpose |
-|---|---|
-| `enabled`, `sort`, `id` | Visibility, order, and identity |
-| `titleEn`, `titleHe` | Localized titles |
-| `artist` | Display artist; defaults to Ben Oz in current normalization |
-| `audio`, `cover`, `video` | Local media filenames |
-| `relatedWorkIds` | Comma-separated Work IDs |
-| `noteEn`, `noteHe` | Localized artist notes |
+The relationship column is singular: use `songId`, not `songIds`. A Work can reference at most one song.
 
 ## Synchronization flow
 
-1. The browser requests Collections, Works, and Songs concurrently.
+1. The browser requests Collections and Works concurrently.
 2. CSV headers become object keys.
 3. Rows with `enabled` other than `TRUE` are excluded.
 4. Collections are sorted numerically by their `sort` value.
 5. Media filenames resolve under `assets/` unless already absolute.
-6. Song `relatedWorkIds` are converted into Work `songIds`.
+6. Each optional Work `songId` is checked against the local Song catalog.
 7. Work IDs and `collectionId` values are trimmed, and Works are attached to their matching Collections.
 8. For each Collection, its Works are filtered first and then sorted numerically by `sort` (normalized as `order`). Equal values retain source-row order, then Work ID.
 9. The normalized data is passed to React as independent collection pages.
@@ -90,7 +81,7 @@ Before publishing spreadsheet changes:
 
 - IDs are present, unique, stable, and lowercase kebab-case.
 - Every `collectionId` matches an enabled Collection.
-- Every `relatedWorkIds` entry matches an enabled Work.
+- Every non-empty `songId` matches a local Song ID (`lihyot` or `yofi` at present).
 - Required English and Hebrew content is present.
 - `enabled` and `available` use explicit `TRUE` or `FALSE`.
 - `sort` values are numeric and intentional.
@@ -126,6 +117,6 @@ pearls-of-truth: work-c sort 10, work-d sort 20
 
 If a request fails, a response is not successful, or no enabled Collections/Works are usable, the application logs a development warning and uses local structured data from `src/data/` and `src/collections/`.
 
-The fallback uses the same normalized Collection, Work, and Song relationships as remote content and includes both Exhibition and Pearls of Truth.
+The fallback uses the same normalized Collection and Work relationships as remote content and the same local Song catalog.
 
 See [CONTENT_MODEL.md](CONTENT_MODEL.md) for entity relationships.

@@ -35,7 +35,7 @@ function work(overrides = {}) {
 }
 
 function validatedContent(Collections, Works) {
-  const validated = validateSheetRows({ Collections, Works, Songs: [] });
+  const validated = validateSheetRows({ Collections, Works });
   return { validated, content: buildRemoteContent(validated.rows) };
 }
 
@@ -79,7 +79,6 @@ test('an enabled public Work without an image is excluded with an exact media di
   const { rows, diagnostics, drafts } = validateSheetRows({
     Collections: [collection()],
     Works: [work({ id: 'missing-image', image: '' })],
-    Songs: [],
   });
   const diagnostic = diagnostics.find(({ id }) => id === 'missing-image');
 
@@ -110,7 +109,6 @@ test('a disabled Work remains an unpublished draft and is removed without a reje
   const { rows, diagnostics, drafts } = validateSheetRows({
     Collections: [collection()],
     Works: [work({ id: 'draft-work', enabled: 'FALSE', image: '' })],
-    Songs: [],
   });
 
   assert.equal(rows.Works.length, 0);

@@ -38,17 +38,17 @@ test('sheet validation ignores duplicates and invalid relationships deterministi
       { id: 'exhibition', enabled: 'TRUE', sort: '2', titleEn: 'Duplicate', titleHe: 'כפול' },
     ],
     Works: [
-      { id: 'work-1', collectionId: 'exhibition', enabled: 'TRUE', available: 'FALSE', sort: '1', titleEn: 'Work', titleHe: 'יצירה', image: 'work.jpg' },
+      { id: 'work-1', collectionId: 'exhibition', enabled: 'TRUE', available: 'FALSE', sort: '1', titleEn: 'Work', titleHe: 'יצירה', image: 'work.jpg', songId: 'yofi' },
       { id: 'orphan', collectionId: 'missing', enabled: 'TRUE', available: 'FALSE', sort: '2', titleEn: 'Orphan', titleHe: 'יתום', image: 'orphan.jpg' },
+      { id: 'unknown-song', collectionId: 'exhibition', enabled: 'TRUE', available: 'FALSE', sort: '3', titleEn: 'Unknown Song', titleHe: 'שיר לא ידוע', image: 'work.jpg', songId: 'missing' },
     ],
-    Songs: [
-      { id: 'song-1', enabled: 'TRUE', sort: '1', titleEn: 'Song', titleHe: 'שיר', audio: 'song.mp3', cover: 'cover.jpg', relatedWorkIds: 'work-1,missing' },
-    ],
-  });
+  }, { knownSongIds: ['lihyot', 'yofi'] });
 
   assert.deepEqual(result.rows.Collections.map(({ id }) => id), ['exhibition']);
-  assert.deepEqual(result.rows.Works.map(({ id }) => id), ['work-1']);
-  assert.equal(result.rows.Songs[0].relatedWorkIds, 'work-1');
+  assert.deepEqual(result.rows.Works.map(({ id }) => id), ['work-1', 'unknown-song']);
+  assert.equal(result.rows.Works[0].songId, 'yofi');
+  assert.equal(result.rows.Works[1].songId, '');
+  assert.equal('Songs' in result.rows, false);
   assert.ok(result.diagnostics.some(({ code }) => code === 'duplicate-id'));
   assert.ok(result.diagnostics.some(({ code }) => code === 'missing-reference'));
 });
@@ -58,10 +58,29 @@ test('bundled fallback is canonical and contains both collections and all relati
   assert.deepEqual(content.collections.map(({ id }) => id), ['exhibition', 'pearls-of-truth']);
   assert.equal(content.works.length, 9);
   assert.equal(validateCanonicalContent(content).length, 0);
-  assert.deepEqual(
-    content.songs.find(({ id }) => id === 'yofi').relatedWorkIds,
-    ['inner-light', 'beauty-as-power', 'the-light-within-pearl'],
-  );
+  assert.equal(content.works.find(({ id }) => id === 'inner-light').songId, 'yofi');
+  assert.equal(content.works.find(({ id }) => id === 'hidden-harmony').songId, 'lihyot');
+  assert.equal('relatedWorkIds' in content.songs.find(({ id }) => id === 'yofi'), false);
+});
+
+test('remote loading fetches only Collections and Works, using local song metadata', async () => {
+  const requestedSheets = [];
+  const csvBySheet = {
+    Collections: 'enabled,sort,id,titleEn,titleHe,posterImage\nTRUE,10,exhibition,Exhibition,תערוכה,cover.jpg\n',
+    Works: 'enabled,sort,id,collectionId,titleEn,titleHe,image,available,price,songId\nTRUE,10,work-1,exhibition,Work,יצירה,work.jpg,FALSE,,yofi\n',
+  };
+  const content = await loadGalleryContent({
+    fetchImpl: async (url) => {
+      const sheet = new URL(url).searchParams.get('sheet');
+      requestedSheets.push(sheet);
+      return { ok: true, text: async () => csvBySheet[sheet] };
+    },
+  });
+
+  assert.deepEqual(requestedSheets, ['Collections', 'Works']);
+  assert.equal(content.source, 'google-sheets');
+  assert.equal(content.works[0].songId, 'yofi');
+  assert.deepEqual(content.songs.map(({ id }) => id), ['lihyot', 'yofi']);
 });
 
 test('a failed sheet request falls back without leaving the loader pending', async () => {

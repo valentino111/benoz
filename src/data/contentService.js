@@ -12,7 +12,7 @@ import {
 } from './contentValidation.js';
 
 const SHEET_ID = '1qS2N_-BPKIP3zXuTYGSFe0zh18u7ECGdZxDspjJG0Ts';
-const SHEET_NAMES = ['Collections', 'Works', 'Songs'];
+const SHEET_NAMES = ['Collections', 'Works'];
 const DEFAULT_TIMEOUT_MS = 8000;
 const localCollectionsById = new Map(localCollections.map((collection) => [collection.id, collection]));
 
@@ -69,11 +69,6 @@ export function normalizeCollections(rows) {
   ));
 }
 
-function relatedWorkIds(value) {
-  const ids = Array.isArray(value) ? value : String(value || '').split(',');
-  return ids.map((id) => String(id).trim()).filter(Boolean);
-}
-
 function normalizeSong(song) {
   const cover = optimizedImage(song.cover, 'thumbnail');
   return {
@@ -90,7 +85,6 @@ function normalizeSong(song) {
     animation: assetPath(song.video),
     noteEn: song.noteEn || '',
     noteHe: song.noteHe || '',
-    relatedWorkIds: relatedWorkIds(song.relatedWorkIds),
   };
 }
 
@@ -98,22 +92,10 @@ function normalizeSongs(rows) {
   return sorted(rows).map(normalizeSong);
 }
 
-function indexSongIdsByWork(songs) {
-  const songIdsByWork = new Map();
-  songs.forEach((song) => {
-    song.relatedWorkIds.forEach((workId) => {
-      const current = songIdsByWork.get(workId) || [];
-      current.push(song.id);
-      songIdsByWork.set(workId, current);
-    });
-  });
-  return songIdsByWork;
-}
-
 function normalizeWork(work, {
   available = false,
   order,
-  songIds = [],
+  songId = '',
   sourceOrder = 0,
 } = {}) {
   const image = optimizedImage(work.image);
@@ -146,43 +128,40 @@ function normalizeWork(work, {
     price: String(work.price || '').trim(),
     editionNumber: edition?.editionNumber ?? null,
     editionTotal: edition?.editionTotal ?? null,
-    songIds: [...songIds],
+    songId: String(songId || '').trim(),
   };
 }
 
-function normalizeWorks(rows, songs) {
-  const songIdsByWork = indexSongIdsByWork(songs);
-
+function normalizeWorks(rows) {
   return rows.map((row, sourceOrder) => (
     normalizeWork(
       { ...row, video: assetPath(row.video) },
       {
         available: parseBoolean(row.available).value,
         order: Number(row.sort),
-        songIds: songIdsByWork.get(row.id) || [],
+        songId: row.songId,
         sourceOrder,
       },
     )
   ));
 }
 
-function normalizeLocalWork(work, sourceOrder, songIdsByWork) {
+function normalizeLocalWork(work, sourceOrder) {
   return normalizeWork(
     work,
     {
       available: Boolean(work.available),
       order: Number.isFinite(Number(work.order)) ? Number(work.order) : (sourceOrder + 1) * 10,
       sourceOrder,
-      songIds: songIdsByWork.get(work.id) || [],
+      songId: work.songId,
     },
   );
 }
 
 export function fallbackContent() {
   const songs = normalizeSongs(localSongs);
-  const songIdsByWork = indexSongIdsByWork(songs);
   const works = localCollections.flatMap((collection) => (
-    collection.works.map((work, sourceOrder) => normalizeLocalWork(work, sourceOrder, songIdsByWork))
+    collection.works.map((work, sourceOrder) => normalizeLocalWork(work, sourceOrder))
   ));
   const collections = sorted(localCollections).map((collection, index) => ({
     ...normalizeCollection(collection, {}, index),
@@ -197,8 +176,8 @@ export function fallbackContent() {
 }
 
 export function buildRemoteContent(rows) {
-  const songs = normalizeSongs(rows.Songs);
-  const works = normalizeWorks(rows.Works, songs);
+  const songs = normalizeSongs(localSongs);
+  const works = normalizeWorks(rows.Works);
   const collections = normalizeCollections(rows.Collections).map((collection) => ({
     ...collection,
     works: getCollectionWorks(works, collection.id),
@@ -243,7 +222,9 @@ export async function loadGalleryContent({ timeoutMs = DEFAULT_TIMEOUT_MS, fetch
     const parsed = Object.fromEntries(
       SHEET_NAMES.map((name, index) => [name, parseCsv(results[index].value, name)]),
     );
-    const { rows, diagnostics, drafts } = validateSheetRows(parsed);
+    const { rows, diagnostics, drafts } = validateSheetRows(parsed, {
+      knownSongIds: localSongs.map((song) => song.id),
+    });
     if (diagnostics.length && import.meta.env?.DEV) {
       console.warn('[Ben Oz Gallery] Spreadsheet validation diagnostics:', diagnostics);
     }

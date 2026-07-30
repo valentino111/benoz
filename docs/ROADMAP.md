@@ -9,20 +9,20 @@ Current functionality includes:
 - React and Vite application foundation;
 - collection entrance for Exhibition and Pearls of Truth;
 - structured local Collection, Work, and Song data;
-- Google Sheets CSV loading for Collections, Works, and Songs;
+- Google Sheets CSV loading for Collections and Works, with local Song metadata;
 - local fallback content when remote loading fails;
 - English and Hebrew presentation;
 - artwork gallery, details dialog, lightbox, audio players, and related-song links;
 - responsive layouts, mobile navigation, swipe navigation, and pinch zoom;
 - local media assets and an existing production build.
 
-The legacy interaction runtime has been removed. React components and hooks own the application behavior, automated lint, unit, build, and browser regression checks are present, and bundled fallback Collections, Works, and Songs share the canonical Google Sheets runtime shape.
+The legacy interaction runtime has been removed. React components and hooks own the application behavior, automated lint, unit, build, and browser regression checks are present, and bundled fallback Collections and Works share the canonical Google Sheets runtime shape.
 
 ## Milestone 1 — Stabilize the content pipeline
 
 Planned engineering work:
 
-- maintain the canonical schema for Collections, Works, and Songs;
+- maintain the canonical schema for Collections and Works plus the local Song catalog;
 - validate required fields, IDs, references, booleans, sorting, and filenames;
 - add request timeout and clear loading/fallback states;
 - keep local fallback behavior aligned with remote behavior;
