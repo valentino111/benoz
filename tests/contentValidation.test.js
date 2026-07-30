@@ -25,8 +25,10 @@ test('boolean and asset validation is strict and safe', () => {
   assert.equal(parseBoolean('yes').valid, false);
   assert.equal(isSafeAssetPath('assets/inner-light.jpg'), true);
   assert.equal(isSafeAssetPath('https://example.com/image.jpg'), true);
+  assert.equal(isSafeAssetPath('‎⁨חיים-הם-תערובת-(remastered)⁩.mp3'), true);
   assert.equal(isSafeAssetPath('javascript:alert(1)'), false);
   assert.equal(isSafeAssetPath('../private/file.jpg'), false);
+  assert.equal(isSafeAssetPath('safe-\u202eevil.mp3'), false);
   assert.deepEqual(parsePrice('₪3,400'), { valid: true, value: 3400, display: '₪3,400' });
   assert.equal(parsePrice('ask <script>').valid, false);
 });

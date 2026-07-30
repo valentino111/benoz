@@ -97,7 +97,9 @@ export function isSafeAssetPath(value) {
   if (!path) return true;
   if (/javascript:|data:|[<>"'\\]|[\u0000-\u001f]/i.test(path)) return false;
   if (path.split(/[/?#]/).includes('..')) return false;
-  return /^(https?:)?\/\//i.test(path) || path.startsWith('/') || /^[\w ()@+.,/-]+$/u.test(path);
+  return /^(https?:)?\/\//i.test(path)
+    || path.startsWith('/')
+    || /^[\p{L}\p{M}\p{N}_ ()@+.,/\-\u200e\u200f\u2066-\u2069]+$/u.test(path);
 }
 
 export function parsePrice(value) {
