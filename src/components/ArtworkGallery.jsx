@@ -350,6 +350,8 @@ export default function ArtworkGallery({
 }) {
   const artworkElements = useRef(new Map());
   const audioRef = useRef(null);
+  const navigationTargetRef = useRef('');
+  const navigationUnlockTimerRef = useRef(null);
   const [playingSongId, setPlayingSongId] = useState('');
   const songsById = Object.fromEntries(songs.map((song) => [song.id, song]));
   const worksByCollection = works.reduce((groups, work) => {
@@ -363,6 +365,11 @@ export default function ArtworkGallery({
     const work = collectionWorks[index];
     const target = work ? artworkElements.current.get(work.id) : null;
     if (!target) return;
+    window.clearTimeout(navigationUnlockTimerRef.current);
+    navigationTargetRef.current = work.id;
+    navigationUnlockTimerRef.current = window.setTimeout(() => {
+      if (navigationTargetRef.current === work.id) navigationTargetRef.current = '';
+    }, 1500);
     const url = new URL(window.location.href);
     url.hash = work.id;
     window.history.replaceState(
@@ -422,14 +429,28 @@ export default function ArtworkGallery({
     if (typeof IntersectionObserver === 'undefined') {
       return () => {
         window.cancelAnimationFrame(scrollFrame);
+        window.clearTimeout(navigationUnlockTimerRef.current);
+        navigationTargetRef.current = '';
         window.removeEventListener('hashchange', scrollToHash);
       };
     }
 
     const hashObserver = new IntersectionObserver((entries) => {
-      const visible = entries
-        .filter((entry) => entry.isIntersecting)
-        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+      const navigationTarget = navigationTargetRef.current;
+      const visible = navigationTarget
+        ? entries.find((entry) => (
+          entry.isIntersecting
+          && entry.intersectionRatio >= 0.45
+          && entry.target.dataset.artworkSlug === navigationTarget
+        ))
+        : entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+      if (navigationTarget && !visible) return;
+      if (navigationTarget) {
+        navigationTargetRef.current = '';
+        window.clearTimeout(navigationUnlockTimerRef.current);
+      }
       const slug = visible?.target?.dataset.artworkSlug;
       if (!slug) return;
       const url = new URL(window.location.href);
@@ -449,6 +470,8 @@ export default function ArtworkGallery({
 
     return () => {
       window.cancelAnimationFrame(scrollFrame);
+      window.clearTimeout(navigationUnlockTimerRef.current);
+      navigationTargetRef.current = '';
       window.removeEventListener('hashchange', scrollToHash);
       hashObserver.disconnect();
     };
